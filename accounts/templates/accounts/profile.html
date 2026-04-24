@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Profile | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="background: var(--ivory); padding: 80px 0;">
+    <div class="container">
+        <div class="section-header" style="text-align: left; margin-bottom: 50px;">
+            <div class="section-eyebrow">Reader Dashboard</div>
+            <h1 class="section-title">Namaste, <em>{{ request.user.username }}</em></h1>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 60px;">
+            <!-- Sidebar: User Info -->
+            <aside class="reveal">
+                <div style="background: white; padding: 40px; border-radius: 24px; border: 2px solid var(--gold-pale); box-shadow: var(--shadow-warm);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="width: 100px; height: 100px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; margin: 0 auto 15px;">
+                            {{ request.user.username|make_list|first|upper }}
+                        </div>
+                        <h3 style="font-family: var(--font-display); font-size: 24px;">{{ request.user.get_full_name|default:request.user.username }}</h3>
+                        <p style="font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; color: var(--gold); letter-spacing: 1px;">Member since {{ request.user.date_joined|date:"M Y" }}</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'accounts:profile' %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-family: var(--font-ui); font-size: 10px; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;">Email Address</label>
+                            <input type="email" name="email" value="{{ request.user.email }}" style="width: 100%; padding: 12px; border: 1px solid var(--gold-pale); border-radius: 8px; font-family: var(--font-body);">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-family: var(--font-ui); font-size: 10px; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;">Phone Number</label>
+                            <input type="text" name="phone_number" value="{{ request.user.phone_number|default:'' }}" style="width: 100%; padding: 12px; border: 1px solid var(--gold-pale); border-radius: 8px; font-family: var(--font-body);">
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; font-family: var(--font-ui); font-size: 10px; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;">Shipping Address</label>
+                            <textarea name="address" style="width: 100%; padding: 12px; border: 1px solid var(--gold-pale); border-radius: 8px; font-family: var(--font-body); height: 100px;">{{ request.user.address|default:'' }}</textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 12px;">Update Profile</button>
+                    </form>
+
+                    <div style="margin-top: 30px; padding-top: 25px; border-top: 1.5px solid var(--ivory-warm);">
+                        <div style="font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; color: var(--gold); letter-spacing: 1px; margin-bottom: 15px;">Account Security</div>
+                        <a href="{% url 'accounts:change_password' %}" class="btn-secondary" style="width: 100%; text-decoration: none; display: block; text-align: center; padding: 12px; font-size: 11px; border: 1.5px solid var(--gold-pale);">🔒 Change Password</a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content: History & Wishlist -->
+            <div style="display: flex; flex-direction: column; gap: 40px;">
+                <!-- Recent Orders -->
+                <div class="reveal reveal-delay-1">
+                    <h2 style="font-family: var(--font-display); font-size: 28px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                        📦 Recent Orders
+                        <div style="height: 1px; flex: 1; background: var(--gold-pale);"></div>
+                    </h2>
+                    
+                    {% if orders %}
+                        <div style="background: white; border-radius: 20px; border: 1.5px solid var(--gold-pale); overflow: hidden;">
+                            {% for order in orders %}
+                            <div style="padding: 25px; border-bottom: 1.5px solid var(--gold-pale); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-family: var(--font-ui); font-size: 11px; color: var(--gold); font-weight: 700;">#{{ order.id }} | {{ order.created_at|date:"d M Y" }}</div>
+                                    <h4 style="font-family: var(--font-display); font-size: 18px; margin-top: 4px;">{{ order.items.count }} Books · ₹{{ order.total_amount }}</h4>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 20px;">
+                                    <span style="padding: 6px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 10px; font-weight: 700; text-transform: uppercase; background: {% if order.status == 'Delivered' %}var(--forest-soft){% else %}var(--beige-warm){% endif %}; color: {% if order.status == 'Delivered' %}var(--forest){% else %}var(--ink-soft){% endif %};">
+                                        {{ order.status }}
+                                    </span>
+                                    <a href="{% url 'accounts:order_detail' order.id %}" style="font-family: var(--font-ui); font-size: 12px; font-weight: 700; color: var(--terracotta); text-decoration: underline;">Details</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="padding: 40px; text-align: center; background: white; border-radius: 20px; border: 1.5px dashed var(--gold-pale);">
+                            <p style="font-family: var(--font-body); color: var(--ink-soft);">No orders placed yet. Time to fill your shelf!</p>
+                            <a href="{% url 'store:book_list' %}" style="color: var(--terracotta); font-weight: 600; text-decoration: underline; margin-top: 10px; display: inline-block;">Browse Books →</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Saved Books -->
+                <div class="reveal reveal-delay-2">
+                    <h2 style="font-family: var(--font-display); font-size: 28px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                        🔖 Saved for Later
+                        <div style="height: 1px; flex: 1; background: var(--gold-pale);"></div>
+                    </h2>
+                    
+                    {% if wishlist %}
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                            {% for item in wishlist %}
+                            <div style="background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--gold-pale); display: flex; gap: 20px; transition: var(--transition);">
+                                <div style="width: 70px; height: 100px; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: var(--shadow-float);">
+                                    {% if item.book.cover_image %}
+                                        <img src="{{ item.book.cover_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div style="width: 100%; height: 100%; background: var(--beige-warm); display: flex; align-items: center; justify-content: center;">📖</div>
+                                    {% endif %}
+                                </div>
+                                <div style="display: flex; flex-direction: column; justify-content: center;">
+                                    <h4 style="font-family: var(--font-display); font-size: 16px; margin-bottom: 4px;">{{ item.book.title }}</h4>
+                                    <div style="font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--terracotta);">₹{{ item.book.final_price }}</div>
+                                    <div style="margin-top: 10px; display: flex; gap: 12px;">
+                                        <a href="{% url 'orders:add_to_cart' item.book.id %}" style="font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--forest); text-transform: uppercase;">Move to Cart</a>
+                                        <a href="{% url 'accounts:toggle_wishlist' item.book.id %}" style="font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--terracotta); text-transform: uppercase;">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="padding: 40px; text-align: center; background: white; border-radius: 20px; border: 1.5px dashed var(--gold-pale);">
+                            <p style="font-family: var(--font-body); color: var(--ink-soft);">Your wishlist is empty.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

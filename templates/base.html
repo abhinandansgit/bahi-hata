@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bahi Hata – Odisha's Premium Digital Book Bazaar.">
+    <title>{% block title %}Bahi Hata | Odisha's Digital Book Bazaar{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursorFollower"></div>
+
+<!-- Reading Progress -->
+<div class="reading-progress" id="readingProgress"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon">📚</span>
+  <span id="toastMsg">Action successful!</span>
+</div>
+
+<!-- Mini Cart Overlay -->
+<div class="mini-cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="mini-cart" id="miniCart">
+  <div class="mini-cart-header">
+    <span class="mini-cart-title">{{ t.cart_title }}</span>
+    <button class="mini-cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="mini-cart-items" id="cartItems">
+    {% if request.user.cart and request.user.cart.items.exists %}
+        {% for item in request.user.cart.items.all %}
+        <div class="mini-cart-item">
+          <div class="mini-cart-book-img">
+            {% if item.book.cover_image %}
+              <img src="{{ item.book.cover_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              📖
+            {% endif %}
+          </div>
+          <div style="flex: 1;">
+            <div class="mini-cart-book-title">{{ item.book.title }}</div>
+            <div class="mini-cart-book-author">{{ item.book.author }}</div>
+            <div class="mini-cart-book-price">₹ {{ item.book.final_price|floatformat:2 }}</div>
+            <a href="{% url 'orders:remove_from_cart' item.id %}" style="font-size: 11px; color: var(--terracotta); margin-top: 4px; display: inline-block;">Remove</a>
+          </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; color: var(--ink-soft); padding: 40px 0;">
+            <p>{{ t.cart_empty }}</p>
+        </div>
+    {% endif %}
+  </div>
+  <div class="mini-cart-footer">
+    {% if request.user.cart and request.user.cart.items.exists %}
+    <div class="cart-total-row">
+      <span class="cart-total-label">{{ t.cart_total }} ({{ request.user.cart.items.count }} items)</span>
+      <span class="cart-total-amount">
+          ₹ {{ request.user.cart.total_price }}
+      </span>
+    </div>
+    <a href="{% url 'orders:checkout' %}" class="btn-checkout">{{ t.btn_checkout }} →</a>
+    {% else %}
+    <button class="btn-checkout" onclick="toggleCart()" style="background: transparent; border: 1px solid var(--terracotta); color: var(--terracotta);">Continue Browsing</button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Announce Bar -->
+<div class="announce-bar">
+  <div class="announce-track" id="announceTrack">
+    <div class="announce-item"><span class="announce-dot">●</span> FREE delivery on orders above ₹499 across Odisha <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> Odia Literature Month — Extra 20% OFF on all Odia books <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> New Arrivals: Gopinath Mohanty Collection just landed <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> Subscribe to Bahi Club — Get 3 books every month at ₹699 <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> Same-day delivery available in Bhubaneswar & Cuttack <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> FREE delivery on orders above ₹499 across Odisha <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> Odia Literature Month — Extra 20% OFF on all Odia books <span class="announce-dot">●</span></div>
+    <div class="announce-item"><span class="announce-dot">●</span> New Arrivals: Gopinath Mohanty Collection just landed <span class="announce-dot">●</span></div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav id="mainNav">
+  <div class="nav-inner">
+    <a href="{% url 'home' %}" class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text">
+        <span class="logo-main">ବହି ହାଟ</span>
+        <span class="logo-sub">Bahi Hata · Since 2024</span>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="{% url 'store:book_list' %}" class="nav-link active">{{ t.nav_shop }}</a>
+      <a href="{% url 'home' %}#odia" class="nav-link">{{ t.nav_odia_books }}</a>
+      <a href="{% url 'home' %}#moods" class="nav-link">{{ t.nav_moods }}</a>
+      {% if request.user.is_authenticated %}
+        {% if request.user.is_vendor %}
+            <a href="{% url 'vendors:dashboard' %}" class="nav-link" style="color: var(--terracotta);">{{ t.nav_vendor }}</a>
+        {% endif %}
+      {% endif %}
+    </div>
+    
+    <form action="{% url 'store:book_list' %}" method="GET" class="nav-search">
+      <span class="nav-search-icon">🔍</span>
+      <input type="text" name="q" placeholder="{{ t.search_placeholder }}" />
+    </form>
+    
+    <div class="nav-actions">
+      <a href="{% url 'toggle_language' %}" class="lang-toggle-btn" title="Switch to {{ t.toggle_lang }}">
+        {{ t.toggle_lang }}
+      </a>
+      
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'accounts:profile' %}" class="nav-btn" title="My Wishlist">🔖</a>
+      {% else %}
+      <a href="{% url 'accounts:login' %}" class="nav-btn" title="Wishlist">🔖</a>
+      {% endif %}
+      
+      <button class="nav-btn" title="Cart" onclick="toggleCart()" style="position:relative;">
+        🛒
+        <span class="cart-count" id="cartCount">{{ cart_count }}</span>
+      </button>
+      
+      {% if not request.user.is_authenticated %}
+      <a href="{% url 'accounts:login' %}" class="nav-cta">{{ t.btn_signin }}</a>
+      {% else %}
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="{% url 'accounts:profile' %}" class="nav-cta">{{ t.btn_profile }}</a>
+        <a href="{% url 'accounts:logout' %}" class="nav-cta" style="background: transparent; color: var(--terracotta); border: 1.5px solid var(--terracotta);">{{ t.btn_logout }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo-main">ବହି ହାଟ</div>
+      <div class="footer-logo-sub">Bahi Hata · Odisha's Book Bazaar</div>
+      <p class="footer-desc">{{ t.footer_desc }}</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn" title="Instagram">📸</a>
+        <a href="#" class="social-btn" title="Facebook">🌐</a>
+        <a href="#" class="social-btn" title="Twitter">🐦</a>
+        <a href="#" class="social-btn" title="YouTube">▶</a>
+        <a href="#" class="social-btn" title="WhatsApp">💬</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ t.footer_explore }}</div>
+      <div class="footer-links">
+        <a href="{% url 'home' %}#moods" class="footer-link">Browse by Mood</a>
+        <a href="{% url 'store:book_list' %}?language=OD" class="footer-link">Odia Literature</a>
+        <a href="{% url 'store:book_list' %}" class="footer-link">New Arrivals</a>
+        <a href="{% url 'home' %}#trending" class="footer-link">Bestsellers</a>
+        <a href="{% url 'store:book_list' %}?heritage=true" class="footer-link">Rare Finds</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ t.footer_account }}</div>
+      <div class="footer-links">
+        <a href="{% url 'orders:view_cart' %}" class="footer-link">My Shelf</a>
+        <a href="{% url 'accounts:profile' %}" class="footer-link">Order History</a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="footer-link">Dashboard</a>
+        {% else %}
+        <a href="{% url 'accounts:login' %}" class="footer-link">Login</a>
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">{{ t.footer_contact }}</div>
+      <div class="footer-contact">
+        <div class="contact-item"><span class="contact-icon">📍</span> Bahi Hata HQ, Saheed Nagar, Bhubaneswar, Odisha 751007</div>
+        <div class="contact-item"><span class="contact-icon">📞</span> +91 9000 123 456</div>
+        <div class="contact-item"><span class="contact-icon">✉</span> hello@bahihata.in</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom" style="max-width:1400px;margin:0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+    <div style="display: flex; gap: 20px; font-family: var(--font-ui); font-size: 11px; text-transform: uppercase;">
+      <a href="{% url 'home' %}" style="color:var(--gold);">Home</a>
+      <a href="{% url 'store:book_list' %}" style="color:var(--gold);">Shop</a>
+      <a href="{% url 'membership' %}" style="color:var(--gold);">Membership Plans</a>
+      <a href="{% url 'accounts:login' %}" style="color:var(--gold);">Login</a>
+      <a href="{% url 'accounts:register' %}" style="color:var(--gold);">Register</a>
+      <a href="{% url 'orders:view_cart' %}" style="color:var(--gold);">Full Cart Page</a>
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'orders:checkout' %}" style="color:var(--gold);">Checkout</a>
+      <a href="{% url 'vendors:dashboard' %}" style="color:var(--gold);">Vendor Dashboard</a>
+      {% endif %}
+    </div>
+    
+    <div style="display:flex; justify-content: space-between; width: 100%;">
+      <span>{{ t.footer_rights }}</span>
+      <span style="display:flex;gap:20px;">
+        <a href="{% url 'home' %}" style="color:inherit;transition:color 0.2s;">Privacy Policy</a>
+        <a href="{% url 'home' %}" style="color:inherit;">Terms of Use</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

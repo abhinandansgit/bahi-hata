@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ t.explore_title }} | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="background: var(--ivory); padding-top: 40px; min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="section-header" style="text-align: left; margin-bottom: 40px;">
+            <div class="section-eyebrow">{{ t.nav_shop }}</div>
+            <h1 class="section-title">{{ t.explore_title|safe }}</h1>
+            <p class="section-desc" style="margin: 0; text-align: left;">{{ t.explore_desc }}</p>
+        </div>
+
+        <div class="patta-line"></div>
+
+        <!-- Main Layout -->
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 40px; margin-top: 40px;">
+            
+            <!-- Sidebar (Sticky) -->
+            <aside style="position: sticky; top: 100px; height: fit-content;">
+                <div style="background: white; padding: 30px; border-radius: 20px; border: 1.5px solid var(--gold-pale); box-shadow: var(--shadow-warm);">
+                    <h3 style="font-family: var(--font-display); font-size: 20px; color: var(--terracotta); margin-bottom: 20px; border-bottom: 1px solid var(--gold-pale); padding-bottom: 10px;">{{ t.filters }}</h3>
+                    
+                    <!-- Categories -->
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; margin-bottom: 15px; color: var(--ink);">{{ t.categories }}</h4>
+                        <ul style="display: flex; flex-direction: column; gap: 10px;">
+                            <li><a href="{% url 'store:explore_hata' %}" class="footer-link {% if not current_category %}active-filter{% endif %}" style="color: var(--ink-soft); font-weight: 500;">All Collections</a></li>
+                            {% for category in categories %}
+                            <li>
+                                <a href="?category={{ category.slug }}&sort={{ current_sort }}" 
+                                   class="footer-link {% if current_category == category.slug %}active-filter{% endif %}" 
+                                   style="color: var(--ink-soft);">{{ category.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Moods -->
+                    <div>
+                        <h4 style="font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; margin-bottom: 15px; color: var(--ink);">{{ t.nav_moods }}</h4>
+                        <ul style="display: flex; flex-direction: column; gap: 10px;">
+                            {% for mood in moods|slice:":5" %}
+                            <li><a href="{% url 'store:book_list' %}?mood={{ mood.slug }}" class="footer-link" style="color: var(--ink-soft);">{{ mood.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product Feed -->
+            <div>
+                <!-- Sort Bar -->
+                <div style="background: white; padding: 15px 30px; border-radius: 16px; margin-bottom: 30px; border: 1.5px solid var(--gold-pale); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-warm);">
+                    <div style="font-family: var(--font-ui); font-size: 13px; color: var(--ink-soft);">
+                         {{ categorized_books|length }} Collections Found
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-family: var(--font-ui); font-size: 13px; color: var(--gold); font-weight: 700;">{{ t.sort_by }}:</span>
+                        <select onchange="location = this.value;" style="border: none; background: var(--ivory-warm); padding: 8px 15px; border-radius: 8px; font-family: var(--font-ui); font-size: 13px; color: var(--ink); cursor: pointer; outline: none;">
+                            <option value="?sort=newest{% if current_category %}&category={{ current_category }}{% endif %}" {% if current_sort == 'newest' %}selected{% endif %}>{{ t.sort_newest }}</option>
+                            <option value="?sort=popular{% if current_category %}&category={{ current_category }}{% endif %}" {% if current_sort == 'popular' %}selected{% endif %}>{{ t.sort_popular }}</option>
+                            <option value="?sort=price_low{% if current_category %}&category={{ current_category }}{% endif %}" {% if current_sort == 'price_low' %}selected{% endif %}>{{ t.sort_price_low }}</option>
+                            <option value="?sort=price_high{% if current_category %}&category={{ current_category }}{% endif %}" {% if current_sort == 'price_high' %}selected{% endif %}>{{ t.sort_price_high }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Flipkart Style Feed -->
+                {% for item in categorized_books %}
+                <div class="reveal" style="margin-bottom: 60px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid var(--gold-pale);">
+                        <h2 style="font-family: var(--font-display); font-size: 28px; color: var(--ink); margin: 0;">{{ item.category.name }}</h2>
+                        <a href="{% url 'store:book_list' %}?category={{ item.category.slug }}" class="see-all">{{ t.see_all }}</a>
+                    </div>
+
+                    <div class="books-grid">
+                        {% for book in item.books %}
+                        <div class="book-card" style="background: white;">
+                            <div class="book-img-wrap" style="height: 320px;">
+                                {% if book.cover_image %}
+                                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                                {% else %}
+                                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--beige-warm); font-size: 40px;">📖</div>
+                                {% endif %}
+                                
+                                {% if book.is_odisha_heritage %}
+                                    <div class="book-ribbon">Heritage</div>
+                                {% elif book.is_trending_in_odisha %}
+                                    <div class="book-ribbon" style="background: var(--terracotta)">Popular</div>
+                                {% endif %}
+                                
+                                <div class="book-wishlist">🔖</div>
+                            </div>
+                            <div class="book-info">
+                                <div class="book-genre" style="color: var(--gold)">{{ book.author }}</div>
+                                <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
+                                <div class="book-price-row">
+                                    <div class="price-wrap">
+                                        <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
+                                        {% if book.discount_percentage > 0 %}
+                                        <span class="price-was">₹{{ book.price|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; padding: 100px 0;">
+                    <span style="font-size: 60px;">🔎</span>
+                    <h2 class="section-title" style="margin-top: 20px;">{{ t.no_books }}</h2>
+                    <a href="{% url 'store:explore_hata' %}" class="btn-primary" style="margin-top: 30px;">Reset Filters</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .active-filter {
+        color: var(--terracotta) !important;
+        font-weight: 700 !important;
+    }
+    .active-filter::before {
+        content: '✦ ';
+        color: var(--gold);
+    }
+    .book-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-book);
+    }
+</style>
+{% endblock %}

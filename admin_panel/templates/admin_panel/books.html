@@ -1,0 +1,151 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Manage Books{% endblock %}
+{% block header_title %}Book Catalog{% endblock %}
+{% block header_subtitle %}{{ books|length }} books across all vendors{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card" style="margin-bottom: 28px;">
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+        <div class="table-toolbar-left">
+            <form method="GET" class="search-bar" id="filter-form">
+                <input type="text" name="q" value="{{ q }}" placeholder="🔍  Search title, author..." class="search-input" id="search-q">
+                <select name="cat" class="filter-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if cat_filter == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="vendor" class="filter-select" onchange="this.form.submit()">
+                    <option value="">All Vendors</option>
+                    {% for v in vendors %}
+                    <option value="{{ v.id }}" {% if vendor_filter == v.id|stringformat:"s" %}selected{% endif %}>{{ v.shop_name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-sm btn-dark">Search</button>
+                {% if q or cat_filter or vendor_filter %}
+                <a href="{% url 'admin_panel:manage_books' %}" class="btn-sm btn-danger" style="text-decoration:none;">✕ Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="table-toolbar-right">
+            <a href="{% url 'vendors:add_book' %}" class="btn-topbar btn-gold" style="text-decoration:none;">+ Add New Book</a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 56px;">Cover</th>
+                    <th>Title & Author</th>
+                    <th>Category</th>
+                    <th>Vendor</th>
+                    <th>Price (₹)</th>
+                    <th>Stock</th>
+                    <th>Lang</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr id="book-row-{{ book.id }}">
+                    <td>
+                        {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" class="book-cover-thumb" alt="{{ book.title }}">
+                        {% else %}
+                            <div class="book-cover-placeholder">📖</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--ink); font-size: 14px;">{{ book.title }}</div>
+                        <div style="font-size: 12px; color: var(--ink-softer); margin-top: 3px;">by {{ book.author }}</div>
+                        {% if book.is_trending_in_odisha %}
+                        <span class="badge badge-gold" style="margin-top: 5px; font-size: 9px;">🔥 Trending</span>
+                        {% endif %}
+                        {% if book.is_odisha_heritage %}
+                        <span class="badge" style="background:#fff3e0;color:#7a3a00;font-size:9px;margin-top:5px;">🏛️ Heritage</span>
+                        {% endif %}
+                        {% if book.is_bestseller %}
+                        <span class="badge" style="background:#e6f4ea;color:#2d5a27;font-size:9px;margin-top:5px;">🏆 Bestseller</span>
+                        {% endif %}
+                        {% if book.is_popular %}
+                        <span class="badge" style="background:#eff6ff;color:#1e40af;font-size:9px;margin-top:5px;">⭐ Popular</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-cat">{{ book.category.name }}</span>
+                    </td>
+                    <td>
+                        <span style="font-size: 13px; color: var(--ink-soft); font-weight: 500;">
+                            {% if book.vendor %}{{ book.vendor.shop_name }}{% else %}<span style="color:var(--ink-softer)">—</span>{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--ink);">₹{{ book.price }}</div>
+                        {% if book.discount_percentage > 0 %}
+                        <div style="font-size: 11px; color: var(--forest);">{{ book.discount_percentage }}% off</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-weight: 700; color: {% if book.stock == 0 %}#c53030{% elif book.stock < 5 %}#92610a{% else %}var(--forest){% endif %};">
+                            {{ book.stock }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge" style="font-size: 10px; background:var(--ivory-warm); color:var(--ink-soft);">{{ book.get_language_display }}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <a href="{% url 'admin_panel:edit_book' book.id %}" class="btn-sm btn-edit" title="Edit full details">✏️ Edit</a>
+                            <a href="{% url 'store:book_detail' book.slug %}" target="_blank" class="btn-sm btn-view" title="View in store">👁</a>
+                            <button onclick="confirmDelete({{ book.id }}, '{{ book.title|escapejs }}')" class="btn-sm btn-danger" title="Delete book">🗑</button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 60px; color: var(--ink-softer);">
+                        <div style="font-size: 40px; margin-bottom: 12px;">📚</div>
+                        <div style="font-size: 16px; font-weight: 600;">No books found</div>
+                        <div style="font-size: 13px; margin-top: 6px;">Try adjusting your search or filters.</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" style="display:none; position:fixed; inset:0; background:rgba(26,16,8,0.6); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:18px; padding:36px; max-width:440px; width:90%; text-align:center; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+        <h2 style="font-family:'Outfit',sans-serif; font-size:22px; color:var(--ink); margin-bottom: 10px;">Delete Book?</h2>
+        <p style="color: var(--ink-soft); font-size: 14px; margin-bottom: 28px;" id="delete-modal-msg">This will permanently delete this book and all its reviews.</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <button onclick="closeDeleteModal()" class="btn-sm btn-outline btn-topbar" style="padding:12px 28px;">Cancel</button>
+            <form id="delete-form" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm btn-danger btn-topbar" style="padding:12px 28px; font-size:14px;">Delete Permanently</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(bookId, title) {
+    document.getElementById('delete-modal-msg').textContent = `"${title}" will be permanently deleted along with all its reviews. This cannot be undone.`;
+    document.getElementById('delete-form').action = `/admin-portal/books/${bookId}/delete/`;
+    document.getElementById('delete-modal').style.display = 'flex';
+}
+function closeDeleteModal() {
+    document.getElementById('delete-modal').style.display = 'none';
+}
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
+{% endblock %}

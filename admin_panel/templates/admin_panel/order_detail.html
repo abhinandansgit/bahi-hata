@@ -1,0 +1,395 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Order #BH-{{ order.id }}{% endblock %}
+{% block header_title %}Order #BH-{{ order.id }}{% endblock %}
+{% block header_subtitle %}Complete buyer and shipping details for fulfilment{% endblock %}
+
+{% block admin_content %}
+
+<style>
+    .od-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 28px;
+        align-items: start;
+    }
+    .od-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--ink-softer);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .od-field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 18px;
+    }
+    .od-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--ink-softer);
+        margin-bottom: 5px;
+    }
+    .od-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink);
+        line-height: 1.5;
+    }
+    .od-value.mono {
+        font-family: 'Inter', monospace;
+        font-size: 14px;
+    }
+    .od-divider {
+        border: none;
+        border-top: 1px solid var(--beige-warm);
+        margin: 22px 0;
+    }
+    .od-item-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--ivory-warm);
+    }
+    .od-item-row:last-child { border-bottom: none; }
+    .od-book-thumb {
+        width: 50px;
+        height: 70px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 1px solid var(--beige-warm);
+        flex-shrink: 0;
+    }
+    .od-book-placeholder {
+        width: 50px;
+        height: 70px;
+        border-radius: 6px;
+        background: var(--beige-warm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .od-item-info { flex: 1; min-width: 0; }
+    .od-item-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .od-item-meta {
+        font-size: 12px;
+        color: var(--ink-softer);
+        margin-top: 4px;
+    }
+    .od-item-price {
+        font-family: 'Outfit', sans-serif;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--terracotta);
+        flex-shrink: 0;
+    }
+    .od-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid var(--gold-pale);
+    }
+    .od-total-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ink);
+    }
+    .od-total-value {
+        font-family: 'Outfit', sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--terracotta);
+    }
+    .shipping-block {
+        background: linear-gradient(135deg, #f9f6f0 0%, #f2ece0 100%);
+        border: 1.5px solid var(--gold-pale);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        font-size: 14px;
+        line-height: 2;
+        color: var(--ink);
+        font-weight: 500;
+        white-space: pre-wrap;
+        position: relative;
+        letter-spacing: 0.2px;
+    }
+    .shipping-block::before {
+        content: '📍';
+        position: absolute;
+        top: -12px;
+        left: 16px;
+        background: white;
+        padding: 0 6px;
+        font-size: 18px;
+    }
+    .status-update-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        text-decoration: none;
+        margin-bottom: 28px;
+        transition: var(--transition);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--beige-warm);
+        background: white;
+    }
+    .back-link:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: var(--gold-pale);
+    }
+    .od-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 18px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .print-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border: 1.5px solid var(--beige-warm);
+        background: white;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        cursor: pointer;
+        transition: var(--transition);
+        width: 100%;
+        justify-content: center;
+        margin-top: 12px;
+        font-family: 'Inter', sans-serif;
+    }
+    .print-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: var(--gold-pale);
+    }
+
+    @media print {
+        .admin-sidebar, .admin-topbar, .back-link, .status-update-form, .print-btn { display: none !important; }
+        .admin-main { margin-left: 0 !important; }
+        .admin-body { padding: 0 !important; }
+        .od-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<a href="{% url 'admin_panel:manage_orders' %}" class="back-link">← Back to Orders</a>
+
+<!-- Top Status Bar -->
+<div class="admin-card" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-softer); font-weight: 700; margin-bottom: 6px;">Order Placed</div>
+        <div style="font-size: 15px; font-weight: 600; color: var(--ink);">{{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"H:i" }}</div>
+    </div>
+    <div>
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-softer); font-weight: 700; margin-bottom: 6px;">Current Status</div>
+        <span class="od-status-badge badge badge-{{ order.status|lower }}">
+            {% if order.status == 'Pending' %}🕐
+            {% elif order.status == 'Processing' %}⚙️
+            {% elif order.status == 'Shipped' %}🚚
+            {% elif order.status == 'Delivered' %}✅
+            {% else %}❌
+            {% endif %}
+            {{ order.status }}
+        </span>
+    </div>
+    <div>
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-softer); font-weight: 700; margin-bottom: 6px;">Update Status</div>
+        <form method="POST" class="status-update-form">
+            {% csrf_token %}
+            <select name="status" class="filter-select" style="min-width: 130px;">
+                <option value="Pending"    {% if order.status == 'Pending'    %}selected{% endif %}>🕐 Pending</option>
+                <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>⚙️ Processing</option>
+                <option value="Shipped"    {% if order.status == 'Shipped'    %}selected{% endif %}>🚚 Shipped</option>
+                <option value="Delivered"  {% if order.status == 'Delivered'  %}selected{% endif %}>✅ Delivered</option>
+                <option value="Cancelled"  {% if order.status == 'Cancelled'  %}selected{% endif %}>❌ Cancelled</option>
+            </select>
+            <button type="submit" class="btn-sm btn-save">Save</button>
+        </form>
+    </div>
+    <div>
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-softer); font-weight: 700; margin-bottom: 6px;">Order Total</div>
+        <div style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: var(--terracotta);">₹{{ order.total_amount }}</div>
+    </div>
+</div>
+
+<div class="od-grid">
+    <!-- LEFT: Buyer Info + Items -->
+    <div>
+        <!-- Buyer Details -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div class="od-section-title">👤 Buyer Information</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px;">
+                <div class="od-field">
+                    <span class="od-label">Username</span>
+                    <span class="od-value">{{ order.user.username }}</span>
+                </div>
+                <div class="od-field">
+                    <span class="od-label">Email Address</span>
+                    <span class="od-value"><a href="mailto:{{ order.user.email }}" style="color: var(--gold); text-decoration: none;">{{ order.user.email }}</a></span>
+                </div>
+                <div class="od-field">
+                    <span class="od-label">Full Name</span>
+                    <span class="od-value">
+                        {% if order.user.get_full_name %}
+                            {{ order.user.get_full_name }}
+                        {% else %}
+                            <span style="color: var(--ink-softer); font-weight: 400; font-style: italic;">Not provided</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="od-field">
+                    <span class="od-label">Phone Number</span>
+                    <span class="od-value">
+                        {% if order.user.phone_number %}
+                            <a href="tel:{{ order.user.phone_number }}" style="color: var(--gold); text-decoration: none;">{{ order.user.phone_number }}</a>
+                        {% else %}
+                            <span style="color: var(--ink-softer); font-weight: 400; font-style: italic;">Not provided</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="od-field">
+                    <span class="od-label">Account Type</span>
+                    <span class="od-value">
+                        {% if order.user.is_vendor %}🏪 Vendor{% else %}🛍️ Customer{% endif %}
+                    </span>
+                </div>
+                <div class="od-field">
+                    <span class="od-label">Member Since</span>
+                    <span class="od-value">{{ order.user.date_joined|date:"M Y" }}</span>
+                </div>
+            </div>
+
+            {% if order.user.address %}
+            <hr class="od-divider">
+            <div class="od-field">
+                <span class="od-label">Saved Address (Profile)</span>
+                <span class="od-value mono">{{ order.user.address }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Ordered Items -->
+        <div class="admin-card">
+            <div class="od-section-title">📚 Ordered Books ({{ order.items.count }} item{{ order.items.count|pluralize }})</div>
+            {% for item in order.items.all %}
+            <div class="od-item-row">
+                {% if item.book.cover_image %}
+                    <img src="{{ item.book.cover_image.url }}" class="od-book-thumb" alt="{{ item.book.title }}">
+                {% else %}
+                    <div class="od-book-placeholder">📖</div>
+                {% endif %}
+                <div class="od-item-info">
+                    <div class="od-item-title">{{ item.book.title }}</div>
+                    <div class="od-item-meta">by {{ item.book.author }} &nbsp;·&nbsp; Qty: {{ item.quantity }} &nbsp;·&nbsp; ₹{{ item.price }} each</div>
+                    {% if item.book.category %}
+                        <span class="badge badge-cat" style="margin-top: 6px;">{{ item.book.category.name }}</span>
+                    {% endif %}
+                </div>
+                <div class="od-item-price">₹{% widthratio item.price 1 item.quantity %}</div>
+            </div>
+            {% endfor %}
+
+            <div class="od-total-row">
+                <span class="od-total-label">Grand Total</span>
+                <span class="od-total-value">₹{{ order.total_amount }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Shipping Address + Print -->
+    <div>
+        <div class="admin-card" style="margin-bottom: 20px;">
+            <div class="od-section-title">🚚 Shipping Details</div>
+            <p style="font-size: 12px; color: var(--ink-softer); margin-bottom: 14px; line-height: 1.5;">
+                Address entered by buyer at checkout. Use this to prepare the shipment label.
+            </p>
+            <div class="shipping-block">{{ order.shipping_address }}</div>
+
+            <hr class="od-divider">
+
+            <div class="od-section-title">💳 Payment</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 13px; color: var(--ink-softer);">Method</span>
+                <span style="font-size: 13px; font-weight: 600; color: var(--ink);">Cash on Delivery / Online</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="font-size: 13px; color: var(--ink-softer);">Payment Status</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--forest);">✅ Confirmed</span>
+            </div>
+        </div>
+
+        <!-- Quick Info Card -->
+        <div class="admin-card" style="margin-bottom: 20px;">
+            <div class="od-section-title">📋 Quick Reference</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--ink-softer);">Order ID</span>
+                    <span style="font-size: 13px; font-weight: 700; color: var(--ink); font-family: monospace;">#BH-{{ order.id }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--ink-softer);">Placed On</span>
+                    <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ order.created_at|date:"d M Y" }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--ink-softer);">Last Updated</span>
+                    <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ order.updated_at|date:"d M Y · H:i" }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--ink-softer);">No. of Items</span>
+                    <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ order.items.count }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--ink-softer);">Total Amount</span>
+                    <span style="font-size: 14px; font-weight: 800; color: var(--terracotta);">₹{{ order.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <button class="print-btn" onclick="window.print()">🖨️ Print Shipping Label / Invoice</button>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header_title %}Dashboard{% endblock %}
+{% block header_subtitle %}Welcome back, {{ request.user.username }} 👋{% endblock %}
+
+{% block admin_content %}
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card gold">
+        <span class="stat-icon">💰</span>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card terracotta">
+        <span class="stat-icon">📦</span>
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">{{ total_orders }}</div>
+    </div>
+    <div class="stat-card forest">
+        <span class="stat-icon">📚</span>
+        <div class="stat-label">Book Titles</div>
+        <div class="stat-value">{{ total_books }}</div>
+    </div>
+    <div class="stat-card blue">
+        <span class="stat-icon">🕐</span>
+        <div class="stat-label">Pending Orders</div>
+        <div class="stat-value">{{ pending_orders }}</div>
+    </div>
+    <div class="stat-card purple">
+        <span class="stat-icon">🏪</span>
+        <div class="stat-label">Vendors</div>
+        <div class="stat-value">{{ total_vendors }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; margin-bottom: 28px;">
+    <!-- Recent Orders -->
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink);">Recent Orders</h3>
+            <a href="{% url 'admin_panel:manage_orders' %}" style="font-size: 13px; color: var(--gold); text-decoration: none; font-weight: 600;">View All →</a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td style="font-weight: 700; color: var(--ink); font-size: 13px;">#BH-{{ order.id }}</td>
+                    <td style="font-size: 13px;">{{ order.user.username }}</td>
+                    <td><span class="badge badge-{{ order.status|lower }}">{{ order.status }}</span></td>
+                    <td style="font-weight: 700; color: var(--terracotta);">₹{{ order.total_amount }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; padding: 30px; color: var(--ink-softer);">No orders yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Category Chart -->
+    <div class="admin-card" style="display: flex; flex-direction: column;">
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 20px;">Catalog Mix</h3>
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+            <canvas id="categoryChart" style="max-height: 220px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Top Books -->
+{% if top_books %}
+<div class="admin-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink);">Top Selling Books</h3>
+        <a href="{% url 'admin_panel:manage_books' %}" style="font-size: 13px; color: var(--gold); text-decoration: none; font-weight: 600;">View All →</a>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cover</th>
+                <th>Title & Author</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in top_books %}
+            <tr>
+                <td style="font-weight: 700; color: var(--ink-softer); font-size: 13px;">{{ forloop.counter }}</td>
+                <td>
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" class="book-cover-thumb" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="book-cover-placeholder">📖</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="font-weight: 700; font-size: 14px; color: var(--ink);">{{ book.title }}</div>
+                    <div style="font-size: 12px; color: var(--ink-softer);">by {{ book.author }}</div>
+                </td>
+                <td><span class="badge badge-cat">{{ book.category.name }}</span></td>
+                <td style="font-weight: 700; color: var(--terracotta);">₹{{ book.price }}</td>
+                <td>
+                    <span style="font-weight: 700; color: {% if book.stock == 0 %}#c53030{% elif book.stock < 5 %}#92610a{% else %}var(--forest){% endif %};">
+                        {{ book.stock }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'admin_panel:edit_book' book.id %}" class="btn-sm btn-edit" style="text-decoration:none;">✏️ Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<script>
+const ctx = document.getElementById('categoryChart').getContext('2d');
+const categoryData = {{ category_stats|safe }};
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: categoryData.map(item => item.name),
+        datasets: [{
+            data: categoryData.map(item => item.book_count),
+            backgroundColor: ['#c9963a', '#9b3a1a', '#2d5a27', '#2b6cb0', '#744210', '#2c7a7b'],
+            borderWidth: 3,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 16,
+                    font: { size: 11, family: 'Inter' },
+                    color: '#5a4a3a'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

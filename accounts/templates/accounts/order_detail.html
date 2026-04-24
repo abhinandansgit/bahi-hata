@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} | Bahi Hata{% endblock %}
+
+{% block content %}
+<style>
+@media print {
+    /* Hide interactive UI and global layouts when printing invoice */
+    nav, footer, .announce-bar, .delivery-track-card, a[href="{% url 'accounts:profile' %}"], button[onclick="window.print()"] {
+        display: none !important;
+    }
+    
+    /* Make the invoice full width and clean */
+    body, .shelf-section { background: white !important; }
+    .container { max-width: 100% !important; }
+    
+    /* Ensure colors print properly */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+<section class="shelf-section" style="background: var(--ivory); padding: 80px 0;">
+    <div class="container" style="max-width: 900px;">
+        <div style="margin-bottom: 40px;">
+            <a href="{% url 'accounts:profile' %}" style="font-family: var(--font-ui); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                ← Back to Dashboard
+            </a>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
+                <div>
+                    <div class="section-eyebrow">Order ID: #{{ order.id }}</div>
+                    <h1 class="section-title" style="margin: 0;">Order <em>Details</em></h1>
+                </div>
+                <div style="text-align: right;">
+                    <span style="display: block; font-family: var(--font-ui); font-size: 12px; color: var(--ink-soft); margin-bottom: 8px;">{{ order.created_at|date:"F d, Y · H:i" }}</span>
+                    <span style="padding: 8px 20px; border-radius: 20px; font-family: var(--font-ui); font-size: 12px; font-weight: 700; text-transform: uppercase; background: var(--terracotta); color: white;">
+                        {{ order.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 40px;">
+            <!-- Items List -->
+            <div class="reveal">
+                <div style="background: white; padding: 30px; border-radius: 24px; border: 2px solid var(--gold-pale); box-shadow: var(--shadow-warm);">
+                    <h3 style="font-family: var(--font-display); font-size: 22px; margin-bottom: 25px; border-bottom: 1px solid var(--gold-pale); padding-bottom: 15px;">Purchased Books</h3>
+                    {% for item in order.items.all %}
+                    <div style="display: flex; gap: 20px; margin-bottom: 25px; align-items: center;">
+                        <div style="width: 60px; height: 85px; border-radius: 8px; overflow: hidden; flex-shrink: 0; box-shadow: var(--shadow-float);">
+                            {% if item.book.cover_image %}
+                                <img src="{{ item.book.cover_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div style="width: 100%; height: 100%; background: var(--beige-warm); display: flex; align-items: center; justify-content: center;">📖</div>
+                            {% endif %}
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-family: var(--font-display); font-size: 18px; margin-bottom: 4px;">{{ item.book.title }}</h4>
+                            <p style="font-family: var(--font-body); font-size: 14px; color: var(--ink-soft);">{{ item.quantity }} x ₹{{ item.price }}</p>
+                        </div>
+                        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink);">
+                            ₹{{ item.total_price|floatformat:2 }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="patta-line" style="margin: 30px 0;"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-family: var(--font-display); font-size: 24px; font-weight: 700;">Grand Total</span>
+                        <span style="font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--terracotta);">₹{{ order.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping & Tracking Info -->
+            <div class="reveal reveal-delay-1" style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <!-- Delivery Tracking Card -->
+                <div class="delivery-track-card" style="box-shadow: var(--shadow-book);">
+                    <div class="track-header">
+                        <div>
+                            <div class="track-order">Live Tracking</div>
+                            <div class="track-id">Order Status</div>
+                        </div>
+                        <div class="track-status-badge">{{ order.status }}</div>
+                    </div>
+                    <div class="track-steps">
+                        <div class="track-step {% if order.status in 'Pending,Processing,Shipped,Delivered' %}done{% else %}active{% endif %}">
+                            <div class="track-dot">✓</div>
+                            <div class="track-step-info">
+                                <div class="track-step-name">Order Confirmed</div>
+                                <div class="track-step-time">{{ order.created_at|date:"M d, g:i A" }}</div>
+                            </div>
+                        </div>
+                        <div class="track-step {% if order.status in 'Processing,Shipped,Delivered' %}done{% elif order.status == 'Pending' %}{% else %}{% endif %}">
+                            <div class="track-dot">{% if order.status in 'Processing,Shipped,Delivered' %}✓{% else %}⚙️{% endif %}</div>
+                            <div class="track-step-info">
+                                <div class="track-step-name">Processing</div>
+                                <div class="track-step-time">{% if order.status in 'Processing,Shipped,Delivered' %}Updated{% else %}Pending{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="track-step {% if order.status in 'Shipped,Delivered' %}done{% elif order.status == 'Processing' %}active{% endif %}">
+                            <div class="track-dot">{% if order.status in 'Shipped,Delivered' %}✓{% else %}🚚{% endif %}</div>
+                            <div class="track-step-info">
+                                <div class="track-step-name">Shipped</div>
+                                <div class="track-step-time">{% if order.status in 'Shipped,Delivered' %}In Transit{% else %}Awaiting{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="track-step {% if order.status == 'Delivered' %}done{% elif order.status == 'Shipped' %}active{% endif %}">
+                            <div class="track-dot">📦</div>
+                            <div class="track-step-info">
+                                <div class="track-step-name">Delivered</div>
+                                <div class="track-step-time">{% if order.status == 'Delivered' %}Arrived{% else %}Expected{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--beige-warm); padding: 30px; border-radius: 24px; border: 1px solid var(--gold-pale);">
+                    <h3 style="font-family: var(--font-display); font-size: 20px; margin-bottom: 20px;">Shipping Info</h3>
+                    <div style="font-family: var(--font-body); font-size: 15px; color: var(--ink); line-height: 1.8; white-space: pre-wrap;">{{ order.shipping_address }}</div>
+                    
+                    <div class="patta-line" style="margin: 25px 0; opacity: 0.3;"></div>
+                    
+                    <h3 style="font-family: var(--font-display); font-size: 20px; margin-bottom: 15px;">Payment</h3>
+                    <p style="font-family: var(--font-body); font-size: 14px; color: var(--ink-soft);">
+                        Status: <strong style="color: var(--forest);">Paid</strong><br>
+                        Method: Credit/Debit Card
+                    </p>
+                </div>
+                
+                <button onclick="window.print()" style="width: 100%; margin-top: 20px; padding: 15px; border: 1.5px solid var(--gold); background: transparent; border-radius: 12px; font-family: var(--font-ui); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; cursor: pointer;">
+                    Print Invoice 🖨️
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

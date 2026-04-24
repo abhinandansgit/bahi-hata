@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Membership Plans - Bahi Hata{% endblock %}
+
+{% block content %}
+<div style="padding-top: 100px;">
+<section class="membership-section patta-border" id="membership">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-ornament">✦ ✦ ✦</div>
+      <div class="section-eyebrow reveal">{{ t.club_eyebrow }}</div>
+      <h2 class="section-title reveal reveal-delay-1">{{ t.club_title|safe }}</h2>
+      <p class="section-desc reveal reveal-delay-2">{{ t.club_desc }}</p>
+    </div>
+    <div class="plans-grid reveal">
+      <div class="plan-card">
+        <div class="plan-badge">{{ t.plan_starter }}</div>
+        <div class="plan-name">Pata Club</div>
+        <div class="plan-price">₹399</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-features">
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 1 Book/month</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 10% off all orders</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> Free delivery</div>
+        </div>
+        <a href="{% url 'accounts:register' %}" class="btn-plan">{{ t.btn_join }}</a>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-badge">{{ t.plan_popular }}</div>
+        <div class="plan-name">Bahi Club</div>
+        <div class="plan-price">₹699</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-features">
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 3 Books/month — curated</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 20% off all orders</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> Priority free delivery</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> Reading personality profile</div>
+        </div>
+        <a href="{% url 'accounts:register' %}" class="btn-plan">Join Bahi Club</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-badge">{{ t.plan_premium }}</div>
+        <div class="plan-name">Sahitya Club</div>
+        <div class="plan-price">₹1,199</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-features">
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 5 Books/month</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> 30% off all orders</div>
+          <div class="plan-feature"><div class="plan-feature-dot">✓</div> Same-day delivery</div>
+        </div>
+        <a href="{% url 'accounts:register' %}" class="btn-plan">Join Sahitya Club</a>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+{% endblock %}
