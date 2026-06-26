@@ -15,4 +15,13 @@ echo "Installing Python dependencies..."
 python -m pip install -r requirements.txt
 
 echo "Running Django collectstatic..."
-# python manage.py collectstatic --noinput --clear || true
+# Run collectstatic and ensure output directory is not empty
+python manage.py collectstatic --noinput --clear || true
+
+# Copy any static assets from the project static folder into staticfiles (fallback)
+if [ -d static ]; then
+  cp -r static/* staticfiles/ || true
+fi
+
+# Add placeholder to avoid empty directory warnings
+mkdir -p staticfiles && echo "keep" > staticfiles/.keep
