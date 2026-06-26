@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="padding: 100px 20px; text-align: center; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <h1 style="font-family: var(--font-display); font-size: 80px; color: var(--terracotta); margin-bottom: 20px;">500</h1>
+    <h2 style="font-family: var(--font-display); font-size: 32px; color: var(--ink); margin-bottom: 16px;">The Shelves Rattled</h2>
+    <p style="font-family: var(--font-body); font-size: 16px; color: var(--ink-soft); max-width: 500px; margin-bottom: 40px; line-height: 1.6;">
+        Our internal bazaar systems just experienced a hiccup. Our finest booksellers have been notified and are actively reorganizing the shelves. Please try again shortly!
+    </p>
+    <a href="{% url 'core:home' %}" class="btn-primary" style="padding: 14px 32px; border-radius: 8px; font-size: 15px; background: linear-gradient(135deg, var(--terracotta-light), var(--terracotta)); color: white; display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700;">
+        Return to the Hata →
+    </a>
+</section>
+{% endblock %}

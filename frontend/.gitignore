@@ -1,0 +1,29 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual environment
+venv/
+env/
+
+# Environment files – keep them local
+.env
+.env.*
+*.env
+
+# Media uploads (we store URLs now, but keep the folder empty)
+media/
+
+# Static files compiled by Django
+staticfiles/
+static/
+
+# Vercel build artefacts
+.vercel/
+.vercel_build_output/
+
+# OS‑specific
+Thumbs.db
+.DS_Store

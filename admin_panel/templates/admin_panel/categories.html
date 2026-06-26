@@ -1,0 +1,119 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Categories & Moods{% endblock %}
+{% block header_title %}Taxonomy Manager{% endblock %}
+{% block header_subtitle %}Manage categories and reading moods{% endblock %}
+
+{% block admin_content %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+    <!-- Categories -->
+    <div>
+        <div class="admin-card" style="margin-bottom: 20px;">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+                🏷️ Add Category
+            </div>
+            <form method="POST" style="display: flex; flex-direction: column; gap: 12px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_category">
+                <input type="text" name="name" placeholder="Category name..." required class="form-control">
+                <input type="text" name="description" placeholder="Short description (optional)..." class="form-control">
+                <button type="submit" class="btn-topbar btn-gold">+ Add Category</button>
+            </form>
+        </div>
+
+        <div class="admin-card">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 18px;">
+                Store Categories ({{ categories|length }})
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th style="text-align:center;">Books</th>
+                        <th style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--ink); font-size: 14px;">{{ cat.name }}</div>
+                            {% if cat.description %}
+                            <div style="font-size: 11px; color: var(--ink-softer); margin-top: 2px;">{{ cat.description }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; font-weight: 700; color: var(--gold);">{{ cat.book_count }}</td>
+                        <td style="text-align: center;">
+                            <form method="POST" onsubmit="return confirm('Delete category &quot;{{ cat.name }}&quot;? This cannot be undone.')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_category">
+                                <input type="hidden" name="cat_id" value="{{ cat.id }}">
+                                <button type="submit" class="btn-sm btn-danger">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; padding: 30px; color: var(--ink-softer);">No categories yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Moods -->
+    <div>
+        <div class="admin-card" style="margin-bottom: 20px;">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+                🌙 Add Reading Mood
+            </div>
+            <form method="POST" style="display: flex; flex-direction: column; gap: 12px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_mood">
+                <input type="text" name="name" placeholder="e.g. For Rainy Evenings..." required class="form-control">
+                <div>
+                    <label style="font-size: 13px; color: var(--ink-soft); font-weight: 600; margin-bottom: 4px; display: block;">Background Image URL (Optional)</label>
+                    <input type="url" name="image" placeholder="https://example.com/mood.jpg" class="form-control">
+                </div>
+                <button type="submit" class="btn-topbar btn-dark">+ Add Mood</button>
+            </form>
+        </div>
+
+        <div class="admin-card">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 18px;">
+                Reading Moods ({{ moods|length }})
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mood Label</th>
+                        <th>Slug</th>
+                        <th style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mood in moods %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--ink); font-size: 14px;">🌙 {{ mood.name }}</td>
+                        <td><code style="font-size: 11px; background: var(--ivory-warm); padding: 3px 8px; border-radius: 4px; color: var(--ink-soft);">{{ mood.slug }}</code></td>
+                        <td style="text-align: center;">
+                            <form method="POST" onsubmit="return confirm('Delete mood &quot;{{ mood.name }}&quot;?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_mood">
+                                <input type="hidden" name="mood_id" value="{{ mood.id }}">
+                                <button type="submit" class="btn-sm btn-danger">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align:center; padding: 30px; color: var(--ink-softer);">No moods defined yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

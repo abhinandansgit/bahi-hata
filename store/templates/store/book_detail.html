@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }} | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="background: var(--ivory); padding-top: 20px;">
+    <div class="container">
+        <div class="detail-layout">
+            <!-- Book Visual -->
+            <div class="reveal">
+                <div class="book-3d-wrap" style="width: 100%; display: flex; justify-content: center; padding: 20px; background: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E') center center; border-radius: 20px;">
+                    <div class="book-3d">
+                        {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-front" style="object-fit: cover;">
+                        {% else %}
+                        <div class="book-front" style="background: var(--beige-warm); display: flex; align-items: center; justify-content: center; font-size: 80px; border: 1px solid var(--gold-pale);">📖</div>
+                        {% endif %}
+                        <div class="book-spine"></div>
+                        <div class="book-back"></div>
+                        {% if book.is_odisha_heritage %}
+                        <div class="book-ribbon" style="top: 20px; font-size: 14px; padding: 8px 20px; z-index: 5;">Heritage Pick</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px; color: var(--ink-soft); font-family: var(--font-ui); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">Hover to interact</div>
+            </div>
+
+            <!-- Book Details -->
+            <div class="reveal reveal-delay-1">
+                <div class="section-eyebrow">{{ book.category.name }}</div>
+                <h1 class="section-title" style="text-align: left; margin-bottom: 8px; font-size: 48px;">{{ book.title }}</h1>
+                <p style="font-family: var(--font-body); font-size: 22px; color: var(--ink-soft); font-style: italic; margin-bottom: 24px;">By {{ book.author }}</p>
+
+                <div class="patta-line" style="margin: 20px 0;"></div>
+
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px;">
+                    <span style="font-family: var(--font-display); font-size: 36px; font-weight: 700; color: var(--terracotta);">₹{{ book.final_price|floatformat:2 }}</span>
+                    {% if book.discount_percentage > 0 %}
+                    <span style="font-family: var(--font-body); font-size: 20px; text-decoration: line-through; color: rgba(26, 16, 8, 0.4);">₹{{ book.price|floatformat:2 }}</span>
+                    <span class="price-badge" style="font-size: 14px;">{{ book.discount_percentage|floatformat:0 }}% OFF</span>
+                    {% endif %}
+                </div>
+
+                <p class="section-desc" style="text-align: left; margin: 0 0 30px 0; font-size: 17px; line-height: 1.7; color: var(--ink-soft);">
+                    {{ book.description|linebreaksbr }}
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: white; padding: 25px; border-radius: 16px; border: 1.5px solid var(--gold-pale); margin-bottom: 40px;">
+                    <div>
+                        <div style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); margin-bottom: 4px;">Language</div>
+                        <div style="font-family: var(--font-display); font-weight: 600; color: var(--ink);">{{ book.get_language_display }}</div>
+                    </div>
+                    <div>
+                        <div style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); margin-bottom: 4px;">Availability</div>
+                        {% if book.stock > 0 %}
+                        <div style="font-family: var(--font-display); font-weight: 600; color: var(--forest);">{{ book.stock }} Units In Stock</div>
+                        {% else %}
+                        <div style="font-family: var(--font-display); font-weight: 600; color: var(--terracotta);">Out of Stock</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="book-action-row" style="display:flex; gap:12px; flex-direction: column;">
+                    <div style="display: flex; gap: 12px; width: 100%;">
+                        {% if book.stock > 0 %}
+                        <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-primary" style="flex: 1; text-align: center; font-size: 16px; padding: 16px;">Add to Shelf</a>
+                        {% else %}
+                        <button class="btn-primary" style="flex: 1; background: #ccc; box-shadow: none; cursor: not-allowed; padding: 16px; font-size: 14px;" disabled>Unavailable</button>
+                        {% endif %}
+                        <a href="{% url 'accounts:toggle_wishlist' book.id %}" onclick="toggleWishlist(event, '{{ book.id }}')" class="btn-secondary" style="width: 54px; height: 54px; font-size: 20px; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0;">
+                            {% if user.is_authenticated and book in user.wishlists.all %}❤️{% else %}🔖{% endif %}
+                        </a>
+                    </div>
+                    
+                    {% if book.stock > 0 %}
+                    <button id="openRandomPageBtn" class="btn-secondary" style="width: 100%; padding: 16px; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                        </svg>
+                        Flip Random Page
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div id="randomPageContent" class="random-page-box" style="margin-top: 30px;"></div>
+
+                <!-- Reviews Section -->
+                <div style="margin-top: 60px;">
+                    <h3 style="font-family: var(--font-display); font-size: 24px; margin-bottom: 30px; border-bottom: 1px solid var(--gold-pale); padding-bottom: 20px;">Reader Reviews</h3>
+
+                    {% if user.is_authenticated %}
+                    {% if not user_has_reviewed %}
+                    <form method="POST" action="{% url 'store:submit_review' book.slug %}" style="background: white; padding: 25px; border-radius: 16px; border: 1.5px solid var(--gold-pale); margin-bottom: 40px;">
+                        {% csrf_token %}
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px;">Your Rating</label>
+                            <select name="rating" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--gold-pale);">
+                                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                                <option value="4">⭐⭐⭐⭐ (Great)</option>
+                                <option value="3">⭐⭐⭐ (Good)</option>
+                                <option value="2">⭐⭐ (Fair)</option>
+                                <option value="1">⭐ (Poor)</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px;">Your Thoughts</label>
+                            <textarea name="comment" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--gold-pale); height: 100px; font-family: var(--font-body);" placeholder="What did you think of this treasure?"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="font-size: 12px; padding: 12px 24px;">Submit Review</button>
+                    </form>
+                    {% endif %}
+                    {% else %}
+                    <p style="background: var(--beige-warm); padding: 15px; border-radius: 12px; font-size: 14px; margin-bottom: 30px;">
+                        Please <a href="{% url 'accounts:login' %}?next={{ request.path }}" style="color: var(--terracotta); font-weight: 700;">Sign In</a> to share your thoughts.
+                    </p>
+                    {% endif %}
+
+                    {% if reviews %}
+                    <div id="reviewsWrapper" class="reviews-container reviews-collapsed">
+                        {% for review in reviews %}
+                        <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px dashed var(--gold-pale);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                <div>
+                                    <span style="font-family: var(--font-display); font-weight: 700;">{{ review.user.username }}</span>
+                                    <span style="margin-left: 10px; color: var(--gold);">
+                                        {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}⭐{% endif %}{% endfor %}
+                                    </span>
+                                </div>
+                                <span style="font-family: var(--font-ui); font-size: 11px; color: var(--ink-soft);">{{ review.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <p style="font-family: var(--font-body); font-size: 15px; color: var(--ink-soft); line-height: 1.6;">{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button id="toggleReviewsBtn" class="review-toggle-btn">Read All Reviews ✦</button>
+                    {% else %}
+                    <p style="font-family: var(--font-body); font-style: italic; color: var(--ink-soft);">No reviews yet. Be the first to share your journey!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if related_books %}
+        <div style="margin-top: 100px;">
+            <div class="section-header">
+                <h2 class="section-title">You Might Also <em>Like</em></h2>
+            </div>
+            <div class="books-grid">
+                {% for b in related_books %}
+                <div class="book-card">
+                    <div class="book-img-wrap" style="height: 250px;">
+                        {% if b.cover_image %}
+                        <img src="{{ b.cover_image.url }}" alt="{{ b.title }}">
+                        {% else %}
+                        <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--beige-warm);">📖</div>
+                        {% endif %}
+                        <div class="book-wishlist">🔖</div>
+                    </div>
+                    <div class="book-info">
+                        <div class="book-genre">{{ b.category.name }}</div>
+                        <h3 class="book-title"><a href="{% url 'store:book_detail' b.slug %}">{{ b.title }}</a></h3>
+                        <div class="book-author">By {{ b.author }}</div>
+                        <div class="book-price-row">
+                            <span class="price-now">₹{{ b.final_price|floatformat:2 }}</span>
+                            <a href="{% url 'orders:add_to_cart' b.id %}" class="btn-cart">Add +</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('openRandomPageBtn');
+        const content = document.getElementById('randomPageContent');
+        const quotes = [
+            "The river flowed silently, carrying the whispers of an ancient civilization...",
+            "It was profoundly difficult to let go, mostly because her heart was tied to the soil of her ancestors.",
+            "Under the shade of the banyan tree, the stories felt more real than the merchants across the street.",
+            "The monsoon arrived in Cuttack with the dramatic flair of an uninvited friend.",
+            "They say the temple walls have eyes, tracking the footprints of generations.",
+            "Her hands traced the delicate threads of the Patta silk, remembering the weavers of Pipli."
+        ];
+
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                content.style.display = 'block';
+                content.innerHTML = `"${randomQuote}"<br><span style="font-size: 0.9rem; color: var(--ink-soft); font-family: var(--font-ui); display: block; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;">— Excerpt from page ${Math.floor(Math.random() * 300) + 12}</span>`;
+                content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        }
+
+        const toggleReviewsBtn = document.getElementById('toggleReviewsBtn');
+        const reviewsWrapper = document.getElementById('reviewsWrapper');
+
+        if (toggleReviewsBtn && reviewsWrapper) {
+            toggleReviewsBtn.addEventListener('click', () => {
+                const isCollapsed = reviewsWrapper.classList.contains('reviews-collapsed');
+                if (isCollapsed) {
+                    reviewsWrapper.classList.remove('reviews-collapsed');
+                    toggleReviewsBtn.innerText = 'Show Fewer Reviews ▲';
+                } else {
+                    reviewsWrapper.classList.add('reviews-collapsed');
+                    toggleReviewsBtn.innerText = 'Read All Reviews ✦';
+                    reviewsWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

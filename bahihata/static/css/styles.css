@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+    /* Odisha Inspired Colors */
+    --clr-terracotta: #C13A3A;
+    --clr-terracotta-dark: #8C2222;
+    --clr-palm-beige: #F2E8C6;
+    --clr-palm-light: #F9F5EB;
+    --clr-antique-gold: #B89947;
+    --clr-ink-black: #1A1A1A;
+    --clr-ivory-white: #FAF9F6;
+    
+    /* Accents */
+    --clr-indigo: #203A70;
+    --clr-forest: #2E5A36;
+    --clr-burnt-orange: #D96A27;
+
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+
+    /* Spacing */
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 2rem;
+    --space-xl: 4rem;
+
+    /* Shadows & Effects */
+    --shadow-soft: 0 4px 20px rgba(26, 26, 26, 0.08);
+    --shadow-book: 5px 15px 30px rgba(0,0,0,0.2), inset 2px 0 5px rgba(255,255,255,0.4);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--clr-ivory-white);
+    color: var(--clr-ink-black);
+    line-height: 1.6;
+    /* Subtle grain texture overlay will go here */
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Subtle grain texture pseudo element */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    color: var(--clr-ink-black);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--clr-terracotta);
+    color: var(--clr-ivory-white);
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--clr-terracotta-dark);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--clr-terracotta);
+    padding: 12px 24px;
+    border: 2px solid var(--clr-terracotta);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background-color: var(--clr-terracotta);
+    color: var(--clr-ivory-white);
+}
+
+/* Base Layout Structure */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+/* Header & Navbar */
+.site-header {
+    background-color: var(--clr-palm-light);
+    border-bottom: 2px solid var(--clr-antique-gold);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-soft);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo h1 {
+    font-size: 2rem;
+    color: var(--clr-terracotta);
+    margin: 0;
+    cursor: pointer;
+}
+
+.search-bar {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 var(--space-lg);
+    position: relative;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 40px 12px 20px;
+    border: 1px solid var(--clr-antique-gold);
+    border-radius: 50px;
+    background-color: var(--clr-ivory-white);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.search-bar input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--clr-terracotta);
+}
+
+.nav-links {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.nav-links a {
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.nav-links a:hover {
+    color: var(--clr-terracotta);
+}
+
+/* Utilities */
+.text-center { text-align: center; }
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+.mb-4 { margin-bottom: var(--space-xl); }

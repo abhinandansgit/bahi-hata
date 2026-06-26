@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vendor Dashboard | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="background: var(--ivory); padding: 80px 0; min-height: 80vh;">
+    <div class="container">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--gold-pale); padding-bottom: 20px; margin-bottom: 40px;">
+            <div>
+                <div class="section-eyebrow">{{ vendor.shop_name }}</div>
+                <h1 class="section-title" style="text-align: left; margin: 0;">Vendor <em>Dashboard</em></h1>
+            </div>
+            <a href="{% url 'vendors:add_book' %}" class="btn-primary" style="padding: 16px 24px;">+ List New Book</a>
+        </div>
+
+        <div class="vendor-dash-layout">
+            <aside class="reveal">
+                <div style="background: white; padding: 30px; border-radius: 16px; border: 1px solid rgba(201, 150, 58, 0.2); box-shadow: var(--shadow-warm);">
+                    <h3 style="font-family: var(--font-display); font-size: 22px; margin-bottom: 20px; color: var(--terracotta); border-bottom: 1.5px solid var(--gold-pale); padding-bottom: 10px;">Shop Stats</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <span style="font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold);">Total Books Listed</span>
+                        <div style="font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--ink);">{{ books.count }}</div>
+                    </div>
+                    
+                    <div>
+                        <span style="font-family: var(--font-ui); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold);">Status</span>
+                        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 600; color: {% if vendor.is_approved %}var(--forest){% else %}var(--terracotta){% endif %};">
+                            {% if vendor.is_approved %}Approved & Live{% else %}Pending Review{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="reveal reveal-delay-1">
+                <h2 style="font-family: var(--font-display); font-size: 28px; color: var(--ink); margin-bottom: 20px;">Your Collection</h2>
+                
+                {% if books %}
+                <div style="background: white; border-radius: 16px; border: 1.5px solid var(--gold-pale); box-shadow: var(--shadow-float); overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: var(--ivory-warm); border-bottom: 1.5px solid var(--gold-pale);">
+                            <tr>
+                                <th style="padding: 20px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft);">Title</th>
+                                <th style="padding: 20px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft);">Price</th>
+                                <th style="padding: 20px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft);">Stock</th>
+                                <th style="padding: 20px; font-family: var(--font-ui); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr style="border-bottom: 1px dashed rgba(201, 150, 58, 0.3);">
+                                <td style="padding: 20px;">
+                                    <a href="{% url 'store:book_detail' book.slug %}" style="font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--terracotta);">{{ book.title }}</a>
+                                </td>
+                                <td style="padding: 20px; font-family: var(--font-body); font-size: 18px; color: var(--ink);">₹{{ book.price }}</td>
+                                <td style="padding: 20px; font-family: var(--font-body); font-size: 18px; color: var(--ink);">{{ book.stock }}</td>
+                                <td style="padding: 20px;">
+                                    <span style="background: rgba(45, 90, 39, 0.1); color: var(--forest); padding: 4px 10px; border-radius: 12px; font-family: var(--font-ui); font-size: 11px; font-weight: 700; text-transform: uppercase;">Live</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 60px 0; background: white; border-radius: 16px; border: 1.5px solid var(--gold-pale); box-shadow: var(--shadow-float);">
+                    <div style="font-size: 50px; margin-bottom: 20px;">📜</div>
+                    <p style="font-family: var(--font-body); font-size: 18px; color: var(--ink-soft); margin-bottom: 20px;">Your digital shelf is empty. Let's add some magic.</p>
+                    <a href="{% url 'vendors:add_book' %}" class="btn-secondary">Add Your First Book</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

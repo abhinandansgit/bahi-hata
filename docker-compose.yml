@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: bahihata_db
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-bahihata}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-supersecret}
+      - POSTGRES_DB=${POSTGRES_DB:-bahihata_db}
+
+  web:
+    build: .
+    container_name: bahihata_web
+    restart: always
+    command: gunicorn --bind 0.0.0.0:8000 bahihata.wsgi:application
+    volumes:
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=False
+      - DJANGO_DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-bahihata}:${POSTGRES_PASSWORD:-supersecret}@db:5432/${POSTGRES_DB:-bahihata_db}
+
+volumes:
+  postgres_data:
+  media_volume:

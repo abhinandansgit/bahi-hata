@@ -1,0 +1,645 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Fixes for inline style template tags */
+  .book-bg-trend-1 {
+    height: 250px;
+    background: linear-gradient(135deg, #9B3A1A, #C4531E);
+  }
+
+  .book-bg-trend-2 {
+    height: 250px;
+    background: linear-gradient(135deg, #2C3E7A, #3D52A0);
+  }
+
+  .book-bg-trend-3 {
+    height: 250px;
+    background: linear-gradient(135deg, #2D5A27, #4A8A40);
+  }
+
+  .book-bg-trend-4 {
+    height: 250px;
+    background: linear-gradient(135deg, #4A2A10, #8B4A20);
+  }
+
+  .book-bg-bs-1 {
+    height: 250px;
+    background: linear-gradient(135deg, #c9963a, #e6b84a);
+  }
+
+  .book-bg-bs-2 {
+    height: 250px;
+    background: linear-gradient(135deg, #2D5A27, #4A8A40);
+  }
+
+  .book-bg-bs-3 {
+    height: 250px;
+    background: linear-gradient(135deg, #9B3A1A, #C4531E);
+  }
+
+  .book-bg-bs-4 {
+    height: 250px;
+    background: linear-gradient(135deg, #2C3E7A, #3D52A0);
+  }
+
+  .book-bg-pop-1 {
+    height: 250px;
+    background: linear-gradient(135deg, #4A2A10, #8B4A20);
+  }
+
+  .book-bg-pop-2 {
+    height: 250px;
+    background: linear-gradient(135deg, #2C3E7A, #3D52A0);
+  }
+
+  .book-bg-pop-3 {
+    height: 250px;
+    background: linear-gradient(135deg, #2D5A27, #4A8A40);
+  }
+
+  .book-bg-pop-4 {
+    height: 250px;
+    background: linear-gradient(135deg, #9B3A1A, #C4531E);
+  }
+
+  .mood-bg-1 {
+    background: linear-gradient(135deg, #1a2a4a, #2d4a7a);
+  }
+
+  .mood-bg-2 {
+    background: linear-gradient(135deg, #4a1a4a, #7a2d7a);
+  }
+
+  .mood-bg-3 {
+    background: linear-gradient(135deg, #1a3a1a, #2d6a2d);
+  }
+
+  .mood-bg-4 {
+    background: linear-gradient(135deg, #3a2a1a, #6a4a2d);
+  }
+
+  .mood-bg-5 {
+    background: linear-gradient(135deg, #3a1a10, #7a3010);
+  }
+
+  .mood-bg-6 {
+    background: linear-gradient(135deg, #2a2a3a, #4a4a7a);
+  }
+</style>
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-sky"></div>
+
+  <div class="hero-scene">
+    <!-- SVG Temple Cityscape simplified for template -->
+    <svg viewBox="0 0 1440 500" xmlns="http://www.w3.org/2000/svg"
+      style="position:absolute;bottom:0;left:0;width:100%;height:100%;opacity:0.35;"
+      preserveAspectRatio="xMidYMax meet">
+      <!-- Background haze -->
+      <ellipse cx="720" cy="500" rx="800" ry="200" fill="rgba(155,58,26,0.15)" />
+      <!-- Far temples -->
+      <g opacity="0.5">
+        <path d="M100 500 L100 320 L110 280 L120 250 L130 230 L140 250 L150 280 L160 320 L160 500Z" fill="#3D1A08" />
+        <path d="M108 320 L152 320 L152 340 L108 340Z" fill="#2C1008" />
+        <polygon points="130,210 120,250 140,250" fill="#4A2010" />
+        <rect x="115" y="250" width="30" height="6" fill="#3D1A08" />
+        <rect x="113" y="260" width="34" height="4" fill="#3D1A08" />
+      </g>
+      <!-- Large central temple -->
+      <g>
+        <path d="M650 500 L650 300 L670 260 L690 220 L710 190 L720 160 L730 190 L750 220 L770 260 L790 300 L790 500Z"
+          fill="#2C1008" />
+        <path d="M656 300 L784 300 L784 340 L656 340Z" fill="#1A0A04" />
+        <polygon points="720,130 700,200 740,200" fill="#3D1A08" />
+        <rect x="695" y="195" width="50" height="10" fill="#2C1008" />
+        <rect x="690" y="208" width="60" height="8" fill="#2C1008" />
+        <!-- Temple details/windows -->
+        <rect x="700" y="360" width="16" height="24" rx="8" fill="#4A2010" />
+        <rect x="724" y="360" width="16" height="24" rx="8" fill="#4A2010" />
+        <rect x="748" y="360" width="16" height="24" rx="8" fill="#4A2010" />
+      </g>
+      <!-- Right temple -->
+      <g opacity="0.6">
+        <path d="M1240 500 L1240 340 L1255 300 L1270 265 L1285 240 L1300 240 L1315 265 L1330 300 L1345 340 L1345 500Z"
+          fill="#3D1A08" />
+        <path d="M1247 340 L1338 340 L1338 360 L1247 360Z" fill="#2C1008" />
+        <polygon points="1292,215 1278,250 1306,250" fill="#4A2010" />
+      </g>
+      <!-- Book market stalls -->
+      <g opacity="0.7">
+        <rect x="200" y="430" width="120" height="70" fill="#1A0A04" />
+        <rect x="195" y="425" width="130" height="12" rx="4" fill="#2C1A08" transform="rotate(-2,260,431)" />
+        <rect x="215" y="442" width="25" height="35" rx="2" fill="#9B3A1A" opacity="0.8" />
+        <rect x="245" y="445" width="20" height="32" rx="2" fill="#C9963A" opacity="0.8" />
+        <rect x="270" y="440" width="22" height="37" rx="2" fill="#2C3E7A" opacity="0.8" />
+        <rect x="296" y="443" width="18" height="34" rx="2" fill="#2D5A27" opacity="0.8" />
+        <text x="255" y="420" font-family="serif" font-size="11" fill="rgba(201,150,58,0.7)" text-anchor="middle">ବହି
+          ହାଟ</text>
+      </g>
+      <!-- Street lamp -->
+      <g opacity="0.6">
+        <rect x="505" y="390" width="6" height="110" fill="#2C1A08" />
+        <ellipse cx="508" cy="388" rx="20" ry="8" fill="#1A0A04" />
+        <circle cx="508" cy="380" r="6" fill="rgba(201,150,58,0.6)" />
+        <ellipse cx="508" cy="380" rx="16" ry="16" fill="rgba(201,150,58,0.08)" />
+      </g>
+      <!-- Bicycle silhouette -->
+      <g opacity="0.5" transform="translate(900,430)">
+        <circle cx="0" cy="30" r="24" fill="none" stroke="#2C1A08" stroke-width="4" />
+        <circle cx="50" cy="30" r="24" fill="none" stroke="#2C1A08" stroke-width="4" />
+        <path d="M0 30 L25 8 L50 30" fill="none" stroke="#2C1A08" stroke-width="3" />
+        <path d="M25 8 L20 -2 L30 -2" fill="none" stroke="#2C1A08" stroke-width="3" />
+        <path d="M25 8 L25 0" fill="none" stroke="#2C1A08" stroke-width="2.5" />
+        <path d="M50 30 L50 10 L62 10" fill="none" stroke="#2C1A08" stroke-width="3" />
+      </g>
+      <!-- Floating palm leaf manuscripts -->
+      <ellipse cx="350" cy="200" rx="35" ry="12" fill="rgba(201,150,58,0.2)" transform="rotate(-20,350,200)" />
+      <ellipse cx="1050" cy="250" rx="30" ry="10" fill="rgba(201,150,58,0.15)" transform="rotate(15,1050,250)" />
+      <!-- Ground shadow -->
+      <rect x="0" y="460" width="1440" height="40" fill="rgba(26,16,8,0.6)" />
+      <!-- Stars/atmospheric dots -->
+      <circle cx="200" cy="80" r="1.5" fill="rgba(201,150,58,0.5)" />
+      <circle cx="450" cy="50" r="1" fill="rgba(201,150,58,0.4)" />
+      <circle cx="900" cy="70" r="1.5" fill="rgba(201,150,58,0.5)" />
+      <circle cx="1200" cy="40" r="1" fill="rgba(201,150,58,0.4)" />
+      <circle cx="1350" cy="90" r="2" fill="rgba(201,150,58,0.3)" />
+      <circle cx="600" cy="30" r="1" fill="rgba(255,255,255,0.3)" />
+      <circle cx="820" cy="55" r="1.5" fill="rgba(255,255,255,0.25)" />
+    </svg>
+    <!-- Floating books as text-based emojis -->
+    <div class="floating-book"
+      style="left:8%;top:25%;--rot-start:-6deg;--rot-end:4deg;animation-duration:5.2s;font-size:42px;">📚</div>
+    <div class="floating-book"
+      style="left:85%;top:20%;--rot-start:5deg;--rot-end:-5deg;animation-duration:4.7s;font-size:36px;animation-delay:1.2s;">
+      📖</div>
+    <div class="floating-book"
+      style="left:15%;top:55%;--rot-start:-3deg;--rot-end:6deg;animation-duration:6s;font-size:28px;animation-delay:2.5s;">
+      📕</div>
+    <div class="floating-book"
+      style="left:78%;top:50%;--rot-start:8deg;--rot-end:-3deg;animation-duration:5.5s;font-size:30px;animation-delay:0.8s;">
+      📗</div>
+    <div class="floating-book"
+      style="left:50%;top:12%;--rot-start:-4deg;--rot-end:4deg;animation-duration:4.9s;font-size:24px;animation-delay:3s;">
+      📜</div>
+
+    <div class="street-ground"></div>
+  </div>
+
+  <div class="particles" id="heroParticles"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal">{{ t.hero_eyebrow }}</div>
+    <h1 class="hero-headline reveal reveal-delay-1">{{ t.hero_headline|safe }}</h1>
+    <p class="hero-sub reveal reveal-delay-2">{{ t.hero_sub }}</p>
+
+    <div class="hero-search reveal reveal-delay-3" id="heroSearchSection">
+      <form action="{% url 'store:book_list' %}" method="GET" class="search-book-shape">
+        <div class="search-spine"></div>
+        <div class="search-input-wrap">
+          <input class="search-main-input" type="text" name="q" placeholder="{{ t.hero_search_placeholder }}"
+            id="heroSearch">
+        </div>
+        <button type="submit" class="search-submit">🔍</button>
+      </form>
+      <div class="search-tags">
+        <span class="search-tag" onclick="setSearch(this)">🌧 Rainy Evening Reads</span>
+        <span class="search-tag" onclick="setSearch(this)">📖 Gopinath Mohanty</span>
+        <span class="search-tag" onclick="setSearch(this)">📜 Odia Literature</span>
+        <span class="search-tag" onclick="setSearch(this)">🎓 UPSC Aspirants</span>
+      </div>
+    </div>
+
+    <div class="hero-ctas reveal reveal-delay-4">
+      <a href="{% url 'store:explore_hata' %}" class="btn-primary">{{ t.hero_cta_explore }}</a>
+      <a href="{% url 'store:book_list' %}" class="btn-secondary">{{ t.hero_cta_browse }}</a>
+    </div>
+
+    <div class="hero-stats reveal reveal-delay-4">
+      {% for stat in site_stats %}
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-target="{{ stat.numeric_value }}">{{ stat.value }}</div>
+        <div class="hero-stat-label">{{ stat.label }}</div>
+      </div>
+      {% empty %}
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-target="500">500</div>
+        <div class="hero-stat-label">{{ t.hero_stat_books }}</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-target="18">18+</div>
+        <div class="hero-stat-label">{{ t.hero_stat_odia }}</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-target="7">7-days</div>
+        <div class="hero-stat-label">{{ t.hero_stat_delivery }}</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-target="4.9">4.9★</div>
+        <div class="hero-stat-label">{{ t.hero_stat_rating }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>{{ t.scroll_label }}</span>
+  </div>
+</section>
+
+<!-- ===== MOOD SECTION ===== -->
+<section class="moods-section" id="moods">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-ornament">✦ ✦ ✦</div>
+      <div class="section-eyebrow reveal">{{ t.section_discovery }}</div>
+      <h2 class="section-title reveal reveal-delay-1">{{ t.section_mood_title|safe }}</h2>
+      <p class="section-desc reveal reveal-delay-2">{{ t.section_mood_desc }}</p>
+    </div>
+    <div class="patta-line"></div>
+    <div class="moods-grid">
+      {% for mood in moods %}
+      <a href="{% url 'store:book_list' %}?mood={{ mood.slug }}" class="mood-card reveal">
+        {% if mood.image %}
+        <div class="mood-bg"
+          style="background-image: url('{{ mood.image.url }}'); background-size: cover; background-position: center;">
+        </div>
+        {% else %}
+        <div
+          class="mood-bg mood-rainy {% cycle 'mood-bg-1' 'mood-bg-2' 'mood-bg-3' 'mood-bg-4' 'mood-bg-5' 'mood-bg-6' %}">
+        </div>
+        {% endif %}
+        <div class="mood-overlay"></div>
+        <div class="mood-content">
+          <span class="mood-emoji">{% cycle ' ' ' ' ' ' ' ' ' ' ' ' %}</span>
+          <div class="mood-label">For {{ mood.name }}</div>
+          <div class="mood-count">✦ {{ t.mood_curated }}</div>
+        </div>
+        <div class="mood-arrow">→</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRENDING SHELF ===== -->
+<section class="shelf-section" id="trending">
+  <div class="container">
+    <div class="shelf-header reveal">
+      <div>
+        <div class="section-eyebrow">🔥 {{ t.section_hot }}</div>
+        <h2 class="section-title" style="margin-bottom:0">{{ t.section_trending_title|safe }}</h2>
+      </div>
+      <a href="{% url 'store:book_list' %}" class="see-all">{{ t.see_all }}</a>
+    </div>
+
+    <div class="shelf-tabs reveal">
+      <button class="shelf-tab active" onclick="setTab(this)">All</button>
+      <button class="shelf-tab" onclick="setTab(this)">Fiction</button>
+      <button class="shelf-tab" onclick="setTab(this)">Non-Fiction</button>
+      <button class="shelf-tab" onclick="setTab(this)">Odia</button>
+      <button class="shelf-tab" onclick="setTab(this)">Children</button>
+      <button class="shelf-tab" onclick="setTab(this)">Academic</button>
+    </div>
+
+    <div class="shelf-scroll-wrap reveal">
+      <button class="shelf-nav shelf-nav-prev" onclick="scrollShelf(-1)">‹</button>
+      <div class="shelf-scroll" id="mainShelf">
+        {% for book in trending_books %}
+        <div class="book-card" data-category="{{ book.category.name|lower }}"
+          data-language="{{ book.get_language_display|lower }}">
+          <div
+            class="book-img-wrap {% cycle 'book-bg-trend-1' 'book-bg-trend-2' 'book-bg-trend-3' 'book-bg-trend-4' %}">
+            {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            {% else %}
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
+              {% cycle '📕' '📗' '📚' '📜' '📖' '📘' %}</div>
+            {% endif %}
+            <div class="book-ribbon">{{ book.category.name|truncatechars:18 }}</div>
+            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
+          </div>
+          <div class="book-info">
+            <div class="book-genre">{{ book.category.name }}</div>
+            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
+            <div class="book-author">{{ book.author }}</div>
+            <div class="book-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-num">4.5+</span>
+            </div>
+            <div class="book-price-row">
+              <div class="price-wrap">
+                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
+                {% if book.discount_percentage > 0 %}
+                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
+            </div>
+            <div class="book-delivery">🚚 Delivery by 7-days</div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding: 40px; color: var(--ink-soft);">No trending books available yet.</div>
+        {% endfor %}
+      </div>
+      <button class="shelf-nav shelf-nav-next" onclick="scrollShelf(1)">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BESTSELLER SHELF ===== -->
+{% if bestseller_books %}
+<section class="shelf-section" id="bestsellers" style="background: var(--beige-warm);">
+  <div class="container">
+    <div class="shelf-header reveal">
+      <div>
+        <div class="section-eyebrow">🏆 HALL OF FAME</div>
+        <h2 class="section-title" style="margin-bottom:0">The <em>Bestsellers</em> Shelf</h2>
+      </div>
+      <a href="{% url 'store:book_list' %}" class="see-all">See All →</a>
+    </div>
+
+    <div class="shelf-scroll-wrap reveal">
+      <button class="shelf-nav shelf-nav-prev" onclick="scrollShelfAlt('bestsellerShelf', -1)">‹</button>
+      <div class="shelf-scroll" id="bestsellerShelf">
+        {% for book in bestseller_books %}
+        <div class="book-card">
+          <div class="book-img-wrap {% cycle 'book-bg-bs-1' 'book-bg-bs-2' 'book-bg-bs-3' 'book-bg-bs-4' %}">
+            {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            {% else %}
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
+              {% cycle '🏆' '📕' '📗' '📚' '📖' '📘' %}</div>
+            {% endif %}
+            <div class="book-ribbon" style="background: var(--gold);">🏆 Bestseller</div>
+            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
+          </div>
+          <div class="book-info">
+            <div class="book-genre">{{ book.category.name }}</div>
+            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
+            <div class="book-author">{{ book.author }}</div>
+            <div class="book-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-num">Bestseller</span>
+            </div>
+            <div class="book-price-row">
+              <div class="price-wrap">
+                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
+                {% if book.discount_percentage > 0 %}
+                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
+            </div>
+            <div class="book-delivery">🚚 Delivery by 7-days</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="shelf-nav shelf-nav-next" onclick="scrollShelfAlt('bestsellerShelf', 1)">›</button>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===== POPULAR PICKS SHELF ===== -->
+{% if popular_books %}
+<section class="shelf-section" id="popular">
+  <div class="container">
+    <div class="shelf-header reveal">
+      <div>
+        <div class="section-eyebrow">⭐ CROWD FAVOURITES</div>
+        <h2 class="section-title" style="margin-bottom:0"><em>Popular</em> Picks</h2>
+      </div>
+      <a href="{% url 'store:book_list' %}" class="see-all">See All →</a>
+    </div>
+
+    <div class="shelf-scroll-wrap reveal">
+      <button class="shelf-nav shelf-nav-prev" onclick="scrollShelfAlt('popularShelf', -1)">‹</button>
+      <div class="shelf-scroll" id="popularShelf">
+        {% for book in popular_books %}
+        <div class="book-card">
+          <div class="book-img-wrap {% cycle 'book-bg-pop-1' 'book-bg-pop-2' 'book-bg-pop-3' 'book-bg-pop-4' %}">
+            {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+            {% else %}
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
+              {% cycle '⭐' '📗' '📚' '📕' '📖' '📘' %}</div>
+            {% endif %}
+            <div class="book-ribbon" style="background: #5a67d8;">⭐ Popular</div>
+            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
+          </div>
+          <div class="book-info">
+            <div class="book-genre">{{ book.category.name }}</div>
+            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
+            <div class="book-author">{{ book.author }}</div>
+            <div class="book-rating">
+              <span class="stars">★★★★☆</span>
+              <span class="rating-num">Popular</span>
+            </div>
+            <div class="book-price-row">
+              <div class="price-wrap">
+                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
+                {% if book.discount_percentage > 0 %}
+                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
+            </div>
+            <div class="book-delivery">🚚 Delivery by 7-days</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="shelf-nav shelf-nav-next" onclick="scrollShelfAlt('popularShelf', 1)">›</button>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===== ODIA LITERATURE BANNER ===== -->
+<div class="odia-banner" id="odia">
+  <div class="odia-banner-inner">
+    <div class="odia-visual">
+      <div class="odia-palm-leaf">
+        ସ୍ୱଦେଶ ପ୍ରେମ ଠାରୁ ବଡ଼ ଧର୍ମ ଆଉ ନାହିଁ ।
+        <br><br>
+        <em style="font-size:11px;color:rgba(26,16,8,0.5)">"There is no religion greater than love for one's
+          homeland."</em>
+      </div>
+    </div>
+    <div class="odia-content">
+      <div class="odia-eyebrow reveal">✦ {{ t.heritage_eyebrow }}</div>
+      <h2 class="odia-title reveal reveal-delay-1">{{ t.heritage_title|safe }}</h2>
+      <p class="odia-body reveal reveal-delay-2">
+        {{ t.heritage_body }}
+      </p>
+      <div class="odia-stats reveal reveal-delay-3">
+        <div>
+          <div class="odia-stat-num">18+</div>
+          <div class="odia-stat-label">Odia Titles</div>
+        </div>
+        <div>
+          <div class="odia-stat-num">30+</div>
+          <div class="odia-stat-label">Authors</div>
+        </div>
+        <div>
+          <div class="odia-stat-num">6+</div>
+          <div class="odia-stat-label">Genres</div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-4">
+        <a href="{% url 'store:book_list' %}?language=OD" class="btn-primary"
+          style="display:inline-block; width:fit-content; text-decoration:none;">{{ t.btn_explore_odia }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow" style="color:var(--gold)">{{ t.testimonial_eyebrow }}</div>
+      <h2 class="section-title" style="color:var(--ivory)">{{ t.testimonial_title|safe }}</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">"Bahi Hata is the first platform that makes me feel like I'm walking through a
+          real book bazaar. The Odia book collection is unmatched!"</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:rgba(155,58,26,0.3);color:var(--gold-light);">P</div>
+          <div>
+            <div class="author-name">Priya Dash</div>
+            <div class="author-loc">📍 Bhubaneswar, Odisha</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal reveal-delay-1">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">"Ordered 8 books for my UPSC prep — delivered within a week to my Rourkela
+          address! The packaging was premium."</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:rgba(44,62,122,0.4);color:var(--gold-light);">S</div>
+          <div>
+            <div class="author-name">Smita Nanda</div>
+            <div class="author-loc">📍 Rourkela, Odisha</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal reveal-delay-2">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">"The Bahi Club subscription changed my reading life. Every month a curated
+          selection of beautiful Odia books arrives with a custom note."</div>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:rgba(45,90,39,0.4);color:var(--gold-light);">R</div>
+          <div>
+            <div class="author-name">Rahul Patra</div>
+            <div class="author-loc">📍 Cuttack, Odisha</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ & NEWSLETTER COMBINED ===== -->
+<section class="faq-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow reveal">We've Got Answers</div>
+      <h2 class="section-title reveal reveal-delay-1">Frequently Asked <em>Questions</em></h2>
+    </div>
+    <div class="faq-grid reveal" style="margin-bottom: 80px;">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Do you deliver across all of Odisha? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes! We deliver to all 30 districts of Odisha. Standard delivery takes 5–7 business days.
+          Same-day delivery is available in Bhubaneswar only if it's a urgent need.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I Get author signed book? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Absolutely. We love to help you get an author signed copy, please contact: 📞6372202830 .
+        </div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How can I sell my book book? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Absolutely. We would love to see you as a vendor on our platform .</div>
+      </div>
+    </div>
+
+    <div class="newsletter-inner"
+      style="background: var(--beige-warm); padding: 60px; border-radius: 24px; border: 1.5px solid rgba(201,150,58,0.3);">
+      <div class="section-eyebrow reveal" style="justify-content:center">The Bahi Patrika</div>
+      <h2 class="section-title reveal reveal-delay-1">Never Miss a <em>Good Book</em></h2>
+      <p class="section-desc reveal reveal-delay-2">Get weekly curated picks, Odia literary highlights, exclusive deals,
+        and author recommendations delivered to your inbox.</p>
+      <form class="newsletter-form reveal reveal-delay-3" onsubmit="handleNewsletter(event)">
+        <input class="newsletter-input" type="email" placeholder="Your email address…" required>
+        <button class="newsletter-submit" type="submit">Subscribe ✦</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const stats = document.querySelectorAll('.hero-stat-num');
+
+    const animateValue = (obj, start, end, duration) => {
+      let startTimestamp = null;
+      const suffix = obj.innerText.replace(/[0-9,.]/g, '');
+      const isFloat = obj.getAttribute('data-target').includes('.');
+
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        let current = progress * (end - start) + start;
+
+        if (isFloat) {
+          obj.innerHTML = current.toFixed(1) + suffix;
+        } else {
+          obj.innerHTML = Math.floor(current).toLocaleString() + suffix;
+        }
+
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          // Ensure final value is exact
+          obj.innerHTML = (isFloat ? end.toFixed(1) : end.toLocaleString()) + suffix;
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    const observerOptions = {
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = entry.target;
+          const endValue = parseFloat(target.getAttribute('data-target'));
+          animateValue(target, 0, endValue, 2000);
+          observer.unobserve(target);
+        }
+      });
+    }, observerOptions);
+
+    stats.forEach(stat => observer.observe(stat));
+  });
+
+  function setSearch(el) {
+    const input = document.getElementById('heroSearch');
+    input.value = el.innerText.replace(/^[^\s]+\s/, ''); // Remove emoji
+    input.focus();
+  }
+</script>
+{% endblock %}

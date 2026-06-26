@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Book | Vendor Portal{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="background: var(--ivory); padding: 80px 0; min-height: 80vh;">
+    <div class="container">
+        
+        <div class="reveal" style="max-width: 800px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <div class="section-eyebrow">Vendor Portal</div>
+                <h1 class="section-title">List a New <em>Book</em></h1>
+                <p class="section-desc">Share a new creation or heritage masterpiece with the world.</p>
+            </div>
+            
+            <div style="background: white; padding: 50px; border-radius: 24px; border: 1.5px solid var(--gold-pale); box-shadow: var(--shadow-book);">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div>
+                            <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Book Title</label>
+                            <input type="text" name="title" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                        </div>
+                        
+                        <div>
+                            <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Author</label>
+                            <input type="text" name="author" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Category</label>
+                        <select name="category" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                            <option value="">Select a category...</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Description</label>
+                        <textarea name="description" rows="5" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);"></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;">
+                        <div>
+                            <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Price (₹)</label>
+                            <input type="number" step="0.01" name="price" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                        </div>
+                        
+                        <div>
+                            <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Initial Stock Quantity</label>
+                            <input type="number" name="stock" required style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 8px;">Cover Image URL (Optional)</label>
+                        <input type="url" name="cover_image" placeholder="https://example.com/book-cover.jpg" style="width: 100%; border: 1px solid rgba(201, 150, 58, 0.4); border-radius: 8px; padding: 16px; font-family: var(--font-body); font-size: 16px; background: var(--ivory-warm);">
+                    </div>
+                    
+                    <button type="submit" class="btn-checkout" style="width: 100%; font-size: 16px; padding: 22px;">List Book in Store</button>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="{% url 'vendors:dashboard' %}" style="font-family: var(--font-ui); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); text-decoration: underline;">Cancel and return to Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
