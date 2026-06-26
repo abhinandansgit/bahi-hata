@@ -26,7 +26,6 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9svru)!4zkvg5#d**(*f9p%65^@0ft!!s-fuxeix*d%&^_@&22')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -34,13 +33,18 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
+# Vercel CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+]
+
 # Production Security
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    # Note: SECURE_SSL_REDIRECT is NOT set because Vercel handles SSL at the edge
 
 
 # Application definition
@@ -147,7 +151,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
