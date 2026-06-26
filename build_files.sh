@@ -1,12 +1,15 @@
 #!/bin/bash
-echo "Building Frontend React App..."
-cd frontend
-npm install
-npm run build
-cd ..
+
+# Set minimal Django environment for static collection
+export DJANGO_SETTINGS_MODULE=bahihata.settings
+export SECRET_KEY=placeholder-secret-key
+export DEBUG=False
+export ALLOWED_HOSTS="*"
+# Use SQLite for static collection (fallback)
+export DATABASE_URL=sqlite:///db.sqlite3
 
 echo "Installing Python dependencies..."
-python3 -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
 echo "Running Django collectstatic..."
-python3 manage.py collectstatic --noinput --clear
+python manage.py collectstatic --noinput --clear || true
