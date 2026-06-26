@@ -103,18 +103,25 @@ WSGI_APPLICATION = "bahihata.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+_DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
 
-if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+if _DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            _DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Fallback to SQLite — use /tmp so it works on read-only filesystems like Vercel
+    import tempfile
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(tempfile.gettempdir(), "db.sqlite3"),
+        }
+    }
 
 
 # Password validation
