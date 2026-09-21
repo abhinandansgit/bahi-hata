@@ -19,30 +19,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9svru)!4zkvg5#d**(*f9
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 # Host & Domain configuration
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()]
-
-# Include subdomain, root domain, and deployment hosts
-DEFAULT_HOSTS = [
-    'bahi-hata.theabhilasha.in',
-    '.theabhilasha.in',
-    'theabhilasha.in',
-    '.vercel.app',
-    '.now.sh',
-    'localhost',
-    '127.0.0.1',
-]
-ALLOWED_HOSTS.extend(DEFAULT_HOSTS)
+ALLOWED_HOSTS = ['*']
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
 VERCEL_URL = os.environ.get('VERCEL_URL')
-if VERCEL_URL:
-    ALLOWED_HOSTS.append(VERCEL_URL)
-    ALLOWED_HOSTS.append(f'.{VERCEL_URL}')
-
-ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
@@ -68,7 +48,8 @@ CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 # Production Security & SSL
 if not DEBUG:
-    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+    # On Vercel, HTTPS termination is performed at the Edge CDN
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -151,12 +132,15 @@ if 'DATABASE_URL' in os.environ and os.environ.get('DATABASE_URL'):
     default_conn_age = 0 if is_serverless else 600
     conn_max_age = int(os.environ.get('CONN_MAX_AGE', str(default_conn_age)))
     
-    DATABASES['default'] = dj_database_url.config(
+    db_config = dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=conn_max_age,
         conn_health_checks=True,
         ssl_require=os.environ.get('DB_SSL_REQUIRE', 'False') == 'True' or 'supabase' in os.environ.get('DATABASE_URL', '')
     )
+    # Required for Supabase transaction pooler (port 6543)
+    db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
+    DATABASES['default'] = db_config
 
 
 # Password validation
@@ -204,7 +188,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
