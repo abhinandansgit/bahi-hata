@@ -12,7 +12,7 @@ from core.models import ReaderStory
 from accounts.models import User
 
 def run():
-    print("✦ Starting Bahi Hata Full Platform Seeding...")
+    print("[*] Starting Bahi Hata Full Platform Seeding...")
 
     # 1. Superuser
     if not User.objects.filter(username="abhiadmin").exists():
@@ -23,7 +23,7 @@ def run():
             first_name="Abhinandan",
             last_name="Mishra"
         )
-        print("✓ Created Superuser: abhiadmin / admin@123")
+        print("[+] Created Superuser: abhiadmin / admin@123")
 
     # 2. Categories
     categories_data = [
@@ -34,7 +34,7 @@ def run():
     for cname in categories_data:
         cat, _ = Category.objects.get_or_create(name=cname)
         cats[cname] = cat
-    print(f"✓ Seeded {len(cats)} Categories.")
+    print(f"[+] Seeded {len(cats)} Categories.")
 
     # 3. Moods
     moods_data = [
@@ -51,7 +51,7 @@ def run():
         m.image_url = murl
         m.save()
         mood_objs[mname] = m
-    print(f"✓ Seeded {len(mood_objs)} Moods.")
+    print(f"[+] Seeded {len(mood_objs)} Moods.")
 
     # 4. Books with 3 images each (500x500 high-res)
     books_data = [
@@ -145,41 +145,41 @@ def run():
             if mn in mood_objs:
                 book.moods.add(mood_objs[mn])
         created_books.append(book)
-    print(f"✓ Seeded {len(created_books)} Books with 3 high-res images each.")
+    print(f"[+] Seeded {len(created_books)} Books with 3 high-res images each.")
 
     # 5. Book Combo
     combo, _ = BookCombo.objects.get_or_create(
-        title="Odia Literary Heritage Heritage Pack",
+        name="Odia Literary Heritage Pack",
         defaults={
             "description": "Curated twin bundle featuring Fakir Mohan Senapati's Chha Mana Atha Guntha and Gopinath Mohanty's Paraja.",
-            "bundle_price": 549.00,
-            "image_url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600",
-            "badge_text": "Heritage Bestseller",
-            "is_active": True,
-            "stock": 25
+            "combo_price": 549.00,
+            "cover_image_url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600",
+            "is_active": True
         }
     )
     if len(created_books) >= 2:
         combo.books.set([created_books[0], created_books[1]])
-    print("✓ Seeded Book Combo.")
+    print("[+] Seeded Book Combo.")
 
     # 6. Abhilasha Magazine Editions
     mag_ed, _ = MagazineEdition.objects.get_or_create(
-        title="Abhilasha Annual Literary Edition 2026 (ଅଭିଳାଷା ବାର୍ଷିକ ସଂକଳନ)",
+        title="Abhilasha Annual Literary Edition 2026",
         defaults={
             "edition_year": "2026",
-            "language": "Odia & Hindi",
-            "theme": "Utkala Renaissance & Contemporary Voices (ଉତ୍କଳ ନବଜାଗରଣ ଓ ନୂତନ ସ୍ୱର)",
+            "issue_number": "Annual Edition",
+            "language": "BI",
             "description": "Bahi Hata's annual print magazine uniting premier poets, essayists, and emerging writers across Odisha and India.",
             "price": 249.00,
-            "original_price": 350.00,
+            "discount_percentage": 15.0,
             "stock": 100,
-            "is_featured": True,
-            "is_available": True,
+            "is_current_edition": True,
+            "is_active": True,
+            "total_pages": 140,
+            "chief_editor": "Abhilasha Editorial Board",
             "cover_image_url": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800"
         }
     )
-    print("✓ Seeded Abhilasha Magazine Edition.")
+    print("[+] Seeded Abhilasha Magazine Edition.")
 
     # 7. Reader Stories
     stories_seed = [
@@ -218,9 +218,9 @@ def run():
             location=sdata["location"],
             defaults=sdata
         )
-    print("✓ Seeded Approved Reader Stories.")
+    print("[+] Seeded Approved Reader Stories.")
 
-    print("✦ All Bahi Hata platform features seeded successfully!")
+    print("[*] All Bahi Hata platform features seeded successfully!")
 
 if __name__ == '__main__':
     run()
