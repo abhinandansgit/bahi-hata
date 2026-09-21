@@ -195,6 +195,7 @@ STORAGES = {
 # WhiteNoise settings for fast CDN caching and resilience
 WHITENOISE_MAX_AGE = int(os.environ.get('WHITENOISE_MAX_AGE', 31536000))
 WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_USE_FINDERS = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
