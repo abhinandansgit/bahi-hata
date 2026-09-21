@@ -1,0 +1,182 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Inventory Management — Bahi Hata Admin{% endblock %}
+{% block header_title %}Inventory Management{% endblock %}
+{% block header_subtitle %}Monitor and bulk-update book stock levels{% endblock %}
+
+{% block admin_content %}
+<style>
+    .inv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .inv-stat-card { background: white; border-radius: 16px; padding: 20px; border: 1.5px solid var(--ivory-warm); text-align: center; }
+    .inv-stat-card.danger { border-color: #fed7d7; background: #fff5f5; }
+    .inv-stat-card.warn { border-color: #feebc8; background: #fffaf0; }
+    .inv-stat-card.good { border-color: #c6f6d5; background: #f0fff4; }
+    .inv-stat-num { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; }
+    .inv-stat-num.danger { color: #c53030; }
+    .inv-stat-num.warn { color: #c05621; }
+    .inv-stat-num.good { color: #276749; }
+    .inv-stat-label { font-size: 12px; color: var(--ink-softer); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-tab { padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1.5px solid var(--beige-warm); background: white; color: var(--ink-soft); cursor: pointer; text-decoration: none; transition: var(--transition); }
+    .filter-tab.active, .filter-tab:hover { background: var(--gold); border-color: var(--gold); color: #5a3e00; }
+    .filter-tab.danger { border-color: #fed7d7; }
+    .filter-tab.danger.active, .filter-tab.danger:hover { background: #c53030; border-color: #c53030; color: white; }
+
+    .inv-table { width: 100%; border-collapse: collapse; }
+    .inv-table th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-softer); padding: 12px 16px; text-align: left; border-bottom: 2px solid var(--ivory-warm); }
+    .inv-table td { padding: 14px 16px; border-bottom: 1px solid var(--ivory-warm); font-size: 14px; vertical-align: middle; }
+    .inv-table tr:hover td { background: var(--ivory); }
+    .inv-table tr.row-out td { background: #fff5f5; }
+    .inv-table tr.row-low td { background: #fffaf0; }
+
+    .stock-input { width: 90px; padding: 7px 12px; border: 1.5px solid var(--beige-warm); border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; transition: var(--transition); }
+    .stock-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); }
+    .stock-input.changed { border-color: var(--terracotta); background: #fff9f5; }
+
+    .stock-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-out { background: #fed7d7; color: #c53030; }
+    .badge-low { background: #feebc8; color: #c05621; }
+    .badge-ok { background: #c6f6d5; color: #276749; }
+
+    @media (max-width: 991px) {
+        .inv-stats { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+        .inv-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .inv-stat-num { font-size: 24px; }
+        .inv-table th:nth-child(3), .inv-table td:nth-child(3) { display: none; }
+    }
+</style>
+
+<!-- Stats -->
+<div class="inv-stats">
+    <div class="inv-stat-card">
+        <div class="inv-stat-num">{{ total_books }}</div>
+        <div class="inv-stat-label">Total Books</div>
+    </div>
+    <div class="inv-stat-card danger">
+        <div class="inv-stat-num danger">{{ out_of_stock }}</div>
+        <div class="inv-stat-label">Out of Stock</div>
+    </div>
+    <div class="inv-stat-card warn">
+        <div class="inv-stat-num warn">{{ low_stock }}</div>
+        <div class="inv-stat-label">Low Stock (≤5)</div>
+    </div>
+    <div class="inv-stat-card good">
+        <div class="inv-stat-num good">{{ in_stock }}</div>
+        <div class="inv-stat-label">Well Stocked</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-tabs">
+    <a href="?filter=all" class="filter-tab {% if stock_filter == 'all' or not stock_filter %}active{% endif %}">All Books</a>
+    <a href="?filter=out" class="filter-tab danger {% if stock_filter == 'out' %}active{% endif %}">⚠️ Out of Stock ({{ out_of_stock }})</a>
+    <a href="?filter=low" class="filter-tab {% if stock_filter == 'low' %}active{% endif %}">🟡 Low Stock ({{ low_stock }})</a>
+    <a href="?filter=ok" class="filter-tab {% if stock_filter == 'ok' %}active{% endif %}">✅ In Stock ({{ in_stock }})</a>
+</div>
+
+<div class="admin-card" style="padding: 0; overflow: hidden;">
+    <form method="POST" id="inventoryForm">
+        {% csrf_token %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--ivory-warm);">
+            <div style="font-size: 14px; color: var(--ink-soft);">
+                <strong>{{ books|length }}</strong> books shown — edit stock quantities below and click Save.
+            </div>
+            <button type="submit" class="btn-topbar btn-gold" id="saveBtn" disabled>
+                💾 Save Changes
+            </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="inv-table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Category</th>
+                        <th>Current Stock</th>
+                        <th>New Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr class="{% if book.stock == 0 %}row-out{% elif book.stock <= 5 %}row-low{% endif %}">
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                {% if book.cover_image_url %}
+                                <img src="{{ book.cover_image_url }}" alt="" style="width: 36px; height: 50px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
+                                {% else %}
+                                <div style="width: 36px; height: 50px; background: var(--beige-warm); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">📖</div>
+                                {% endif %}
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px; color: var(--ink);">{{ book.title }}</div>
+                                    <div style="font-size: 11px; color: var(--ink-softer);">{{ book.author }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: var(--ink-soft);">{{ book.category.name }}</td>
+                        <td style="font-weight: 700; font-size: 16px; color: {% if book.stock == 0 %}#c53030{% elif book.stock <= 5 %}#c05621{% else %}#276749{% endif %};">
+                            {{ book.stock }}
+                        </td>
+                        <td>
+                            <input type="number" name="stock_{{ book.id }}"
+                                   value="{{ book.stock }}" min="0" class="stock-input"
+                                   data-original="{{ book.stock }}"
+                                   onchange="markChanged(this)">
+                        </td>
+                        <td>
+                            {% if book.stock == 0 %}
+                            <span class="stock-badge badge-out">⚠️ Out of Stock</span>
+                            {% elif book.stock <= 5 %}
+                            <span class="stock-badge badge-low">🟡 Low Stock</span>
+                            {% else %}
+                            <span class="stock-badge badge-ok">✅ In Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--ink-softer);">No books found for this filter.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="padding: 16px 24px; border-top: 1px solid var(--ivory-warm); display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-topbar btn-gold" id="saveBtn2" disabled>
+                💾 Save All Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+let changedCount = 0;
+
+function markChanged(input) {
+    const orig = parseInt(input.dataset.original, 10);
+    const curr = parseInt(input.value, 10);
+    if (curr !== orig) {
+        input.classList.add('changed');
+        changedCount++;
+    } else {
+        input.classList.remove('changed');
+        changedCount = Math.max(0, changedCount - 1);
+    }
+    const saveBtns = document.querySelectorAll('#saveBtn, #saveBtn2');
+    saveBtns.forEach(btn => {
+        btn.disabled = changedCount === 0;
+        btn.textContent = changedCount > 0 ? `💾 Save ${changedCount} Change(s)` : '💾 Save Changes';
+    });
+}
+
+// Warn on leave if unsaved
+window.addEventListener('beforeunload', (e) => {
+    if (changedCount > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+{% endblock %}

@@ -56,13 +56,245 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 // Trigger hero reveals immediately
 setTimeout(() => document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('visible')), 100);
 
-// ===== MINI CART =====
-function toggleCart() {
+// ===== READING SHELF (SIDE-OUT CART DRAWER) =====
+function openCart() {
   const cart = document.getElementById('miniCart');
   const overlay = document.getElementById('cartOverlay');
-  if(cart) cart.classList.toggle('open');
-  if(overlay) overlay.classList.toggle('open');
+  if (cart) cart.classList.add('open');
+  if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
+function closeCart() {
+  const cart = document.getElementById('miniCart');
+  const overlay = document.getElementById('cartOverlay');
+  if (cart) cart.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleCart() {
+  const cart = document.getElementById('miniCart');
+  if (cart && cart.classList.contains('open')) {
+    closeCart();
+  } else {
+    fetchCartData();
+    openCart();
+  }
+}
+
+// Close on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeCart();
+});
+
+async function fetchCartData() {
+  try {
+    const response = await fetch('/orders/api/cart-data/', {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await response.json();
+    if (data.authenticated && data.cart) {
+      renderShelfDrawer(data.cart);
+    }
+  } catch (err) {
+    console.warn('Could not fetch shelf data:', err);
+  }
+}
+
+function updateCartBadges(count) {
+  document.querySelectorAll('.cart-count, #cartCount, .mob-cart-badge, #shelfCountBadge').forEach(el => {
+    el.textContent = count;
+  });
+}
+
+function renderShelfDrawer(cart) {
+  const container = document.getElementById('shelfItemsContainer');
+  const footer = document.getElementById('shelfFooter');
+  const subtotalEl = document.getElementById('shelfSubtotal');
+  const countBadge = document.getElementById('shelfCountBadge');
+
+  if (!container) return;
+
+  const totalCount = cart.total_items_count || 0;
+  if (countBadge) countBadge.textContent = totalCount;
+  updateCartBadges(totalCount);
+
+  if (totalCount === 0) {
+    container.innerHTML = `
+      <div class="mini-cart-empty">
+          <div class="mini-cart-empty-icon">📖</div>
+          <h4 class="mini-cart-empty-title">Your shelf is empty</h4>
+          <p class="mini-cart-empty-desc">Explore hand-picked Odia classics, book combos, and Abhilasha magazine editions.</p>
+          <a href="/store/books/" class="btn-sm btn-gold" onclick="closeCart()">Explore Books →</a>
+      </div>
+    `;
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+
+  if (footer) {
+    footer.style.display = 'block';
+    if (subtotalEl) subtotalEl.textContent = `₹${(cart.subtotal || 0).toFixed(2)}`;
+  }
+
+  let html = '';
+
+  // 1. Regular Books
+  if (cart.items && cart.items.length > 0) {
+    cart.items.forEach(item => {
+      html += `
+        <div class="shelf-item-card" data-item-id="${item.id}" data-item-type="book">
+          ${item.cover_image_url ? 
+            `<img src="${item.cover_image_url}" alt="${item.title}" class="shelf-item-img">` : 
+            `<div class="shelf-item-img-placeholder">📖</div>`
+          }
+          <div class="shelf-item-info">
+            <div>
+              <div class="shelf-item-tag">${item.category || 'Odia Literature'}</div>
+              <h4 class="shelf-item-title" title="${item.title}">${item.title}</h4>
+              <div class="shelf-item-meta">by ${item.author || 'Author'}</div>
+            </div>
+            <div class="shelf-item-bottom">
+              <div class="shelf-item-price">₹${item.price}</div>
+              <div class="shelf-qty-stepper">
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=decrease')">−</button>
+                <span class="shelf-qty-val">${item.quantity}</span>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=increase')">+</button>
+              </div>
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${item.remove_url}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // 2. Magazine Editions
+  if (cart.magazine_items && cart.magazine_items.length > 0) {
+    cart.magazine_items.forEach(mi => {
+      html += `
+        <div class="shelf-item-card mag-item" data-item-id="${mi.id}" data-item-type="magazine">
+          ${mi.cover_image_url ? 
+            `<img src="${mi.cover_image_url}" alt="${mi.title}" class="shelf-item-img">` : 
+            `<div class="shelf-item-img-placeholder">📰</div>`
+          }
+          <div class="shelf-item-info">
+            <div>
+              <div class="shelf-item-tag" style="color: var(--forest);">📖 Magazine · ${mi.year}</div>
+              <h4 class="shelf-item-title" title="${mi.title}">${mi.title}</h4>
+              <div class="shelf-item-meta">${mi.issue} · ${mi.language}</div>
+            </div>
+            <div class="shelf-item-bottom">
+              <div class="shelf-item-price">₹${mi.price}</div>
+              <div class="shelf-qty-stepper">
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=decrease')">−</button>
+                <span class="shelf-qty-val">${mi.quantity}</span>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=increase')">+</button>
+              </div>
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${mi.remove_url}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // 3. Combo Bundles
+  if (cart.combo_items && cart.combo_items.length > 0) {
+    cart.combo_items.forEach(ci => {
+      html += `
+        <div class="shelf-item-card combo-item" data-item-id="${ci.id}" data-item-type="combo">
+          <div class="shelf-item-img-placeholder" style="background: linear-gradient(135deg, var(--gold-pale), var(--beige-warm)); font-size: 32px;">🎁</div>
+          <div class="shelf-item-info">
+            <div>
+              <div class="shelf-item-tag" style="color: var(--gold);">🎁 Combo Bundle</div>
+              <h4 class="shelf-item-title" title="${ci.name}">${ci.name}</h4>
+              <div class="shelf-item-meta">${ci.books_included.join(' + ')}</div>
+            </div>
+            <div class="shelf-item-bottom">
+              <div class="shelf-item-price">₹${ci.price}</div>
+              <span style="font-size: 12px; color: var(--ink-softer); font-weight: 700;">Qty: 1</span>
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${ci.remove_url}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+async function updateShelfItem(url) {
+  try {
+    const res = await fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await res.json();
+    if (data.cart) {
+      renderShelfDrawer(data.cart);
+    }
+    if (data.message) {
+      showToast(data.message);
+    }
+  } catch (err) {
+    console.error('Shelf update failed:', err);
+  }
+}
+
+// Global AJAX interceptor for Add to Cart buttons
+async function handleAddToCartClick(e, btn) {
+  e.preventDefault();
+  const href = btn.getAttribute('href');
+  if (!href) return;
+
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.7';
+
+  try {
+    const res = await fetch(href, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    if (res.status === 401) {
+      const data = await res.json();
+      if (data.login_url) {
+        window.location.href = data.login_url;
+        return;
+      }
+    }
+
+    const data = await res.json();
+    if (data.success && data.cart) {
+      renderShelfDrawer(data.cart);
+      showToast(data.message || 'Added to your reading shelf!');
+      openCart();
+    } else if (data.message) {
+      showToast(data.message);
+    }
+  } catch (err) {
+    // Fallback normal navigation if AJAX fails
+    window.location.href = href;
+  } finally {
+    btn.style.pointerEvents = '';
+    btn.style.opacity = '';
+  }
+}
+
+// Bind click event listener on document
+document.addEventListener('click', (e) => {
+  const addBtn = e.target.closest('a[href*="/orders/cart/add/"], a[href*="/orders/cart/add-combo/"], a[href*="/orders/cart/add-magazine/"], .btn-cart, .btn-add-shelf, .btn-combo-add, .btn-mag-cart');
+  if (addBtn && !addBtn.getAttribute('href')?.includes('checkout=1')) {
+    handleAddToCartClick(e, addBtn);
+  }
+});
 
 // ===== TOAST =====
 let toastTimer;
@@ -176,5 +408,113 @@ function handleNewsletter(e) {
   e.preventDefault();
   showToast('📬 Welcome to the Bahi Patrika! Check your inbox.');
   e.target.reset();
+}
+
+// ===================================================
+// BOOK CARDS AUTO-SWIPING & MULTI-IMAGE CAROUSEL
+// ===================================================
+const cardSliderTimers = new Map();
+
+function updateCardSlide(sliderEl, targetIndex) {
+  const slides = sliderEl.querySelectorAll('.book-slide');
+  const dots = sliderEl.parentElement.querySelectorAll('.slider-dot');
+  const total = slides.length;
+  if (total <= 1) return;
+
+  const validIndex = ((targetIndex % total) + total) % total;
+  sliderEl.setAttribute('data-current-slide', validIndex);
+
+  slides.forEach((slide, idx) => {
+    slide.classList.toggle('active', idx === validIndex);
+  });
+
+  dots.forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === validIndex);
+  });
+}
+
+function nextCardSlide(sliderEl) {
+  const curr = parseInt(sliderEl.getAttribute('data-current-slide') || '0', 10);
+  updateCardSlide(sliderEl, curr + 1);
+}
+
+function prevCardSlide(sliderEl) {
+  const curr = parseInt(sliderEl.getAttribute('data-current-slide') || '0', 10);
+  updateCardSlide(sliderEl, curr - 1);
+}
+
+function goToSlide(e, dotEl, targetIndex) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const wrap = dotEl.closest('.book-img-wrap');
+  if (!wrap) return;
+  const slider = wrap.querySelector('.book-card-slider');
+  if (slider) updateCardSlide(slider, targetIndex);
+}
+
+function manualSlide(e, btnEl, delta) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const wrap = btnEl.closest('.book-img-wrap');
+  if (!wrap) return;
+  const slider = wrap.querySelector('.book-card-slider');
+  if (slider) {
+    if (delta > 0) nextCardSlide(slider);
+    else prevCardSlide(slider);
+  }
+}
+
+function pauseCardSlider(wrapEl) {
+  const slider = wrapEl.querySelector('.book-card-slider');
+  if (slider && cardSliderTimers.has(slider)) {
+    clearInterval(cardSliderTimers.get(slider));
+    cardSliderTimers.delete(slider);
+  }
+}
+
+function resumeCardSlider(wrapEl) {
+  const slider = wrapEl.querySelector('.book-card-slider');
+  if (!slider) return;
+  const total = parseInt(slider.getAttribute('data-total-slides') || '0', 10);
+  if (total > 1 && !cardSliderTimers.has(slider)) {
+    const timer = setInterval(() => nextCardSlide(slider), 3500);
+    cardSliderTimers.set(slider, timer);
+  }
+}
+
+function initBookCardSliders() {
+  document.querySelectorAll('.book-card-slider').forEach((slider, idx) => {
+    const total = parseInt(slider.getAttribute('data-total-slides') || '0', 10);
+    if (total > 1) {
+      // Stagger auto-play start so not all cards swipe in unison
+      const staggerDelay = (idx % 4) * 800 + 2000;
+      setTimeout(() => {
+        if (!cardSliderTimers.has(slider)) {
+          const timer = setInterval(() => nextCardSlide(slider), 3600);
+          cardSliderTimers.set(slider, timer);
+        }
+      }, staggerDelay);
+
+      // Add touch swipe detection
+      let touchStartX = 0;
+      let touchEndX = 0;
+      slider.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      slider.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 40) {
+          nextCardSlide(slider);
+        } else if (touchEndX - touchStartX > 40) {
+          prevCardSlide(slider);
+        }
+      }, { passive: true });
+    }
+  });
+}
+
+// Initialize on DOMContentLoaded and dynamic loads
+document.addEventListener('DOMContentLoaded', initBookCardSliders);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initBookCardSliders();
 }
 

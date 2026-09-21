@@ -1,0 +1,102 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Edit Combo — {{ combo.name }}{% endblock %}
+{% block header_title %}Edit Combo{% endblock %}
+{% block header_subtitle %}{{ combo.name }}{% endblock %}
+
+{% block admin_content %}
+<style>
+    .book-selector { max-height: 280px; overflow-y: auto; border: 1.5px solid var(--beige-warm); border-radius: 12px; padding: 12px; }
+    .book-select-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: var(--transition); }
+    .book-select-item:hover { background: var(--ivory); }
+    .book-select-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); }
+    .book-select-item label { font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; flex: 1; }
+    .book-select-search { width: 100%; padding: 9px 14px; border: 1.5px solid var(--beige-warm); border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+    .book-select-search:focus { border-color: var(--gold); outline: none; }
+</style>
+
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_panel:manage_combos' %}" class="btn-sm btn-outline" style="text-decoration:none;">← Back to Combos</a>
+</div>
+
+<div class="admin-card">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="form-label">Combo Name *</label>
+                <input type="text" name="name" class="form-control" value="{{ combo.name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Combo Price (₹) *</label>
+                <input type="number" name="combo_price" class="form-control" step="0.01" value="{{ combo.combo_price }}" required>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2">{{ combo.description }}</textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin: 0;">Cover Image URL</label>
+                <label class="btn-upload-file" title="Upload to Supabase Storage">
+                    ☁️ Upload File
+                    <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'edit_combo_cover', 'edit_combo_preview_img', null, 'combos', 'cover')">
+                </label>
+            </div>
+            <input type="url" name="cover_image_url" id="edit_combo_cover" class="form-control" value="{{ combo.cover_image_url|default:'' }}" placeholder="https://... or click Upload File">
+            <div id="edit_combo_preview" style="margin-top: 8px;">
+                <img id="edit_combo_preview_img" src="{{ combo.cover_image_url|default:'' }}" style="{% if not combo.cover_image_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--beige-warm);">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Books in Combo *</label>
+            <input type="text" class="book-select-search" placeholder="🔍 Search books..." id="editBookSearch">
+            <div class="book-selector" id="editBookSelector">
+                {% for book in all_books %}
+                <div class="book-select-item book-item" data-title="{{ book.title|lower }}">
+                    <input type="checkbox" name="books" value="{{ book.id }}" id="ebk_{{ book.id }}"
+                           {% if book.id in selected_book_ids %}checked{% endif %}>
+                    <label for="ebk_{{ book.id }}">
+                        {{ book.title }}
+                        <span style="color: var(--ink-softer); font-weight: 400;">· {{ book.author }} · ₹{{ book.final_price }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div id="editSelectedCount" style="font-size: 12px; color: var(--gold); margin-top: 6px; font-weight: 600;"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-soft);">
+                <input type="checkbox" name="is_active" {% if combo.is_active %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--gold);">
+                Active / Visible on storefront
+            </label>
+            <button type="submit" class="btn-topbar btn-gold">✅ Save Combo</button>
+            <a href="{% url 'admin_panel:manage_combos' %}" class="btn-topbar btn-outline" style="text-decoration:none;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('editBookSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.book-item').forEach(item => {
+        item.style.display = item.dataset.title.includes(q) ? 'flex' : 'none';
+    });
+});
+
+function updateEditCount() {
+    const n = document.querySelectorAll('input[name="books"]:checked').length;
+    const el = document.getElementById('editSelectedCount');
+    el.textContent = `${n} book${n !== 1 ? 's' : ''} selected${n < 2 ? ' (need at least 2)' : ''}`;
+    el.style.color = n >= 2 ? 'var(--forest)' : 'var(--terracotta)';
+}
+document.querySelectorAll('input[name="books"]').forEach(cb => cb.addEventListener('change', updateEditCount));
+updateEditCount();
+</script>
+{% endblock %}

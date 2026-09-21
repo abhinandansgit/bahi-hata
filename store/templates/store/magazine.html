@@ -1,0 +1,694 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Abhilasha Magazine (ଅଭିଳାଷା) | Annual Literary Journal — Bahi Hata{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --mag-gold: #c9963a;
+        --mag-terracotta: #9b3a1a;
+        --mag-ink: #1a1008;
+    }
+
+    /* Hero */
+    .mag-hero {
+        background: linear-gradient(135deg, #18120c 0%, #2c1a0e 50%, #150f0a 100%);
+        color: var(--ivory);
+        padding: 70px 0 60px;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 3px solid var(--gold);
+    }
+    .mag-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(201,150,58,0.15) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .mag-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(201,150,58,0.15);
+        border: 1px solid rgba(201,150,58,0.35);
+        color: var(--gold-light);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+    }
+    .mag-hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.15;
+        margin-bottom: 16px;
+        color: #ffffff;
+    }
+    .mag-hero-title em {
+        color: var(--gold-light);
+        font-style: italic;
+    }
+    .mag-hero-desc {
+        font-size: clamp(15px, 2vw, 18px);
+        color: rgba(255,255,255,0.8);
+        max-width: 720px;
+        line-height: 1.7;
+        margin-bottom: 28px;
+    }
+
+    /* Flagship Showcase Card */
+    .flagship-section {
+        padding: 60px 0 70px;
+        background: var(--ivory);
+    }
+    .flagship-card {
+        background: white;
+        border-radius: 20px;
+        border: 1.5px solid var(--beige-warm);
+        box-shadow: 0 12px 40px rgba(26,16,8,0.08);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 480px 1fr;
+        gap: 40px;
+        padding: 40px;
+        margin-bottom: 60px;
+        position: relative;
+    }
+    .flagship-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .flagship-main-img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 14px;
+        border: 1px solid var(--beige-warm);
+        background: var(--ivory-warm);
+    }
+    .flagship-thumbs {
+        display: flex;
+        gap: 12px;
+    }
+    .flagship-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: var(--transition);
+        background: var(--ivory-warm);
+    }
+    .flagship-thumb.active, .flagship-thumb:hover {
+        border-color: var(--gold);
+        transform: scale(1.05);
+    }
+
+    .flagship-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .flagship-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #c9963a, #e8b86d);
+        color: #1a1008;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 20px;
+        width: fit-content;
+        margin-bottom: 12px;
+    }
+    .flagship-title {
+        font-family: var(--font-display);
+        font-size: clamp(24px, 3.5vw, 34px);
+        color: var(--ink);
+        line-height: 1.25;
+        margin-bottom: 12px;
+    }
+    .flagship-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin-bottom: 18px;
+    }
+    .flagship-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .flagship-desc {
+        font-size: 14.5px;
+        line-height: 1.8;
+        color: var(--ink-soft);
+        margin-bottom: 24px;
+    }
+    .flagship-price-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding: 16px 20px;
+        background: var(--ivory-warm);
+        border-radius: 12px;
+        width: fit-content;
+    }
+    .flagship-price-curr {
+        font-family: var(--font-display);
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--ink);
+    }
+    .flagship-price-orig {
+        font-size: 16px;
+        color: var(--ink-softer);
+        text-decoration: line-through;
+    }
+    .flagship-discount-badge {
+        background: var(--forest);
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .flagship-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .btn-mag-order {
+        background: var(--forest);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+    .btn-mag-order:hover {
+        background: #23471f;
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-mag-cart {
+        background: var(--gold);
+        color: var(--ink);
+        padding: 14px 26px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+    }
+    .btn-mag-cart:hover {
+        background: var(--gold-light);
+        transform: translateY(-2px);
+    }
+
+    /* Past Editions Grid */
+    .past-editions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 28px;
+        margin-top: 30px;
+    }
+    .edition-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid var(--beige-warm);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+    }
+    .edition-card:hover {
+        border-color: var(--gold);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-float);
+    }
+    .edition-card-img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--beige-warm);
+        margin-bottom: 16px;
+        background: var(--ivory-warm);
+    }
+    .edition-card-title {
+        font-family: var(--font-display);
+        font-size: 18px;
+        color: var(--ink);
+        line-height: 1.3;
+        margin-bottom: 6px;
+    }
+
+    /* Submissions Section */
+    .submissions-section {
+        background: linear-gradient(180deg, var(--beige-warm) 0%, var(--ivory-warm) 100%);
+        padding: 80px 0 100px;
+        border-top: 2px solid var(--gold-pale);
+    }
+    .submissions-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 48px;
+        background: white;
+        border-radius: 24px;
+        border: 1.5px solid var(--gold-pale);
+        box-shadow: 0 16px 48px rgba(26,16,8,0.08);
+        padding: 48px;
+    }
+
+    .sub-guide-box {
+        background: var(--ivory-warm);
+        border-radius: 16px;
+        padding: 24px;
+        border-left: 4px solid var(--terracotta);
+        margin-bottom: 24px;
+    }
+    .sub-guide-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 14px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+    }
+    .sub-guide-icon {
+        color: var(--terracotta);
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .email-direct-box {
+        background: linear-gradient(135deg, #2c1a0e, #1a1008);
+        color: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--gold);
+        text-align: center;
+        margin-top: 24px;
+    }
+    .email-address-pill {
+        font-family: 'Courier New', monospace;
+        font-size: clamp(14px, 2vw, 17px);
+        font-weight: 700;
+        color: var(--gold-light);
+        background: rgba(201,150,58,0.15);
+        border: 1px solid rgba(201,150,58,0.3);
+        padding: 8px 16px;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 12px 0 16px;
+        word-break: break-all;
+    }
+
+    .sub-form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid var(--beige-warm);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+        transition: var(--transition);
+        background: var(--ivory);
+    }
+    .sub-form-control:focus {
+        border-color: var(--gold);
+        background: white;
+        box-shadow: 0 0 0 3px var(--gold-pale);
+    }
+    .sub-form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ink-soft);
+        margin-bottom: 6px;
+    }
+
+    @media (max-width: 991px) {
+        .flagship-card { grid-template-columns: 1fr; padding: 24px; gap: 24px; }
+        .submissions-wrap { grid-template-columns: 1fr; padding: 28px; gap: 32px; }
+    }
+</style>
+
+<!-- ===== HERO ===== -->
+<section class="mag-hero">
+    <div class="container">
+        <div class="mag-hero-badge">
+            ✦ Annual Literary & Cultural Journal · ବାର୍ଷିକ ସାହିତ୍ୟ ପତ୍ରିକା ✦
+        </div>
+        <h1 class="mag-hero-title">
+            ଅଭିଳାଷା · <em>अभिलाषा</em><br>
+            Abhilasha Annual Magazine
+        </h1>
+        <p class="mag-hero-desc">
+            Odisha's celebrated annual literary magazine showcasing extraordinary poetry, short fiction, essays, and cultural archives in <strong>Odia (ଓଡ଼ିଆ)</strong> and <strong>Hindi (हिन्दी)</strong>. Order print copies or submit your writings for our upcoming annual edition.
+        </p>
+
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+            <a href="#flagship-edition" class="btn-primary" style="text-decoration: none;">
+                📖 Explore Current Edition
+            </a>
+            <a href="#submit-writings" class="btn-outline" style="color: var(--ivory); border-color: rgba(255,255,255,0.4); text-decoration: none;">
+                ✍️ Submit Your Writing (Hindi/Odia)
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CURRENT / FLAGSHIP EDITION SHOWCASE ===== -->
+<section class="flagship-section" id="flagship-edition">
+    <div class="container">
+        <div style="margin-bottom: 32px;">
+            <div class="section-eyebrow">🔥 Flagship Annual Release</div>
+            <h2 class="section-title" style="margin-bottom: 4px;">Featured <em>Annual Edition</em></h2>
+            <p class="section-desc">Collector's print edition delivered across all 30 districts of Odisha via India Post.</p>
+        </div>
+
+        {% if current_edition %}
+        <div class="flagship-card">
+            <!-- Image Gallery (500x500) -->
+            <div class="flagship-gallery">
+                <img src="{{ current_edition.cover_image_url|default:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500' }}"
+                     alt="{{ current_edition.title }}"
+                     id="mainMagCover"
+                     class="flagship-main-img">
+
+                {% if current_edition.has_multiple_images %}
+                <div class="flagship-thumbs">
+                    {% for img_url in current_edition.all_images %}
+                    <img src="{{ img_url }}"
+                         alt="Preview {{ forloop.counter }}"
+                         class="flagship-thumb {% if forloop.first %}active{% endif %}"
+                         onclick="changeMainMagCover('{{ img_url }}', this)">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info & Ordering -->
+            <div class="flagship-info">
+                <div class="flagship-pill">⭐ {{ current_edition.edition_year }} Annual Edition</div>
+                <h3 class="flagship-title">{{ current_edition.title }}</h3>
+
+                <div class="flagship-meta">
+                    <span>🌐 <strong>{{ current_edition.get_language_display }}</strong></span>
+                    <span>📖 <strong>{{ current_edition.total_pages|default:160 }} Pages</strong></span>
+                    <span>🖋️ <strong>{{ current_edition.chief_editor }}</strong></span>
+                    <span>📦 <strong>{{ current_edition.issue_number }}</strong></span>
+                </div>
+
+                <p class="flagship-desc">
+                    {{ current_edition.description }}
+                </p>
+
+                <div class="flagship-price-wrap">
+                    <span class="flagship-price-curr">₹{{ current_edition.final_price }}</span>
+                    {% if current_edition.discount_percentage > 0 %}
+                    <span class="flagship-price-orig">₹{{ current_edition.price }}</span>
+                    <span class="flagship-discount-badge">{{ current_edition.discount_percentage }}% OFF</span>
+                    {% endif %}
+                </div>
+
+                <div style="font-size: 13px; margin-bottom: 20px;">
+                    {% if current_edition.in_stock %}
+                    <span style="color: var(--forest); font-weight: 700;">✓ In Stock</span>
+                    <span style="color: var(--ink-softer);">· Ready to ship across Odisha within 48–72 hours via India Post</span>
+                    {% else %}
+                    <span style="color: var(--terracotta); font-weight: 700;">⚠️ Currently Out of Stock (Print reprints in progress)</span>
+                    {% endif %}
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flagship-actions">
+                    {% if current_edition.in_stock %}
+                    <!-- Direct WhatsApp Checkout -->
+                    <a href="https://wa.me/916372202830?text=Namaskar%20Bahi%20Hata!%20%F0%9F%93%9A%0A%0AI%20would%20like%20to%20order%20the%20*{{ current_edition.title|urlencode }}*%20(Year%3A%20{{ current_edition.edition_year }}%2C%20Price%3A%20%E2%82%B9{{ current_edition.final_price }}).%0A%0AMy%20Name%3A%20%0ADelivery%20Address%3A%20%0APincode%3A%20" 
+                       target="_blank" 
+                       class="btn-mag-order">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                        <span>Place Order — ₹{{ current_edition.final_price }}</span>
+                    </a>
+
+                    <!-- Add to Cart -->
+                    <a href="{% url 'orders:add_magazine_to_cart' current_edition.id %}" class="btn-mag-cart">
+                        <span>🛒 Add to Cart</span>
+                    </a>
+                    {% else %}
+                    <a href="https://wa.me/916372202830?text=Namaskar%20Bahi%20Hata!%20Please%20notify%20me%20when%20*{{ current_edition.title|urlencode }}*%20is%20back%20in%20stock." target="_blank" class="btn-mag-order" style="background: var(--terracotta);">
+                        💬 Pre-Order / Inquire on WhatsApp
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- PREVIOUS ANNUAL EDITIONS ARCHIVE -->
+        {% if other_editions %}
+        <div style="margin-top: 48px;">
+            <div class="section-eyebrow">📚 Archival Library</div>
+            <h3 class="section-title" style="font-size: 26px; margin-bottom: 6px;">Previous <em>Annual Editions</em></h3>
+            <p class="section-desc">Collector issues from past literary years.</p>
+
+            <div class="past-editions-grid">
+                {% for edition in other_editions %}
+                <div class="edition-card">
+                    <img src="{{ edition.cover_image_url|default:'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500' }}"
+                         alt="{{ edition.title }}"
+                         class="edition-card-img">
+
+                    <div style="font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; margin-bottom: 4px;">
+                        {{ edition.edition_year }} · {{ edition.get_language_display }}
+                    </div>
+
+                    <h4 class="edition-card-title">{{ edition.title }}</h4>
+
+                    <p style="font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 16px; flex: 1;">
+                        {{ edition.description|truncatewords:18 }}
+                    </p>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--beige-warm);">
+                        <div>
+                            <span style="font-size: 18px; font-weight: 800; color: var(--ink);">₹{{ edition.final_price }}</span>
+                            {% if edition.discount_percentage > 0 %}
+                            <span style="font-size: 11px; color: var(--ink-softer); text-decoration: line-through;">₹{{ edition.price }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            {% if edition.in_stock %}
+                            <a href="https://wa.me/916372202830?text=Hello%20Bahi%20Hata!%20I%20want%20to%20order%20*{{ edition.title|urlencode }}*%20(Year%3A%20{{ edition.edition_year }})." 
+                               target="_blank" 
+                               class="btn-sm" 
+                               style="background: var(--forest); color: white; text-decoration: none; padding: 6px 12px;">
+                                Order
+                            </a>
+                            <a href="{% url 'orders:add_magazine_to_cart' edition.id %}" 
+                               class="btn-sm btn-gold" 
+                               style="text-decoration: none; padding: 6px 10px;"
+                               title="Add to Cart">
+                                🛒
+                            </a>
+                            {% else %}
+                            <span style="font-size: 11px; color: var(--ink-softer); font-weight: 700;">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ===== CALL FOR WRITINGS & SUBMISSIONS ===== -->
+<section class="submissions-section" id="submit-writings">
+    <div class="container">
+        <div class="section-header" style="text-align: center; margin-bottom: 48px;">
+            <div class="section-ornament">✦ ✦ ✦</div>
+            <div class="section-eyebrow">Call for Submissions · ଲେଖା ପଠାନ୍ତୁ</div>
+            <h2 class="section-title" style="margin-bottom: 8px;">
+                Submit Your Writings for <em>Abhilasha Annual Magazine</em>
+            </h2>
+            <p class="section-desc" style="max-width: 680px; margin: 0 auto;">
+                We invite unpublished literary works in <strong>Odia (ଓଡ଼ିଆ)</strong> and <strong>Hindi (हिन्दी)</strong> from passionate poets, storytellers, researchers, and essayists to be published in our upcoming print annual edition.
+            </p>
+        </div>
+
+        <div class="submissions-wrap">
+            <!-- Left: Guidelines & Official Email -->
+            <div>
+                <h3 style="font-family: var(--font-display); font-size: 22px; color: var(--ink); margin-bottom: 16px;">
+                    Submission Guidelines
+                </h3>
+
+                <div class="sub-guide-box">
+                    <div class="sub-guide-item">
+                        <span class="sub-guide-icon">🖋️</span>
+                        <div><strong>Accepted Genres:</strong> Poetry (କବିତା / कविता), Short Stories (ଗଳ୍ପ / लघु कथा), Literary Essays (ପ୍ରବନ୍ଧ / निबंध), and Cultural Commentaries.</div>
+                    </div>
+                    <div class="sub-guide-item">
+                        <span class="sub-guide-icon">🌐</span>
+                        <div><strong>Languages:</strong> Odia (ଓଡ଼ିଆ) or Hindi (हिन्दी). Bilingual entries are warmly welcomed.</div>
+                    </div>
+                    <div class="sub-guide-item">
+                        <span class="sub-guide-icon">📄</span>
+                        <div><strong>Originality:</strong> All submissions must be the author's original, previously unpublished work.</div>
+                    </div>
+                    <div class="sub-guide-item" style="margin-bottom: 0;">
+                        <span class="sub-guide-icon">🏆</span>
+                        <div><strong>Publication & Honor:</strong> Selected writers will receive a complimentary print copy of the Annual Magazine and feature in our literary directory.</div>
+                    </div>
+                </div>
+
+                <!-- Direct Email Channel -->
+                <div class="email-direct-box">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-light);">
+                        Official Editorial Mailbox
+                    </div>
+                    <div class="email-address-pill" id="editorialEmail">theabhilasha14@gmail.com</div>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 16px;">
+                        Prefer emailing manuscripts with attachments (DOC/PDF)? Send directly with the subject <em>"Submission for Abhilasha Annual Magazine (Hindi/Odia)"</em>.
+                    </p>
+
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <a href="mailto:theabhilasha14@gmail.com?subject=Submission%20for%20Abhilasha%20Annual%20Magazine%20(Hindi/Odia)" class="btn-sm btn-gold" style="text-decoration: none; padding: 10px 18px;">
+                            ✉️ Send Email
+                        </a>
+                        <button type="button" class="btn-sm" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 18px;" onclick="copyEditorialEmail()">
+                            📋 Copy Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Direct Submission Form -->
+            <div>
+                <h3 style="font-family: var(--font-display); font-size: 22px; color: var(--ink); margin-bottom: 8px;">
+                    Submit Online
+                </h3>
+                <p style="font-size: 13.5px; color: var(--ink-soft); margin-bottom: 24px;">
+                    Fill out the form below to submit your writing directly to our editorial panel.
+                </p>
+
+                {% if messages %}
+                {% for msg in messages %}
+                <div style="padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 600;
+                            background: {% if msg.tags == 'error' %}#fff5f5{% else %}#f0fff4{% endif %};
+                            color: {% if msg.tags == 'error' %}#c53030{% else %}#276749{% endif %};
+                            border: 1px solid {% if msg.tags == 'error' %}#fed7d7{% else %}#c6f6d5{% endif %};">
+                    {{ msg }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'store:submit_writing' %}">
+                    {% csrf_token %}
+
+                    <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label class="sub-form-label">Your Full Name *</label>
+                            <input type="text" name="author_name" class="sub-form-control" placeholder="e.g. Abhinandan Mishra" required>
+                        </div>
+                        <div>
+                            <label class="sub-form-label">Email Address *</label>
+                            <input type="email" name="email" class="sub-form-control" placeholder="e.g. theabhilasha14@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label class="sub-form-label">Phone / WhatsApp Number *</label>
+                            <input type="tel" name="phone_number" class="sub-form-control" placeholder="e.g. 6372202830" required>
+                        </div>
+                        <div>
+                            <label class="sub-form-label">Language of Writing *</label>
+                            <select name="language" class="sub-form-control">
+                                <option value="OD">Odia (ଓଡ଼ିଆ)</option>
+                                <option value="HI">Hindi (हिन्दी)</option>
+                                <option value="EN">English</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div>
+                            <label class="sub-form-label">Category / Genre *</label>
+                            <select name="genre" class="sub-form-control">
+                                <option value="POETRY">Poetry / କବିତା / कविता</option>
+                                <option value="STORY">Short Story / ଗଳ୍ପ / लघु कथा</option>
+                                <option value="ESSAY">Essay / ପ୍ରବନ୍ଧ / निबंध</option>
+                                <option value="ARTICLE">Cultural / Literary Article</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="sub-form-label">Title of Work *</label>
+                            <input type="text" name="title_of_work" class="sub-form-control" placeholder="e.g. ସନ୍ଧ୍ୟାର ସ୍ୱର (Voices of Twilight)" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label class="sub-form-label">Your Writing Text / Manuscript *</label>
+                        <textarea name="content_text" rows="7" class="sub-form-control" placeholder="Paste your poem, short story, or essay here..." required></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label class="sub-form-label">Short Author Bio & District / Town</label>
+                        <input type="text" name="author_bio" class="sub-form-control" placeholder="e.g. Writer & Researcher from Patia, Bhubaneswar, Odisha.">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border: none; cursor: pointer;">
+                        ✉️ Submit Writing to Editorial Board
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function changeMainMagCover(url, thumbEl) {
+    document.getElementById('mainMagCover').src = url;
+    document.querySelectorAll('.flagship-thumb').forEach(t => t.classList.remove('active'));
+    if (thumbEl) thumbEl.classList.add('active');
+}
+
+function copyEditorialEmail() {
+    const email = 'theabhilasha14@gmail.com';
+    navigator.clipboard.writeText(email).then(() => {
+        alert('Copied editorial email: ' + email);
+    });
+}
+</script>
+{% endblock %}

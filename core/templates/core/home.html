@@ -248,6 +248,40 @@
   </div>
 </section>
 
+<!-- ===== TRENDING SHELF ===== -->
+<section class="shelf-section" id="trending">
+  <div class="container">
+    <div class="shelf-header reveal">
+      <div>
+        <div class="section-eyebrow">🔥 {{ t.section_hot }}</div>
+        <h2 class="section-title" style="margin-bottom:0">{{ t.section_trending_title|safe }}</h2>
+      </div>
+      <a href="{% url 'store:book_list' %}" class="see-all">{{ t.see_all }}</a>
+    </div>
+
+    <div class="shelf-tabs reveal">
+      <button class="shelf-tab active" onclick="setTab(this)">All</button>
+      <button class="shelf-tab" onclick="setTab(this)">Fiction</button>
+      <button class="shelf-tab" onclick="setTab(this)">Non-Fiction</button>
+      <button class="shelf-tab" onclick="setTab(this)">Odia</button>
+      <button class="shelf-tab" onclick="setTab(this)">Children</button>
+      <button class="shelf-tab" onclick="setTab(this)">Academic</button>
+    </div>
+
+    <div class="shelf-scroll-wrap reveal">
+      <button class="shelf-nav shelf-nav-prev" onclick="scrollShelf(-1)">‹</button>
+      <div class="shelf-scroll" id="mainShelf">
+        {% for book in trending_books %}
+          {% include 'includes/book_card.html' with book=book %}
+        {% empty %}
+          <div style="padding: 40px; color: var(--ink-soft);">No trending books available yet.</div>
+        {% endfor %}
+      </div>
+      <button class="shelf-nav shelf-nav-next" onclick="scrollShelf(1)">›</button>
+    </div>
+  </div>
+</section>
+
 <!-- ===== MOOD SECTION ===== -->
 <section class="moods-section" id="moods">
   <div class="container">
@@ -283,72 +317,6 @@
   </div>
 </section>
 
-<!-- ===== TRENDING SHELF ===== -->
-<section class="shelf-section" id="trending">
-  <div class="container">
-    <div class="shelf-header reveal">
-      <div>
-        <div class="section-eyebrow">🔥 {{ t.section_hot }}</div>
-        <h2 class="section-title" style="margin-bottom:0">{{ t.section_trending_title|safe }}</h2>
-      </div>
-      <a href="{% url 'store:book_list' %}" class="see-all">{{ t.see_all }}</a>
-    </div>
-
-    <div class="shelf-tabs reveal">
-      <button class="shelf-tab active" onclick="setTab(this)">All</button>
-      <button class="shelf-tab" onclick="setTab(this)">Fiction</button>
-      <button class="shelf-tab" onclick="setTab(this)">Non-Fiction</button>
-      <button class="shelf-tab" onclick="setTab(this)">Odia</button>
-      <button class="shelf-tab" onclick="setTab(this)">Children</button>
-      <button class="shelf-tab" onclick="setTab(this)">Academic</button>
-    </div>
-
-    <div class="shelf-scroll-wrap reveal">
-      <button class="shelf-nav shelf-nav-prev" onclick="scrollShelf(-1)">‹</button>
-      <div class="shelf-scroll" id="mainShelf">
-        {% for book in trending_books %}
-        <div class="book-card" data-category="{{ book.category.name|lower }}"
-          data-language="{{ book.get_language_display|lower }}">
-          <div
-            class="book-img-wrap {% cycle 'book-bg-trend-1' 'book-bg-trend-2' 'book-bg-trend-3' 'book-bg-trend-4' %}">
-            {% if book.cover_image %}
-            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
-            {% else %}
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
-              {% cycle '📕' '📗' '📚' '📜' '📖' '📘' %}</div>
-            {% endif %}
-            <div class="book-ribbon">{{ book.category.name|truncatechars:18 }}</div>
-            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
-          </div>
-          <div class="book-info">
-            <div class="book-genre">{{ book.category.name }}</div>
-            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
-            <div class="book-author">{{ book.author }}</div>
-            <div class="book-rating">
-              <span class="stars">★★★★★</span>
-              <span class="rating-num">4.5+</span>
-            </div>
-            <div class="book-price-row">
-              <div class="price-wrap">
-                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
-                {% if book.discount_percentage > 0 %}
-                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
-                {% endif %}
-              </div>
-              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
-            </div>
-            <div class="book-delivery">🚚 Delivery by 7-days</div>
-          </div>
-        </div>
-        {% empty %}
-        <div style="padding: 40px; color: var(--ink-soft);">No trending books available yet.</div>
-        {% endfor %}
-      </div>
-      <button class="shelf-nav shelf-nav-next" onclick="scrollShelf(1)">›</button>
-    </div>
-  </div>
-</section>
-
 <!-- ===== BESTSELLER SHELF ===== -->
 {% if bestseller_books %}
 <section class="shelf-section" id="bestsellers" style="background: var(--beige-warm);">
@@ -365,37 +333,7 @@
       <button class="shelf-nav shelf-nav-prev" onclick="scrollShelfAlt('bestsellerShelf', -1)">‹</button>
       <div class="shelf-scroll" id="bestsellerShelf">
         {% for book in bestseller_books %}
-        <div class="book-card">
-          <div class="book-img-wrap {% cycle 'book-bg-bs-1' 'book-bg-bs-2' 'book-bg-bs-3' 'book-bg-bs-4' %}">
-            {% if book.cover_image %}
-            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
-            {% else %}
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
-              {% cycle '🏆' '📕' '📗' '📚' '📖' '📘' %}</div>
-            {% endif %}
-            <div class="book-ribbon" style="background: var(--gold);">🏆 Bestseller</div>
-            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
-          </div>
-          <div class="book-info">
-            <div class="book-genre">{{ book.category.name }}</div>
-            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
-            <div class="book-author">{{ book.author }}</div>
-            <div class="book-rating">
-              <span class="stars">★★★★★</span>
-              <span class="rating-num">Bestseller</span>
-            </div>
-            <div class="book-price-row">
-              <div class="price-wrap">
-                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
-                {% if book.discount_percentage > 0 %}
-                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
-                {% endif %}
-              </div>
-              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
-            </div>
-            <div class="book-delivery">🚚 Delivery by 7-days</div>
-          </div>
-        </div>
+          {% include 'includes/book_card.html' with book=book %}
         {% endfor %}
       </div>
       <button class="shelf-nav shelf-nav-next" onclick="scrollShelfAlt('bestsellerShelf', 1)">›</button>
@@ -420,37 +358,7 @@
       <button class="shelf-nav shelf-nav-prev" onclick="scrollShelfAlt('popularShelf', -1)">‹</button>
       <div class="shelf-scroll" id="popularShelf">
         {% for book in popular_books %}
-        <div class="book-card">
-          <div class="book-img-wrap {% cycle 'book-bg-pop-1' 'book-bg-pop-2' 'book-bg-pop-3' 'book-bg-pop-4' %}">
-            {% if book.cover_image %}
-            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
-            {% else %}
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;opacity:0.8;">
-              {% cycle '⭐' '📗' '📚' '📕' '📖' '📘' %}</div>
-            {% endif %}
-            <div class="book-ribbon" style="background: #5a67d8;">⭐ Popular</div>
-            <div class="book-wishlist" onclick="addWishlist(event)">🔖</div>
-          </div>
-          <div class="book-info">
-            <div class="book-genre">{{ book.category.name }}</div>
-            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
-            <div class="book-author">{{ book.author }}</div>
-            <div class="book-rating">
-              <span class="stars">★★★★☆</span>
-              <span class="rating-num">Popular</span>
-            </div>
-            <div class="book-price-row">
-              <div class="price-wrap">
-                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
-                {% if book.discount_percentage > 0 %}
-                <span class="price-old" style="text-decoration:line-through;color:var(--ink-softer);font-size:12px;margin-left:6px;">₹{{ book.price|floatformat:2 }}</span>
-                {% endif %}
-              </div>
-              <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
-            </div>
-            <div class="book-delivery">🚚 Delivery by 7-days</div>
-          </div>
-        </div>
+          {% include 'includes/book_card.html' with book=book %}
         {% endfor %}
       </div>
       <button class="shelf-nav shelf-nav-next" onclick="scrollShelfAlt('popularShelf', 1)">›</button>
@@ -500,50 +408,150 @@
 
 
 
-<!-- ===== TESTIMONIALS ===== -->
-<section class="testimonials-section">
+<!-- ===== READER STORIES (TESTIMONIALS & REVIEW FORM) ===== -->
+<section class="testimonials-section" id="reader-stories">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow" style="color:var(--gold)">{{ t.testimonial_eyebrow }}</div>
-      <h2 class="section-title" style="color:var(--ivory)">{{ t.testimonial_title|safe }}</h2>
+    <div class="section-header" style="text-align: center; margin-bottom: 44px;">
+      <div class="section-ornament" style="color: var(--gold);">✦ ✦ ✦</div>
+      <div class="section-eyebrow reveal" style="color:var(--gold); justify-content: center;">{{ t.testimonial_eyebrow }}</div>
+      <h2 class="section-title reveal reveal-delay-1" style="color:var(--ivory); margin-bottom: 8px;">{{ t.testimonial_title|safe }}</h2>
+      <p class="section-desc reveal reveal-delay-2" style="color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto;">
+        Real experiences shared by readers across all 30 districts of Odisha.
+      </p>
     </div>
-    <div class="testimonials-grid">
-      <div class="testimonial-card reveal">
-        <div class="testimonial-stars">★★★★★</div>
-        <div class="testimonial-text">"Bahi Hata is the first platform that makes me feel like I'm walking through a
-          real book bazaar. The Odia book collection is unmatched!"</div>
-        <div class="testimonial-author">
-          <div class="author-avatar" style="background:rgba(155,58,26,0.3);color:var(--gold-light);">P</div>
-          <div>
-            <div class="author-name">Priya Dash</div>
-            <div class="author-loc">📍 Bhubaneswar, Odisha</div>
+
+    <!-- FLASH MESSAGES IF ANY -->
+    {% if messages %}
+    <div style="max-width: 900px; margin: 0 auto 24px;">
+      {% for msg in messages %}
+      <div style="padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+                  background: {% if msg.tags == 'error' %}rgba(197,48,48,0.2){% else %}rgba(45,90,39,0.25){% endif %};
+                  color: {% if msg.tags == 'error' %}#feb2b2{% else %}#9ae6b4{% endif %};
+                  border: 1px solid {% if msg.tags == 'error' %}rgba(197,48,48,0.4){% else %}rgba(72,187,120,0.4){% endif %};">
+        {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- TWO-COLUMN LAYOUT: CAROUSEL + REVIEW FORM -->
+    <div class="stories-wrapper">
+      
+      <!-- LEFT: PAGE-SWIPE REVIEW CAROUSEL -->
+      <div class="stories-carousel-col reveal">
+        <div class="stories-book-frame">
+          <div class="book-spine-accent"></div>
+          
+          <div class="stories-carousel-viewport" id="storyCarouselViewport">
+            {% for story in reader_stories %}
+            <div class="story-page-slide {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}">
+              <div class="story-page-content">
+                <div class="story-page-header">
+                  <div class="story-stars">{{ story.stars }}</div>
+                  <span class="story-badge">✓ Verified Reader</span>
+                </div>
+
+                <div class="story-quote-mark">“</div>
+
+                <div class="story-quote-text">
+                  "{{ story.review_text }}"
+                </div>
+
+                <div class="story-author-box">
+                  <div class="author-avatar story-avatar-gradient-{{ forloop.counter|divisibleby:2|yesno:'1,2' }}">
+                    {{ story.initial }}
+                  </div>
+                  <div>
+                    <div class="story-author-name">{{ story.name }}</div>
+                    <div class="story-author-loc">📍 {{ story.location }}</div>
+                  </div>
+                  <div style="margin-left: auto; font-size: 10px; color: rgba(201,150,58,0.7); font-family: var(--font-ui);">
+                    {{ story.created_at|date:"M Y" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="story-page-slide active">
+              <div class="story-page-content">
+                <div class="story-quote-text">
+                  "Bahi Hata is Odisha's beloved digital book bazaar. Be the first to share your reading story!"
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- CAROUSEL CONTROLS -->
+          <div class="story-carousel-controls">
+            <button type="button" class="story-nav-btn story-prev" onclick="prevStorySlide()" aria-label="Previous Story">‹</button>
+            
+            <div class="story-indicators" id="storyDots">
+              {% for story in reader_stories %}
+              <button type="button" class="story-dot {% if forloop.first %}active{% endif %}" onclick="goToStorySlide({{ forloop.counter0 }})" aria-label="Slide {{ forloop.counter }}"></button>
+              {% endfor %}
+            </div>
+
+            <span class="story-counter" id="storyCounter">1 / {{ reader_stories|length|default:1 }}</span>
+
+            <button type="button" class="story-nav-btn story-next" onclick="nextStorySlide()" aria-label="Next Story">›</button>
           </div>
         </div>
       </div>
-      <div class="testimonial-card reveal reveal-delay-1">
-        <div class="testimonial-stars">★★★★★</div>
-        <div class="testimonial-text">"Ordered 8 books for my UPSC prep — delivered within a week to my Rourkela
-          address! The packaging was premium."</div>
-        <div class="testimonial-author">
-          <div class="author-avatar" style="background:rgba(44,62,122,0.4);color:var(--gold-light);">S</div>
-          <div>
-            <div class="author-name">Smita Nanda</div>
-            <div class="author-loc">📍 Rourkela, Odisha</div>
+
+      <!-- RIGHT: SUBMIT REVIEW FORM -->
+      <div class="stories-form-col reveal reveal-delay-1">
+        <div class="story-submit-card">
+          <div class="story-form-title">
+            <span>✍️</span>
+            <div>
+              <h3>Share Your Story</h3>
+              <p>Tell us about your favorite Odia book or shopping experience</p>
+            </div>
           </div>
+
+          <form method="POST" action="{% url 'submit_story' %}" id="readerStoryForm">
+            {% csrf_token %}
+
+            <!-- Interactive Star Rating Picker -->
+            <div style="margin-bottom: 18px;">
+              <label class="story-label">Your Rating *</label>
+              <div class="star-rating-picker" id="starRatingPicker">
+                <input type="hidden" name="rating" id="ratingValue" value="5">
+                <button type="button" class="star-pick active" data-star="1" onclick="setStoryRating(1)">★</button>
+                <button type="button" class="star-pick active" data-star="2" onclick="setStoryRating(2)">★</button>
+                <button type="button" class="star-pick active" data-star="3" onclick="setStoryRating(3)">★</button>
+                <button type="button" class="star-pick active" data-star="4" onclick="setStoryRating(4)">★</button>
+                <button type="button" class="star-pick active" data-star="5" onclick="setStoryRating(5)">★</button>
+                <span class="star-rating-label" id="starRatingText">★★★★★ Exceptional</span>
+              </div>
+            </div>
+
+            <div class="story-form-row">
+              <div>
+                <label class="story-label">Your Name *</label>
+                <input type="text" name="name" class="story-input" placeholder="e.g. Abhinandan Mishra" required
+                       value="{{ request.user.get_full_name|default:request.user.username }}">
+              </div>
+              <div>
+                <label class="story-label">Your City / District *</label>
+                <input type="text" name="location" class="story-input" placeholder="e.g. Bhubaneswar, Odisha" required>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label class="story-label">Your Experience / Review *</label>
+              <textarea name="review_text" rows="4" class="story-textarea" placeholder="What resonated with you most about Bahi Hata or your favorite Odia book?" required></textarea>
+            </div>
+
+            <button type="submit" class="story-submit-btn">
+              <span>Publish Reader Story</span>
+              <span>✦</span>
+            </button>
+          </form>
         </div>
       </div>
-      <div class="testimonial-card reveal reveal-delay-2">
-        <div class="testimonial-stars">★★★★★</div>
-        <div class="testimonial-text">"The Bahi Club subscription changed my reading life. Every month a curated
-          selection of beautiful Odia books arrives with a custom note."</div>
-        <div class="testimonial-author">
-          <div class="author-avatar" style="background:rgba(45,90,39,0.4);color:var(--gold-light);">R</div>
-          <div>
-            <div class="author-name">Rahul Patra</div>
-            <div class="author-loc">📍 Cuttack, Odisha</div>
-          </div>
-        </div>
-      </div>
+
     </div>
   </div>
 </section>
@@ -558,8 +566,7 @@
     <div class="faq-grid reveal" style="margin-bottom: 80px;">
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">Do you deliver across all of Odisha? <span class="faq-icon">+</span></div>
-        <div class="faq-a">Yes! We deliver to all 30 districts of Odisha. Standard delivery takes 5–7 business days.
-          Same-day delivery is available in Bhubaneswar only if it's a urgent need.</div>
+        <div class="faq-a">Yes! We deliver across all 30 districts of Odisha via India Post. Standard delivery takes 3–5 business days.</div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">Can I Get author signed book? <span class="faq-icon">+</span></div>
@@ -567,21 +574,50 @@
         </div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">How can I sell my book book? <span class="faq-icon">+</span></div>
-        <div class="faq-a">Absolutely. We would love to see you as a vendor on our platform .</div>
+        <div class="faq-q">How can I publish or list my book on Bahi Hata? <span class="faq-icon">+</span></div>
+        <div class="faq-a">We welcome author submissions! Please contact our editorial team at 📧 bahihata2026@gmail.com or 📞 +91 63722 02830 for book review and listing.</div>
       </div>
     </div>
 
     <div class="newsletter-inner"
-      style="background: var(--beige-warm); padding: 60px; border-radius: 24px; border: 1.5px solid rgba(201,150,58,0.3);">
-      <div class="section-eyebrow reveal" style="justify-content:center">The Bahi Patrika</div>
-      <h2 class="section-title reveal reveal-delay-1">Never Miss a <em>Good Book</em></h2>
-      <p class="section-desc reveal reveal-delay-2">Get weekly curated picks, Odia literary highlights, exclusive deals,
-        and author recommendations delivered to your inbox.</p>
-      <form class="newsletter-form reveal reveal-delay-3" onsubmit="handleNewsletter(event)">
-        <input class="newsletter-input" type="email" placeholder="Your email address…" required>
-        <button class="newsletter-submit" type="submit">Subscribe ✦</button>
-      </form>
+      style="background: var(--beige-warm); padding: 56px 40px; border-radius: 24px; border: 1.5px solid rgba(201,150,58,0.3); text-align: center; max-width: 840px; margin: 0 auto; box-shadow: var(--shadow-warm);">
+      <div class="section-eyebrow reveal" style="justify-content:center">✦ The Bahi Hata Community ✦</div>
+      <h2 class="section-title reveal reveal-delay-1" style="margin-bottom: 12px;">Never Miss a <em>Good Book</em></h2>
+      <p class="section-desc reveal reveal-delay-2" style="max-width: 640px; margin: 0 auto 28px; line-height: 1.7;">
+        Join our vibrant WhatsApp reader community & follow us on Instagram for daily Odia literary highlights, rare book discussions, author quotes, and exclusive community discounts.
+      </p>
+
+      <div class="reveal reveal-delay-3" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <!-- WhatsApp Group Button -->
+        <a href="https://chat.whatsapp.com/C69kBKx4zArA0VR4ptgk53?mode=gi_t" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="community-btn community-btn-wa">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+          </svg>
+          <div style="text-align: left;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">Join VIP Group</div>
+            <div style="font-size: 15px; font-weight: 800;">WhatsApp Community</div>
+          </div>
+        </a>
+
+        <!-- Instagram Button -->
+        <a href="https://www.instagram.com/bahi_hata" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="community-btn community-btn-ig">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <div style="text-align: left;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95;">Follow Us</div>
+            <div style="font-size: 15px; font-weight: 800;">@bahi_hata Instagram</div>
+          </div>
+        </a>
+      </div>
     </div>
   </div>
 </section>
@@ -641,5 +677,143 @@
     input.value = el.innerText.replace(/^[^\s]+\s/, ''); // Remove emoji
     input.focus();
   }
+
+  /* ===== READER STORIES CONTROLLER ===== */
+  let currentStoryIdx = 0;
+  let storyAutoPlayTimer = null;
+  const ratingLabels = {
+    5: '★★★★★ Exceptional',
+    4: '★★★★☆ Very Good',
+    3: '★★★☆☆ Good',
+    2: '★★☆☆☆ Fair',
+    1: '★☆☆☆☆ Needs Improvement'
+  };
+
+  function setStoryRating(rating) {
+    const ratingInput = document.getElementById('ratingValue');
+    const label = document.getElementById('starRatingText');
+    if (ratingInput) ratingInput.value = rating;
+    if (label && ratingLabels[rating]) {
+      label.innerText = ratingLabels[rating];
+    }
+    const starBtns = document.querySelectorAll('#starRatingPicker .star-pick');
+    starBtns.forEach(btn => {
+      const star = parseInt(btn.getAttribute('data-star'));
+      if (star <= rating) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  function getStorySlides() {
+    return document.querySelectorAll('.story-page-slide');
+  }
+
+  function getStoryDots() {
+    return document.querySelectorAll('.story-dot');
+  }
+
+  function renderStorySlide(targetIdx, direction = 'next') {
+    const slides = getStorySlides();
+    const dots = getStoryDots();
+    const counter = document.getElementById('storyCounter');
+    const total = slides.length;
+    if (total === 0) return;
+
+    // Normalize index
+    let nextIdx = targetIdx;
+    if (nextIdx >= total) nextIdx = 0;
+    if (nextIdx < 0) nextIdx = total - 1;
+
+    slides.forEach((slide, idx) => {
+      slide.classList.remove('active', 'prev-slide');
+      if (idx === nextIdx) {
+        slide.classList.add('active');
+      } else if (idx === currentStoryIdx) {
+        slide.classList.add('prev-slide');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      if (idx === nextIdx) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+
+    if (counter) {
+      counter.innerText = `${nextIdx + 1} / ${total}`;
+    }
+
+    currentStoryIdx = nextIdx;
+  }
+
+  function nextStorySlide() {
+    renderStorySlide(currentStoryIdx + 1, 'next');
+    resetStoryAutoPlay();
+  }
+
+  function prevStorySlide() {
+    renderStorySlide(currentStoryIdx - 1, 'prev');
+    resetStoryAutoPlay();
+  }
+
+  function goToStorySlide(idx) {
+    renderStorySlide(idx);
+    resetStoryAutoPlay();
+  }
+
+  function resetStoryAutoPlay() {
+    if (storyAutoPlayTimer) clearInterval(storyAutoPlayTimer);
+    const slides = getStorySlides();
+    if (slides.length > 1) {
+      storyAutoPlayTimer = setInterval(() => {
+        renderStorySlide(currentStoryIdx + 1, 'next');
+      }, 5000);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    resetStoryAutoPlay();
+
+    // Pause on hover
+    const viewport = document.getElementById('storyCarouselViewport');
+    if (viewport) {
+      viewport.addEventListener('mouseenter', () => {
+        if (storyAutoPlayTimer) clearInterval(storyAutoPlayTimer);
+      });
+      viewport.addEventListener('mouseleave', () => {
+        resetStoryAutoPlay();
+      });
+
+      // Touch swipe detection for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      viewport.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      viewport.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+          if (diff > 0) {
+            // Swiped left -> next page
+            nextStorySlide();
+          } else {
+            // Swiped right -> prev page
+            prevStorySlide();
+          }
+        }
+      }
+    }
+  });
 </script>
 {% endblock %}

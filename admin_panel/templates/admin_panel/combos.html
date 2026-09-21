@@ -1,0 +1,186 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Combos — Bahi Hata Admin{% endblock %}
+{% block header_title %}Book Combos{% endblock %}
+{% block header_subtitle %}Bundle 2+ books into special combo deals with a single offer price{% endblock %}
+
+{% block admin_content %}
+<style>
+    .combo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 28px; }
+    .combo-card { background: white; border-radius: 18px; border: 1.5px solid var(--ivory-warm); overflow: hidden; transition: var(--transition); }
+    .combo-card:hover { box-shadow: var(--shadow-warm); border-color: var(--gold-pale); transform: translateY(-2px); }
+    .combo-card.inactive { opacity: 0.65; }
+    .combo-img { width: 100%; height: 150px; object-fit: cover; background: var(--beige-warm); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .combo-body { padding: 20px; }
+    .combo-books-strip { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .combo-book-chip { background: var(--ivory-warm); border: 1px solid var(--gold-pale); padding: 4px 10px; border-radius: 12px; font-size: 11px; color: var(--ink-soft); font-weight: 600; }
+    .combo-price-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    .combo-orig-price { font-size: 14px; color: var(--ink-softer); text-decoration: line-through; }
+    .combo-deal-price { font-size: 22px; font-weight: 700; color: var(--terracotta); font-family: 'Outfit', sans-serif; }
+    .savings-badge { background: #c6f6d5; color: #276749; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+    .create-panel { background: white; border-radius: 20px; border: 2px solid var(--gold-pale); padding: 28px; margin-bottom: 28px; }
+    .book-selector { max-height: 240px; overflow-y: auto; border: 1.5px solid var(--beige-warm); border-radius: 12px; padding: 12px; }
+    .book-select-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: var(--transition); }
+    .book-select-item:hover { background: var(--ivory); }
+    .book-select-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); }
+    .book-select-item label { font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; flex: 1; }
+    .book-select-search { width: 100%; padding: 9px 14px; border: 1.5px solid var(--beige-warm); border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+    .book-select-search:focus { border-color: var(--gold); outline: none; }
+
+    @media (max-width: 600px) {
+        .combo-grid { grid-template-columns: 1fr; }
+        .create-panel { padding: 20px; }
+    }
+</style>
+
+<!-- Create Form -->
+<div class="create-panel">
+    <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 22px; display: flex; align-items: center; gap: 8px;">
+        <span>🎁</span> Create New Combo
+    </div>
+
+    <form method="POST" action="{% url 'admin_panel:create_combo' %}">
+        {% csrf_token %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="form-label">Combo Name *</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Odia Classics Trio" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Combo Price (₹) *</label>
+                <input type="number" name="combo_price" class="form-control" step="0.01" min="1" required placeholder="e.g. 399">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Description <span style="color: var(--ink-softer); font-weight: 400;">(optional)</span></label>
+            <textarea name="description" class="form-control" rows="2" placeholder="Brief description shown on the combos page..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin: 0;">Cover Image URL <span style="color: var(--ink-softer); font-weight: 400;">(optional)</span></label>
+                <label class="btn-upload-file" title="Upload to Supabase Storage">
+                    ☁️ Upload File
+                    <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'combo_cover_url', 'combo_preview_img', null, 'combos', 'cover')">
+                </label>
+            </div>
+            <input type="url" name="cover_image_url" id="combo_cover_url" class="form-control" placeholder="https://... or click Upload File">
+            <div id="combo_preview" style="margin-top: 8px;">
+                <img id="combo_preview_img" src="" style="display: none; width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--beige-warm);">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Select Books (min 2) *</label>
+            <input type="text" id="bookSearch" class="book-select-search" placeholder="🔍  Search books by title...">
+            <div class="book-selector" id="bookSelector">
+                {% for book in books %}
+                <div class="book-select-item book-item" data-title="{{ book.title|lower }}">
+                    <input type="checkbox" name="books" value="{{ book.id }}" id="bk_{{ book.id }}">
+                    <label for="bk_{{ book.id }}">
+                        {{ book.title }}
+                        <span style="color: var(--ink-softer); font-weight: 400;">· {{ book.author }} · ₹{{ book.final_price }}</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div id="selectedCount" style="font-size: 12px; color: var(--gold); margin-top: 6px; font-weight: 600;">0 books selected</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-soft);">
+                <input type="checkbox" name="is_active" checked style="width: 16px; height: 16px; accent-color: var(--gold);">
+                Publish immediately
+            </label>
+            <button type="submit" class="btn-topbar btn-gold">🎁 Create Combo</button>
+        </div>
+    </form>
+</div>
+
+<!-- Combos Grid -->
+<div style="font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: var(--ink-softer); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+    {{ combos|length }} Combo{{ combos|length|pluralize }} Created
+</div>
+
+<div class="combo-grid">
+    {% for combo in combos %}
+    <div class="combo-card {% if not combo.is_active %}inactive{% endif %}">
+        {% if combo.cover_image_url %}
+        <img src="{{ combo.cover_image_url }}" alt="{{ combo.name }}" class="combo-img">
+        {% else %}
+        <div class="combo-img">🎁</div>
+        {% endif %}
+        <div class="combo-body">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3;">{{ combo.name }}</div>
+                    {% if not combo.is_active %}
+                    <span style="font-size: 10px; color: #c53030; background: #fff5f5; padding: 2px 8px; border-radius: 12px; font-weight: 700;">INACTIVE</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <a href="{% url 'admin_panel:edit_combo' combo.id %}" class="btn-sm btn-outline" style="text-decoration:none; padding: 5px 10px;">✏️</a>
+                    <form method="POST" action="{% url 'admin_panel:delete_combo' combo.id %}" style="display:inline;" onsubmit="return confirm('Delete combo?')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-sm btn-danger" style="padding: 5px 10px;">🗑</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="combo-books-strip">
+                {% for book in combo.books.all %}
+                <span class="combo-book-chip">📖 {{ book.title|truncatechars:22 }}</span>
+                {% endfor %}
+            </div>
+
+            {% if combo.description %}
+            <p style="font-size: 12px; color: var(--ink-softer); line-height: 1.5; margin-bottom: 10px;">{{ combo.description|truncatechars:80 }}</p>
+            {% endif %}
+
+            <div class="combo-price-row">
+                <span class="combo-orig-price">₹{{ combo.original_total }}</span>
+                <span class="combo-deal-price">₹{{ combo.combo_price }}</span>
+                {% if combo.savings > 0 %}
+                <span class="savings-badge">Save {{ combo.savings_percentage }}%</span>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: 10px; font-size: 11px; color: var(--ink-softer);">
+                {{ combo.books.count }} book{{ combo.books.count|pluralize }}
+                · {% if combo.all_in_stock %}✅ In stock{% else %}⚠️ Some OOS{% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--ink-softer);">
+        <div style="font-size: 48px; margin-bottom: 12px;">🎁</div>
+        <div style="font-size: 16px; font-weight: 600;">No combos yet</div>
+        <div style="font-size: 13px; margin-top: 6px;">Use the form above to bundle books into special deals.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// Book search filter
+document.getElementById('bookSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.book-item').forEach(item => {
+        item.style.display = item.dataset.title.includes(q) ? 'flex' : 'none';
+    });
+});
+
+// Selected count
+document.querySelectorAll('input[name="books"]').forEach(cb => {
+    cb.addEventListener('change', updateCount);
+});
+function updateCount() {
+    const n = document.querySelectorAll('input[name="books"]:checked').length;
+    const el = document.getElementById('selectedCount');
+    el.textContent = `${n} book${n !== 1 ? 's' : ''} selected${n < 2 ? ' (need at least 2)' : ''}`;
+    el.style.color = n >= 2 ? 'var(--forest)' : 'var(--terracotta)';
+}
+</script>
+{% endblock %}

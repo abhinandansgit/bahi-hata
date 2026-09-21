@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Combo Deals | Bahi Hata{% endblock %}
+
+{% block content %}
+<section style="background: var(--ivory); padding: 80px 0; min-height: 70vh;">
+    <div class="container">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 60px;">
+            <div class="section-eyebrow">🎁 Special Bundles</div>
+            <h1 class="section-title">Combo <em>Deals</em></h1>
+            <p class="section-desc" style="max-width: 500px; margin: 0 auto;">
+                Handpicked book bundles at unbeatable prices — more books, bigger savings.
+            </p>
+        </div>
+
+        {% if combos %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;">
+            {% for combo in combos %}
+            <div class="combo-deal-card reveal">
+                <!-- Cover -->
+                <div class="combo-cover">
+                    {% if combo.cover_image_url %}
+                    <img src="{{ combo.cover_image_url }}" alt="{{ combo.name }}">
+                    {% else %}
+                    <div class="combo-cover-placeholder">
+                        {% for book in combo.books.all|slice:":3" %}
+                        <div class="combo-mini-cover">
+                            {% if book.cover_image_url %}
+                            <img src="{{ book.cover_image_url }}" alt="{{ book.title }}">
+                            {% else %}
+                            <span>📖</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if combo.savings_percentage > 0 %}
+                    <div class="combo-savings-ribbon">Save {{ combo.savings_percentage }}%</div>
+                    {% endif %}
+                </div>
+
+                <!-- Info -->
+                <div class="combo-info">
+                    <h2 class="combo-name">{{ combo.name }}</h2>
+                    {% if combo.description %}
+                    <p class="combo-desc">{{ combo.description }}</p>
+                    {% endif %}
+
+                    <!-- Books list -->
+                    <div class="combo-books-list">
+                        {% for book in combo.books.all %}
+                        <div class="combo-book-row">
+                            {% if book.cover_image_url %}
+                            <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" class="combo-book-thumb">
+                            {% else %}
+                            <div class="combo-book-thumb-ph">📖</div>
+                            {% endif %}
+                            <div>
+                                <div class="combo-book-title">{{ book.title }}</div>
+                                <div class="combo-book-author">by {{ book.author }}</div>
+                            </div>
+                            <div class="combo-book-price">₹{{ book.final_price }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="combo-pricing">
+                        <div class="combo-was">
+                            <span>Individually:</span>
+                            <span class="was-price">₹{{ combo.original_total }}</span>
+                        </div>
+                        <div class="combo-now">
+                            <span class="now-label">Combo Price</span>
+                            <span class="now-price">₹{{ combo.combo_price }}</span>
+                        </div>
+                        {% if combo.savings > 0 %}
+                        <div class="combo-you-save">
+                            🎉 You save ₹{{ combo.savings }}!
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CTA -->
+                    {% if combo.all_in_stock %}
+                    <a href="{% url 'orders:add_combo_to_cart' combo.id %}" class="btn-combo-add">
+                        Add Combo to Cart
+                    </a>
+                    {% else %}
+                    <button class="btn-combo-add" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        Out of Stock
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div style="text-align: center; padding: 100px 0; color: var(--ink-softer);">
+            <div style="font-size: 72px; margin-bottom: 20px;">🎁</div>
+            <h2 style="font-family: var(--font-display); font-size: 28px; color: var(--ink);">Combo Deals Coming Soon</h2>
+            <p style="margin-top: 12px; font-size: 16px;">Check back soon for handpicked bundles.</p>
+            <a href="{% url 'store:book_list' %}" class="btn-primary" style="display: inline-flex; margin-top: 32px;">Browse All Books →</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% block extra_css %}
+<style>
+.combo-deal-card {
+    background: white;
+    border-radius: 24px;
+    border: 1.5px solid var(--gold-pale);
+    overflow: hidden;
+    box-shadow: var(--shadow-float);
+    transition: var(--transition);
+}
+.combo-deal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-warm);
+}
+
+.combo-cover {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--beige-warm), var(--gold-pale));
+}
+.combo-cover > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.combo-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+}
+.combo-mini-cover {
+    width: 70px;
+    height: 100px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: var(--beige-warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+.combo-mini-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+.combo-savings-ribbon {
+    position: absolute;
+    top: 16px;
+    right: -8px;
+    background: var(--terracotta);
+    color: white;
+    padding: 6px 20px 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%);
+    letter-spacing: 0.5px;
+}
+
+.combo-info { padding: 24px; }
+.combo-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+.combo-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.combo-books-list {
+    border: 1px solid var(--gold-pale);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.combo-book-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px dashed var(--gold-pale);
+}
+.combo-book-row:last-child { border-bottom: none; }
+.combo-book-thumb {
+    width: 32px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+.combo-book-thumb-ph {
+    width: 32px;
+    height: 44px;
+    background: var(--beige-warm);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.combo-book-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+}
+.combo-book-author {
+    font-size: 11px;
+    color: var(--ink-softer);
+    font-style: italic;
+}
+.combo-book-price {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+}
+
+.combo-pricing {
+    background: var(--ivory-warm);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+.combo-was {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-softer);
+    margin-bottom: 8px;
+}
+.was-price { text-decoration: line-through; }
+.combo-now {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.now-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.now-price {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--terracotta);
+}
+.combo-you-save {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--forest);
+    margin-top: 6px;
+    text-align: right;
+}
+
+.btn-combo-add {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--ink);
+    color: white;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.btn-combo-add:hover {
+    background: var(--terracotta);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .combo-deal-card { border-radius: 18px; }
+    .combo-info { padding: 18px; }
+    .combo-name { font-size: 19px; }
+    .now-price { font-size: 24px; }
+}
+</style>
+{% endblock %}
+{% endblock %}

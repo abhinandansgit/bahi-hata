@@ -78,36 +78,7 @@
 
                     <div class="books-grid">
                         {% for book in item.books %}
-                        <div class="book-card" style="background: white;">
-                            <div class="book-img-wrap" style="height: 320px;">
-                                {% if book.cover_image %}
-                                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
-                                {% else %}
-                                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--beige-warm); font-size: 40px;">📖</div>
-                                {% endif %}
-                                
-                                {% if book.is_odisha_heritage %}
-                                    <div class="book-ribbon">Heritage</div>
-                                {% elif book.is_trending_in_odisha %}
-                                    <div class="book-ribbon" style="background: var(--terracotta)">Popular</div>
-                                {% endif %}
-                                
-                                <div class="book-wishlist">🔖</div>
-                            </div>
-                            <div class="book-info">
-                                <div class="book-genre" style="color: var(--gold)">{{ book.author }}</div>
-                                <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
-                                <div class="book-price-row">
-                                    <div class="price-wrap">
-                                        <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
-                                        {% if book.discount_percentage > 0 %}
-                                        <span class="price-was">₹{{ book.price|floatformat:2 }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
-                                </div>
-                            </div>
-                        </div>
+                            {% include 'includes/book_card.html' with book=book %}
                         {% endfor %}
                     </div>
                 </div>

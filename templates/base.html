@@ -5,14 +5,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Bahi Hata – Odisha's Premium Digital Book Bazaar.">
+    <meta name="description" content="Bahi Hata – Odisha's Premier Digital Book Bazaar & Literary Treasury.">
     <title>{% block title %}Bahi Hata | Odisha's Digital Book Bazaar{% endblock %}</title>
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@300;400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -24,18 +30,23 @@
     <!-- Reading Progress -->
     <div class="reading-progress" id="readingProgress"></div>
 
-    <!-- Toast -->
+    <!-- Toast Notification -->
     <div class="toast" id="toast">
-        <span class="toast-icon">📚</span>
+        <span class="toast-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        </span>
         <span id="toastMsg">Action successful!</span>
     </div>
 
-    <!-- Mini Cart Overlay -->
+    <!-- Mini Cart Overlay & Drawer -->
     <div class="mini-cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
     <div class="mini-cart" id="miniCart">
         <div class="mini-cart-header">
-            <span class="mini-cart-title">{{ t.cart_title }}</span>
-            <button class="mini-cart-close" onclick="toggleCart()">✕</button>
+            <div class="mini-cart-title-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <span class="mini-cart-title">{{ t.cart_title }}</span>
+            </div>
+            <button class="mini-cart-close" onclick="toggleCart()" aria-label="Close Cart">✕</button>
         </div>
         <div class="mini-cart-items" id="cartItems">
             {% if request.user.cart and request.user.cart.items.exists %}
@@ -43,23 +54,26 @@
             <div class="mini-cart-item">
                 <div class="mini-cart-book-img">
                     {% if item.book.cover_image %}
-                    <img src="{{ item.book.cover_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}">
                     {% else %}
-                    📖
+                    <div class="placeholder-cover">📖</div>
                     {% endif %}
                 </div>
-                <div style="flex: 1;">
+                <div class="mini-cart-info">
                     <div class="mini-cart-book-title">{{ item.book.title }}</div>
                     <div class="mini-cart-book-author">{{ item.book.author }}</div>
                     <div class="mini-cart-book-price">₹ {{ item.book.final_price|floatformat:2 }}</div>
-                    <a href="{% url 'orders:remove_from_cart' item.id %}"
-                        style="font-size: 11px; color: var(--terracotta); margin-top: 4px; display: inline-block;">Remove</a>
+                    <a href="{% url 'orders:remove_from_cart' item.id %}" class="mini-cart-remove">Remove item</a>
                 </div>
             </div>
             {% endfor %}
             {% else %}
-            <div style="text-align: center; color: var(--ink-soft); padding: 40px 0;">
-                <p>{{ t.cart_empty }}</p>
+            <div class="empty-cart-state">
+                <div class="empty-cart-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <p class="empty-cart-text">{{ t.cart_empty }}</p>
+                <a href="{% url 'store:book_list' %}" class="btn-browse-shelf" onclick="toggleCart()">Browse Literary Treasury</a>
             </div>
             {% endif %}
         </div>
@@ -67,106 +81,105 @@
             {% if request.user.cart and request.user.cart.items.exists %}
             <div class="cart-total-row">
                 <span class="cart-total-label">{{ t.cart_total }} ({{ request.user.cart.items.count }} items)</span>
-                <span class="cart-total-amount">
-                    ₹ {{ request.user.cart.total_price }}
-                </span>
+                <span class="cart-total-amount">₹ {{ request.user.cart.total_price }}</span>
             </div>
-            <a href="{% url 'orders:checkout' %}" class="btn-checkout">{{ t.btn_checkout }} →</a>
+            <a href="{% url 'orders:checkout' %}" class="btn-checkout">Proceed to Checkout →</a>
             {% else %}
-            <button class="btn-checkout" onclick="toggleCart()"
-                style="background: transparent; border: 1px solid var(--terracotta); color: var(--terracotta);">Continue
-                Browsing</button>
+            <button class="btn-checkout-secondary" onclick="toggleCart()">Continue Browsing</button>
             {% endif %}
         </div>
     </div>
 
-    <!-- Announce Bar -->
+    <!-- Announcement Bar -->
     <div class="announce-bar">
         <div class="announce-track" id="announceTrack">
-            <div class="announce-item"><span class="announce-dot">●</span> FREE delivery on orders above ₹1299 across
-                Odisha <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> Odia Literature Month — Extra 10% OFF on all
-                Odia books <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> New Arrivals: Gopinath Mohanty Collection
-                just landed <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> 3-day delivery available in Bhubaneswar &
-                Cuttack <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> FREE delivery on orders above ₹1299 across
-                Odisha <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> Odia Literature Month — Extra 10% OFF on all
-                Odia books <span class="announce-dot">●</span></div>
-            <div class="announce-item"><span class="announce-dot">●</span> New Arrivals: Gopinath Mohanty Collection
-                just landed <span class="announce-dot">●</span></div>
+            <div class="announce-item"><span class="announce-dot">✦</span> Express Delivery across Odisha & Nationwide <span class="announce-dot">✦</span></div>
+            <div class="announce-item"><span class="announce-dot">✦</span> Odia Literature Month — Extra 10% OFF on Classic Odia Books <span class="announce-dot">✦</span></div>
+            <div class="announce-item"><span class="announce-dot">✦</span> Authentic Collections from Renowned Odisha Publishers <span class="announce-dot">✦</span></div>
+            <div class="announce-item"><span class="announce-dot">✦</span> Express Delivery across Odisha & Nationwide <span class="announce-dot">✦</span></div>
+            <div class="announce-item"><span class="announce-dot">✦</span> Odia Literature Month — Extra 10% OFF on Classic Odia Books <span class="announce-dot">✦</span></div>
         </div>
     </div>
 
-    <!-- Navigation -->
+    <!-- Navigation Header -->
     <nav id="mainNav">
         <div class="nav-inner">
-            <!-- LOGO (always visible) -->
-            <a href="{% url 'home' %}" class="logo">
-                <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo" style="height: 55px;">
+            <!-- BRAND LOGO -->
+            <a href="{% url 'home' %}" class="logo-brand" title="Bahi Hata - Home">
+                <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo" class="brand-logo-img">
             </a>
 
-            <!-- DESKTOP: Nav links -->
+            <!-- DESKTOP: Nav Links -->
             <div class="nav-links">
-                <a href="{% url 'store:book_list' %}" class="nav-link active">{{ t.nav_shop }}</a>
+                <a href="{% url 'store:book_list' %}" class="nav-link">{{ t.nav_shop }}</a>
+                <a href="{% url 'store:combos' %}" class="nav-link">🎁 Combos</a>
+                <a href="{% url 'store:magazine' %}" class="nav-link">📖 Abhilasha</a>
                 <a href="{% url 'home' %}#odia" class="nav-link">{{ t.nav_odia_books }}</a>
                 <a href="{% url 'home' %}#moods" class="nav-link">{{ t.nav_moods }}</a>
-                {% if request.user.is_authenticated %}
-                {% if request.user.is_vendor %}
-                <a href="{% url 'vendors:dashboard' %}" class="nav-link" style="color: var(--terracotta);">{{
-                    t.nav_vendor }}</a>
-                {% endif %}
-                {% endif %}
             </div>
 
-            <!-- DESKTOP: Search bar -->
+            <!-- DESKTOP: Search Bar -->
             <form action="{% url 'store:book_list' %}" method="GET" class="nav-search">
-                <span class="nav-search-icon">🔍</span>
+                <span class="nav-search-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
                 <input type="text" name="q" placeholder="{{ t.search_placeholder }}" />
             </form>
 
-            <!-- DESKTOP: Actions -->
+            <!-- DESKTOP: Action Buttons -->
             <div class="nav-actions">
-                <a href="{% url 'toggle_language' %}" class="lang-toggle-btn" title="Switch to {{ t.toggle_lang }}">
-                    {{ t.toggle_lang }}
+                <a href="{% url 'toggle_language' %}" class="lang-toggle-btn" title="Switch Language">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span>{{ t.toggle_lang }}</span>
                 </a>
+
                 {% if request.user.is_authenticated %}
-                <a href="{% url 'accounts:profile' %}" class="nav-btn" title="My Wishlist">🔖</a>
+                <a href="{% url 'accounts:profile' %}" class="nav-btn" title="My Wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                </a>
                 {% else %}
-                <a href="{% url 'accounts:login' %}" class="nav-btn" title="Wishlist">🔖</a>
+                <a href="{% url 'accounts:login' %}" class="nav-btn" title="Wishlist">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                </a>
                 {% endif %}
+
                 <button class="nav-btn" title="Cart" onclick="toggleCart()" style="position:relative;">
-                    🛒
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span class="cart-count" id="cartCount">{{ cart_count }}</span>
                 </button>
+
                 {% if not request.user.is_authenticated %}
                 <a href="{% url 'accounts:login' %}" class="nav-cta">{{ t.btn_signin }}</a>
                 {% else %}
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="user-nav-group">
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'admin_panel:dashboard' %}" class="nav-cta admin-badge-btn" title="Admin Portal">Admin</a>
+                    {% endif %}
                     <a href="{% url 'accounts:profile' %}" class="nav-cta">{{ t.btn_profile }}</a>
                     <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
-                        <button type="submit" class="nav-cta" style="background: transparent; color: var(--terracotta); border: 1.5px solid var(--terracotta); cursor: pointer; font-family: inherit; font-size: inherit;">{{ t.btn_logout }}</button>
+                        <button type="submit" class="nav-cta-outline">{{ t.btn_logout }}</button>
                     </form>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- MOBILE ONLY: Right-side controls (profile + menu button) -->
+            <!-- MOBILE: Right Controls -->
             <div class="mobile-nav-right">
                 <button class="nav-btn" title="Cart" onclick="toggleCart()" style="position:relative;">
-                    🛒
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span class="cart-count">{{ cart_count }}</span>
                 </button>
                 {% if request.user.is_authenticated %}
-                <a href="{% url 'accounts:profile' %}" class="nav-btn" title="Profile">👤</a>
+                <a href="{% url 'accounts:profile' %}" class="nav-btn" title="Profile">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
                 {% else %}
-                <a href="{% url 'accounts:login' %}" class="nav-btn" title="Sign In">👤</a>
+                <a href="{% url 'accounts:login' %}" class="nav-btn" title="Sign In">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
                 {% endif %}
-                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open menu"
-                    title="Menu">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open menu" title="Menu">
                     <span class="mmb-spine"></span>
                     <div class="mmb-lines">
                         <span></span><span></span><span></span>
@@ -176,52 +189,115 @@
         </div>
     </nav>
 
-    <!-- MOBILE: Full-screen slide-out drawer -->
+    <!-- MOBILE: Slide-Out Drawer -->
     <div class="mobile-drawer" id="mobileDrawer">
         <div class="mobile-drawer-inner">
-            <!-- Close button -->
-            <button class="mobile-drawer-close" onclick="toggleMobileMenu()">✕</button>
+            <div class="mobile-drawer-header">
+                <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo" style="height: 48px;">
+                <button class="mobile-drawer-close" onclick="toggleMobileMenu()">✕</button>
+            </div>
 
-            <!-- Compact search -->
             <form action="{% url 'store:book_list' %}" method="GET" class="mobile-drawer-search">
-                <span>🔍</span>
-                <input type="text" name="q" placeholder="Search books…" autocomplete="off">
-                <button type="submit">Go</button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" name="q" placeholder="Search books & authors…" autocomplete="off">
+                <button type="submit">Search</button>
             </form>
 
-            <!-- Nav links -->
             <nav class="mobile-drawer-nav">
-                <a href="{% url 'store:book_list' %}" onclick="toggleMobileMenu()">📚 {{ t.nav_shop }}</a>
-                <a href="{% url 'home' %}#odia" onclick="toggleMobileMenu()">⭐ {{ t.nav_odia_books }}</a>
-                <a href="{% url 'home' %}#moods" onclick="toggleMobileMenu()">✨ {{ t.nav_moods }}</a>
-                {% if request.user.is_authenticated and request.user.is_vendor %}
-                <a href="{% url 'vendors:dashboard' %}" onclick="toggleMobileMenu()">🏪 {{ t.nav_vendor }}</a>
+                <a href="{% url 'store:book_list' %}" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>{{ t.nav_shop }}</span>
+                </a>
+                <a href="{% url 'store:combos' %}" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V22H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                    <span>🎁 Combo Deals</span>
+                </a>
+                <a href="{% url 'store:magazine' %}" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    <span>📖 Abhilasha Magazine</span>
+                </a>
+                <a href="{% url 'home' %}#odia" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span>{{ t.nav_odia_books }}</span>
+                </a>
+                <a href="{% url 'home' %}#moods" onclick="toggleMobileMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                    <span>{{ t.nav_moods }}</span>
+                </a>
+                {% if request.user.is_authenticated and request.user.is_staff %}
+                <a href="{% url 'admin_panel:dashboard' %}" onclick="toggleMobileMenu()" style="color: var(--terracotta);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Admin Portal</span>
+                </a>
                 {% endif %}
             </nav>
 
             <div class="mobile-drawer-divider"></div>
 
-            <!-- Account actions -->
             <div class="mobile-drawer-actions">
                 {% if not request.user.is_authenticated %}
                 <a href="{% url 'accounts:login' %}" class="mobile-drawer-cta">Sign In</a>
-                <a href="{% url 'accounts:register' %}" class="mobile-drawer-cta mobile-drawer-cta-outline">Register</a>
+                <a href="{% url 'accounts:register' %}" class="mobile-drawer-cta mobile-drawer-cta-outline">Create Account</a>
                 {% else %}
-                <a href="{% url 'accounts:profile' %}" class="mobile-drawer-cta" onclick="toggleMobileMenu()">👤 My
-                    Profile</a>
+                <a href="{% url 'accounts:profile' %}" class="mobile-drawer-cta" onclick="toggleMobileMenu()">My Profile & Orders</a>
                 <form action="{% url 'accounts:logout' %}" method="post" style="width: 100%;">
                     {% csrf_token %}
-                    <button type="submit" class="mobile-drawer-cta mobile-drawer-cta-outline" style="width: 100%; text-align: center; cursor: pointer; font-family: inherit; font-size: inherit; border: 1.5px solid var(--terracotta); background: transparent; color: var(--terracotta);">Sign Out</button>
+                    <button type="submit" class="mobile-drawer-cta mobile-drawer-cta-outline" style="width: 100%;">Sign Out</button>
                 </form>
                 {% endif %}
                 <a href="{% url 'toggle_language' %}" class="mobile-drawer-lang">🌐 {{ t.toggle_lang }}</a>
             </div>
         </div>
     </div>
-    <!-- Backdrop -->
     <div class="mobile-drawer-backdrop" id="mobileBackdrop" onclick="toggleMobileMenu()"></div>
 
+    <!-- ===== READING SHELF (SLIDE-OUT SIDE CART) ===== -->
+    <div class="mini-cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <aside class="mini-cart" id="miniCart" aria-label="Reading Shelf">
+        <div class="mini-cart-header">
+            <div class="mini-cart-title-wrap">
+                <span style="font-size: 20px;">📚</span>
+                <h3 class="mini-cart-title">Your Reading Shelf</h3>
+                <span class="mini-cart-count-badge" id="shelfCountBadge">0</span>
+            </div>
+            <button class="mini-cart-close" onclick="closeCart()" aria-label="Close Reading Shelf">✕</button>
+        </div>
 
+        <div class="mini-cart-body" id="shelfItemsContainer">
+            <!-- Dynamic Shelf Items rendered via JS -->
+            <div class="mini-cart-empty">
+                <div class="mini-cart-empty-icon">📖</div>
+                <h4 class="mini-cart-empty-title">Your shelf is empty</h4>
+                <p class="mini-cart-empty-desc">Explore hand-picked Odia classics, book combos, and Abhilasha magazine editions.</p>
+                <a href="{% url 'store:book_list' %}" class="btn-sm btn-gold" onclick="closeCart()">Explore Books →</a>
+            </div>
+        </div>
+
+        <div class="mini-cart-footer" id="shelfFooter" style="display: none;">
+            <div class="mini-cart-subtotal-row">
+                <span class="mini-cart-subtotal-lbl">Shelf Subtotal</span>
+                <span class="mini-cart-subtotal-val" id="shelfSubtotal">₹0.00</span>
+            </div>
+            <div class="mini-cart-badge-row">
+                <span>🚚</span>
+                <span>Express Delivery across Odisha (India Post / Courier)</span>
+            </div>
+            <a href="{% url 'orders:checkout' %}" class="btn-shelf-checkout">
+                Place Order / Checkout →
+            </a>
+            <a href="{% url 'orders:view_cart' %}" class="btn-shelf-cart-link">
+                View Full Cart & Apply Coupons ↗
+            </a>
+        </div>
+    </aside>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span style="font-size: 18px;">✨</span>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
+    <!-- Main Content -->
     <main>
         {% block content %}{% endblock %}
     </main>
@@ -230,73 +306,106 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-brand">
-                <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo"
-                    style="height: 65px; margin-bottom: 12px;">
+                <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo" class="footer-logo-img">
                 <p class="footer-desc">{{ t.footer_desc }}</p>
-                <div class="footer-socials">
-                    <a href="#" class="social-btn" title="Instagram">📸</a>
-                    <a href="#" class="social-btn" title="Facebook">🌐</a>
-                    <a href="#" class="social-btn" title="Twitter">🐦</a>
-                    <a href="#" class="social-btn" title="YouTube">▶</a>
-                    <a href="#" class="social-btn" title="WhatsApp">💬</a>
+                <div class="footer-badges">
+                    <span class="f-badge">✓ 100% Genuine Books</span>
+                    <span class="f-badge">✓ Odisha Express Shipping</span>
                 </div>
             </div>
             <div>
                 <div class="footer-col-title">{{ t.footer_explore }}</div>
                 <div class="footer-links">
+                    <a href="{% url 'store:magazine' %}" class="footer-link">📖 Abhilasha Magazine (Annual)</a>
                     <a href="{% url 'home' %}#moods" class="footer-link">Browse by Mood</a>
-                    <a href="{% url 'store:book_list' %}?language=OD" class="footer-link">Odia Literature</a>
+                    <a href="{% url 'store:book_list' %}?language=OD" class="footer-link">Odia Classics & Modern</a>
                     <a href="{% url 'store:book_list' %}" class="footer-link">New Arrivals</a>
-                    <a href="{% url 'home' %}#trending" class="footer-link">Bestsellers</a>
-                    <a href="{% url 'store:book_list' %}?heritage=true" class="footer-link">Rare Finds</a>
+                    <a href="{% url 'home' %}#trending" class="footer-link">Trending Collection</a>
+                    <a href="{% url 'store:book_list' %}?heritage=true" class="footer-link">Odisha Heritage Series</a>
                 </div>
             </div>
             <div>
                 <div class="footer-col-title">{{ t.footer_account }}</div>
                 <div class="footer-links">
-                    <a href="{% url 'orders:view_cart' %}" class="footer-link">My Shelf</a>
+                    <a href="{% url 'orders:view_cart' %}" class="footer-link">My Shopping Cart</a>
                     <a href="{% url 'accounts:profile' %}" class="footer-link">Order History</a>
                     {% if request.user.is_authenticated %}
-                    <a href="{% url 'accounts:profile' %}" class="footer-link">Dashboard</a>
+                    <a href="{% url 'accounts:profile' %}" class="footer-link">My Account Dashboard</a>
                     {% else %}
-                    <a href="{% url 'accounts:login' %}" class="footer-link">Login</a>
+                    <a href="{% url 'accounts:login' %}" class="footer-link">Customer Login</a>
+                    <a href="{% url 'accounts:register' %}" class="footer-link">Register Account</a>
                     {% endif %}
                 </div>
             </div>
             <div>
                 <div class="footer-col-title">{{ t.footer_contact }}</div>
                 <div class="footer-contact">
-                    <div class="contact-item"><span class="contact-icon">📍</span> Bahi Hata HQ, Patia, Bhubaneswar,
-                        Odisha 751024</div>
-                    <div class="contact-item"><span class="contact-icon">📞</span> +91 63722 02830</div>
-                    <div class="contact-item"><span class="contact-icon">✉</span> bahihata2026@gmail.com </div>
+                    <div class="contact-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span>Bahi Hata HQ, Patia, Bhubaneswar, Odisha 751024</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        <span>+91 63722 02830</span>
+                    </div>
+                    <div class="contact-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <span>bahihata2026@gmail.com</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="footer-bottom"
-            style="max-width:1400px;margin:0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-            <div
-                style="display: flex; gap: 20px; font-family: var(--font-ui); font-size: 11px; text-transform: uppercase;">
-                <a href="{% url 'home' %}" style="color:var(--gold);">Home</a>
-                <a href="{% url 'store:book_list' %}" style="color:var(--gold);">Shop</a>
-                <a href="{% url 'membership' %}" style="color:var(--gold);">Membership Plans</a>
-                <a href="{% url 'accounts:login' %}" style="color:var(--gold);">Login</a>
-                <a href="{% url 'accounts:register' %}" style="color:var(--gold);">Register</a>
-                <a href="{% url 'orders:view_cart' %}" style="color:var(--gold);">Full Cart Page</a>
-                {% if request.user.is_authenticated %}
-                <a href="{% url 'orders:checkout' %}" style="color:var(--gold);">Checkout</a>
-                {% endif %}
-            </div>
-
-            <div style="display:flex; justify-content: space-between; width: 100%;">
+        
+        <div class="footer-bottom">
+            <div class="footer-rights-wrap" style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 16px;">
                 <span>{{ t.footer_rights }}</span>
-                <span style="display:flex;gap:20px;">
-                    <a href="{% url 'home' %}" style="color:inherit;transition:color 0.2s;">Privacy Policy</a>
-                    <a href="{% url 'home' %}" style="color:inherit;">Terms of Use</a>
-                </span>
+                <div class="footer-legal-links">
+                    <a href="{% url 'home' %}">Privacy Policy</a>
+                    <span>•</span>
+                    <a href="{% url 'home' %}">Terms of Service</a>
+                </div>
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Bottom App Bar -->
+    <div class="mobile-bottom-bar" id="mobileBottomBar">
+        <a href="{% url 'home' %}" class="mob-tab {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'store:book_list' %}" class="mob-tab {% if request.resolver_match.url_name == 'book_list' %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Shop</span>
+        </a>
+        <a href="{% url 'store:combos' %}" class="mob-tab mob-tab-combo {% if request.resolver_match.url_name == 'combos' %}active{% endif %}">
+            <div class="mob-tab-badge-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V22H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                <span class="mob-combo-pill">SALE</span>
+            </div>
+            <span>Combos</span>
+        </a>
+        <a href="{% url 'orders:view_cart' %}" class="mob-tab mob-tab-cart {% if 'cart' in request.resolver_match.url_name %}active{% endif %}">
+            <div class="mob-cart-icon-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                {% if cart_count > 0 %}
+                <span class="mob-cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </div>
+            <span>Cart</span>
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="mob-tab {% if 'profile' in request.resolver_match.url_name %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Account</span>
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:login' %}" class="mob-tab {% if 'login' in request.resolver_match.url_name %}active{% endif %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <span>Sign In</span>
+        </a>
+        {% endif %}
+    </div>
 
     <script src="{% static 'js/main.js' %}"></script>
     <script>
@@ -307,13 +416,11 @@
             const isOpen = drawer.classList.contains('open');
             
             if (isOpen) {
-                // Closing
                 drawer.classList.remove('open');
                 backdrop.classList.remove('open');
                 btn.classList.remove('open');
                 document.body.style.overflow = '';
             } else {
-                // Opening
                 drawer.classList.add('open');
                 backdrop.classList.add('open');
                 btn.classList.add('open');

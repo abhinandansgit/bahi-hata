@@ -567,7 +567,61 @@
         ::-webkit-scrollbar-thumb { background: var(--beige-warm); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--gold-pale); }
 
-        /* ─── VENDOR BADGE ─── */
+        /* ─── SMALL BUTTONS ─── */
+        .btn-sm {
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Inter', sans-serif;
+            background: none;
+        }
+        .btn-sm.btn-outline {
+            border-color: rgba(201,150,58,0.3);
+            color: var(--ink-soft);
+        }
+        .btn-sm.btn-outline:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+        .btn-sm.btn-danger { border-color: rgba(197,48,48,0.3); color: #c53030; }
+        .btn-sm.btn-danger:hover { background: #c53030; color: white; border-color: #c53030; }
+        .btn-sm.btn-gold-sm { background: var(--gold); color: var(--ink); border: none; }
+        .btn-sm.btn-gold-sm:hover { background: var(--gold-light); }
+
+        /* ─── FORM UTILITIES ─── */
+        .form-group { margin-bottom: 0; }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--ink-softer);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--beige-warm);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            outline: none;
+            transition: var(--transition);
+            background: white;
+            resize: vertical;
+        }
+        .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-pale); }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+        /* ─── VENDOR BADGE (kept for compat) ─── */
         .vendor-name {
             font-size: 11px;
             color: var(--ink-softer);
@@ -595,6 +649,10 @@
                class="sidebar-link {% if 'book' in request.resolver_match.url_name %}active{% endif %}">
                 <span class="nav-icon">📚</span> Manage Books
             </a>
+            <a href="{% url 'admin_panel:manage_magazine' %}" 
+               class="sidebar-link {% if 'magazine' in request.resolver_match.url_name %}active{% endif %}">
+                <span class="nav-icon">📖</span> Abhilasha Magazine
+            </a>
             <a href="{% url 'admin_panel:manage_categories' %}" 
                class="sidebar-link {% if request.resolver_match.url_name == 'manage_categories' %}active{% endif %}">
                 <span class="nav-icon">🏷️</span> Categories & Moods
@@ -605,9 +663,19 @@
                class="sidebar-link {% if request.resolver_match.url_name == 'manage_orders' %}active{% endif %}">
                 <span class="nav-icon">📦</span> Orders
             </a>
-            <a href="{% url 'admin_panel:manage_vendors' %}" 
-               class="sidebar-link {% if request.resolver_match.url_name == 'manage_vendors' %}active{% endif %}">
-                <span class="nav-icon">🏪</span> Vendors
+            <a href="{% url 'admin_panel:inventory' %}" 
+               class="sidebar-link {% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                <span class="nav-icon">📊</span> Inventory
+            </a>
+
+            <div class="sidebar-section-label">Promotions</div>
+            <a href="{% url 'admin_panel:manage_combos' %}" 
+               class="sidebar-link {% if 'combo' in request.resolver_match.url_name %}active{% endif %}">
+                <span class="nav-icon">🎁</span> Book Combos
+            </a>
+            <a href="{% url 'admin_panel:manage_offers' %}" 
+               class="sidebar-link {% if 'offer' in request.resolver_match.url_name %}active{% endif %}">
+                <span class="nav-icon">🏷️</span> Offers & Coupons
             </a>
 
             <div class="sidebar-section-label">Site</div>
@@ -663,5 +731,134 @@
             {% block admin_content %}{% endblock %}
         </div>
     </main>
+
+    <!-- Supabase Fast Image Upload & Toast System -->
+    <style>
+        .upload-btn-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+        }
+        .btn-upload-file {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            background: var(--gold-pale);
+            color: #7a5c1e;
+            border: 1px solid var(--gold);
+            transition: var(--transition);
+            user-select: none;
+        }
+        .btn-upload-file:hover {
+            background: var(--gold);
+            color: var(--ink);
+        }
+    </style>
+
+    <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showAdminToast(msg, type='success') {
+        let toast = document.getElementById('admin-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'admin-toast';
+            toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999; padding:14px 20px; border-radius:10px; font-weight:600; font-size:13px; box-shadow:0 10px 30px rgba(0,0,0,0.18); transition:all 0.3s ease; display:flex; align-items:center; gap:8px;';
+            document.body.appendChild(toast);
+        }
+        if (type === 'success') {
+            toast.style.background = '#1a2e1a';
+            toast.style.color = '#86efac';
+            toast.style.border = '1px solid #22c55e';
+        } else if (type === 'loading') {
+            toast.style.background = '#2c2214';
+            toast.style.color = '#fde68a';
+            toast.style.border = '1px solid #c9963a';
+        } else {
+            toast.style.background = '#3b1212';
+            toast.style.color = '#fca5a5';
+            toast.style.border = '1px solid #ef4444';
+        }
+        toast.innerHTML = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        if (type !== 'loading') {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+            }, 4000);
+        }
+    }
+
+    async function uploadImageToSupabase(fileInput, targetInputId, previewImgId, placeholderId, folder='books', prefix='item') {
+        if (!fileInput.files || !fileInput.files[0]) return;
+        const file = fileInput.files[0];
+
+        // File validation: max 10MB
+        if (file.size > 10 * 1024 * 1024) {
+            showAdminToast('❌ File too large. Maximum image size is 10MB.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('folder', folder);
+        formData.append('prefix', prefix);
+
+        showAdminToast('⚡ Optimizing WebP & Uploading to Supabase...', 'loading');
+
+        try {
+            const res = await fetch('/admin-portal/upload-image/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                }
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success && data.url) {
+                const targetInput = document.getElementById(targetInputId);
+                if (targetInput) {
+                    targetInput.value = data.url;
+                }
+                const preview = document.getElementById(previewImgId);
+                const ph = document.getElementById(placeholderId);
+                if (preview) {
+                    preview.src = data.url;
+                    preview.style.display = 'inline-block';
+                }
+                if (ph) {
+                    ph.style.display = 'none';
+                }
+                const sizeKb = data.size_bytes ? (data.size_bytes / 1024).toFixed(1) + ' KB' : 'Optimized';
+                showAdminToast(`✅ Uploaded to Supabase (${sizeKb} WebP)`, 'success');
+            } else {
+                showAdminToast(`❌ Upload failed: ${data.error || 'Server error'}`, 'error');
+            }
+        } catch (err) {
+            showAdminToast(`❌ Network error during upload: ${err.message}`, 'error');
+        }
+    }
+    </script>
 </body>
 </html>

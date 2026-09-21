@@ -4,91 +4,294 @@
 {% block title %}Shop Collection | Bahi Hata{% endblock %}
 
 {% block content %}
-<section class="shelf-section" style="background: var(--ivory); padding-top: 40px;">
+<section class="shelf-section" style="background: var(--ivory); padding-top: 40px; padding-bottom: 90px; min-height: 80vh;">
     <div class="container">
-        <div class="section-header" style="text-align: left; margin-bottom: 40px;">
-            <div class="section-eyebrow">{{ t.nav_shop }}</div>
-            <h1 class="section-title">{{ t.shop_title|safe }}</h1>
-            <p class="section-desc" style="margin: 0; text-align: left;">{{ t.shop_desc }}</p>
+        <!-- Shop Header & Search -->
+        <div class="shop-header-wrapper">
+            <div>
+                <div class="section-eyebrow">{{ t.nav_shop }}</div>
+                <h1 class="section-title" style="margin-bottom: 6px; text-align: left;">{{ t.shop_title|safe }}</h1>
+                <p class="section-desc" style="margin: 0; text-align: left;">{{ t.shop_desc }}</p>
+            </div>
+            
+            <!-- In-page Search Bar -->
+            <form action="{% url 'store:book_list' %}" method="GET" class="shop-search-form">
+                {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                {% if current_mood %}<input type="hidden" name="mood" value="{{ current_mood }}">{% endif %}
+                {% if current_heritage %}<input type="hidden" name="heritage" value="true">{% endif %}
+                <div class="shop-search-input-wrap">
+                    <input type="text" name="q" value="{{ current_query }}" placeholder="Search titles, authors, genres…"
+                           class="shop-search-input">
+                    <svg class="shop-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.2">
+                        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    {% if current_query %}
+                    <a href="{% url 'store:book_list' %}{% if current_category %}?category={{ current_category }}{% elif current_mood %}?mood={{ current_mood }}{% elif current_heritage %}?heritage=true{% endif %}"
+                       class="shop-search-clear" title="Clear query">✕</a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn-primary shop-search-btn">
+                    Search
+                </button>
+            </form>
         </div>
+
+        <!-- Mobile Filter Toggle Bar & Chips -->
+        <div class="shop-mobile-controls">
+            <button type="button" class="mob-filter-toggle-btn" onclick="toggleMobileFilters()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <span>Filter & Categories</span>
+                {% if current_category or current_mood or current_heritage %}
+                <span class="mob-filter-count-badge">Active</span>
+                {% endif %}
+            </button>
+
+            <!-- Quick Horizontal Category Chips -->
+            <div class="shop-mobile-chips">
+                <a href="{% url 'store:book_list' %}" class="mob-chip {% if not current_category and not current_heritage %}active{% endif %}">
+                    All
+                </a>
+                <a href="{% url 'store:book_list' %}?heritage=true" class="mob-chip {% if current_heritage %}active{% endif %}">
+                    🏛 Heritage
+                </a>
+                {% for category in categories %}
+                <a href="?category={{ category.slug }}{% if current_query %}&q={{ current_query }}{% endif %}" class="mob-chip {% if current_category == category.slug %}active{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Active Filter Status Bar -->
+        {% if current_query or current_category or current_mood or current_heritage or current_language %}
+        <div class="shop-active-filters-bar">
+            <div class="active-filter-pills">
+                <span class="active-count-label">Showing <strong>{{ total_count }}</strong> book{{ total_count|pluralize }}</span>
+                {% if current_query %}
+                <span class="active-pill pill-query">
+                    Search: "{{ current_query }}"
+                    <a href="{% url 'store:book_list' %}{% if current_category %}?category={{ current_category }}{% elif current_mood %}?mood={{ current_mood }}{% elif current_heritage %}?heritage=true{% endif %}">✕</a>
+                </span>
+                {% endif %}
+                {% if current_category %}
+                <span class="active-pill pill-category">
+                    Category: {{ current_category|title }}
+                    <a href="{% url 'store:book_list' %}{% if current_query %}?q={{ current_query }}{% endif %}">✕</a>
+                </span>
+                {% endif %}
+                {% if current_mood %}
+                <span class="active-pill pill-mood">
+                    Mood: {{ current_mood|title }}
+                    <a href="{% url 'store:book_list' %}{% if current_query %}?q={{ current_query }}{% endif %}">✕</a>
+                </span>
+                {% endif %}
+                {% if current_heritage %}
+                <span class="active-pill pill-heritage">
+                    🏛 Heritage Series
+                    <a href="{% url 'store:book_list' %}{% if current_query %}?q={{ current_query }}{% endif %}">✕</a>
+                </span>
+                {% endif %}
+            </div>
+            <a href="{% url 'store:book_list' %}" class="clear-all-link">
+                ✕ Clear all filters
+            </a>
+        </div>
+        {% endif %}
         
-        <div class="patta-line"></div>
+        <div class="patta-line" style="margin-bottom: 30px;"></div>
 
         <div class="shop-layout">
             <!-- Sidebar Filters -->
-            <aside style="background: white; padding: 30px; border-radius: 16px; border: 1px solid rgba(201, 150, 58, 0.2); box-shadow: var(--shadow-warm); height: fit-content;">
-                <h3 style="font-family: var(--font-display); font-size: 22px; margin-bottom: 20px; color: var(--terracotta); border-bottom: 1.5px solid var(--gold-pale); padding-bottom: 10px;">{{ t.filters }}</h3>
+            <aside class="shop-sidebar" id="shopSidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title-group">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <h3 class="sidebar-title">Filters</h3>
+                    </div>
+                    {% if current_category or current_mood or current_heritage or current_query %}
+                    <a href="{% url 'store:book_list' %}" class="sidebar-reset-btn" title="Reset all filters">Reset</a>
+                    {% endif %}
+                </div>
                 
-                <div style="margin-bottom: 30px;">
-                    <h4 style="font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 15px; color: var(--ink);">{{ t.categories }}</h4>
-                    <ul style="display: flex; flex-direction: column; gap: 10px;">
-                        <li><a href="{% url 'store:book_list' %}" class="footer-link" style="color: var(--ink-soft); font-weight: 500;">All Genres</a></li>
+                <!-- Categories Group -->
+                <div class="filter-group">
+                    <div class="filter-subtitle-row">
+                        <span class="filter-subtitle-bullet"></span>
+                        <h4 class="filter-subtitle">Categories</h4>
+                    </div>
+                    <ul class="filter-list">
+                        <li>
+                            <a href="{% url 'store:book_list' %}{% if current_query %}?q={{ current_query }}{% endif %}" class="filter-link {% if not current_category and not current_heritage %}active{% endif %}">
+                                <span class="filter-link-label">
+                                    <span class="filter-icon">📚</span>
+                                    <span>All Genres</span>
+                                </span>
+                                {% if not current_category and not current_heritage %}
+                                <span class="filter-active-dot">●</span>
+                                {% endif %}
+                            </a>
+                        </li>
                         {% for category in categories %}
-                        <li><a href="?category={{ category.slug }}" class="footer-link" style="color: var(--ink-soft);">{{ category.name }}</a></li>
+                        <li>
+                            <a href="?category={{ category.slug }}{% if current_query %}&q={{ current_query }}{% endif %}" class="filter-link {% if current_category == category.slug %}active{% endif %}">
+                                <span class="filter-link-label">
+                                    <span class="filter-icon">
+                                        {% if 'fiction' in category.slug and not 'non' in category.slug %}📖
+                                        {% elif 'non-fiction' in category.slug %}🧠
+                                        {% elif 'odia' in category.slug %}📜
+                                        {% elif 'children' in category.slug %}🎨
+                                        {% elif 'academic' in category.slug %}🎓
+                                        {% elif 'poetry' in category.slug %}✍️
+                                        {% elif 'spiritual' in category.slug %}🕊️
+                                        {% elif 'historical' in category.slug %}🏰
+                                        {% else %}🔖{% endif %}
+                                    </span>
+                                    <span>{{ category.name }}</span>
+                                </span>
+                                {% if current_category == category.slug %}
+                                <span class="filter-active-dot">●</span>
+                                {% endif %}
+                            </a>
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
                 
-                <div style="margin-bottom: 30px;">
-                    <h4 style="font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 15px; color: var(--ink);">{{ t.nav_moods }}</h4>
-                    <ul style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Moods Group -->
+                <div class="filter-group">
+                    <div class="filter-subtitle-row">
+                        <span class="filter-subtitle-bullet"></span>
+                        <h4 class="filter-subtitle">Reading Moods</h4>
+                    </div>
+                    <ul class="filter-list">
                         {% for mood in moods %}
-                        <li><a href="?mood={{ mood.slug }}" class="footer-link" style="color: var(--ink-soft);">{{ mood.name }}</a></li>
+                        <li>
+                            <a href="?mood={{ mood.slug }}{% if current_query %}&q={{ current_query }}{% endif %}" class="filter-link {% if current_mood == mood.slug %}active{% endif %}">
+                                <span class="filter-link-label">
+                                    <span class="filter-icon">
+                                        {% if 'rain' in mood.slug %}🌧️
+                                        {% elif 'upsc' in mood.slug %}🎯
+                                        {% elif 'dream' in mood.slug %}✨
+                                        {% elif 'odia' in mood.slug %}🏛️
+                                        {% elif 'spiritual' in mood.slug %}🧘
+                                        {% elif 'quick' in mood.slug or 'weekend' in mood.slug %}⚡
+                                        {% else %}🔮{% endif %}
+                                    </span>
+                                    <span>{{ mood.name }}</span>
+                                </span>
+                                {% if current_mood == mood.slug %}
+                                <span class="filter-active-dot">●</span>
+                                {% endif %}
+                            </a>
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
                 
-                <div>
-                    <h4 style="font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 15px; color: var(--ink);">{{ t.special_collections }}</h4>
-                    <ul style="display: flex; flex-direction: column; gap: 10px;">
-                        <li><a href="?heritage=true" class="footer-link" style="color: var(--terracotta); font-weight: 600;">Odisha Heritage Picks 🏛</a></li>
+                <!-- Special Collections -->
+                <div class="filter-group" style="border-bottom: none; padding-bottom: 0;">
+                    <div class="filter-subtitle-row">
+                        <span class="filter-subtitle-bullet"></span>
+                        <h4 class="filter-subtitle">Special Collections</h4>
+                    </div>
+                    <ul class="filter-list">
+                        <li>
+                            <a href="?heritage=true{% if current_query %}&q={{ current_query }}{% endif %}" class="filter-link heritage-filter-link {% if current_heritage %}active{% endif %}">
+                                <span class="filter-link-label">
+                                    <span class="filter-icon">🏛️</span>
+                                    <span>Odisha Heritage Series</span>
+                                </span>
+                                {% if current_heritage %}
+                                <span class="filter-active-dot">●</span>
+                                {% endif %}
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </aside>
 
-            <!-- Grid -->
-            <div style="min-width: 0;">
+            <!-- Book Grid / Results Container -->
+            <div class="shop-results-container">
+                {% if books %}
                 <div class="books-grid">
                     {% for book in books %}
-                    <div class="book-card shop-book-card">
-                        <div class="book-img-wrap">
-                            {% if book.cover_image %}
-                                <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
-                            {% else %}
-                                <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: var(--beige-warm); font-size: 40px; min-height: 250px;">📖</div>
-                            {% endif %}
-                            
-                            {% if book.is_odisha_heritage %}
-                                <div class="book-ribbon">Heritage</div>
-                            {% endif %}
-                            
-                            <div class="book-wishlist">🔖</div>
-                        </div>
-                        <div class="book-info">
-                            <div class="book-genre">{{ book.category.name }}</div>
-                            <h3 class="book-title"><a href="{% url 'store:book_detail' book.slug %}">{{ book.title }}</a></h3>
-                            <div class="book-author">By {{ book.author }}</div>
-                            <div class="book-price-row">
-                                <div class="price-wrap">
-                                    <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
-                                    {% if book.discount_percentage > 0 %}
-                                    <span class="price-was">₹{{ book.price|floatformat:2 }}</span>
-                                    {% endif %}
-                                </div>
-                                <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart">Add +</a>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div style="text-align: center; padding: 100px 0; grid-column: 1 / -1;">
-                        <span style="font-size: 40px;">📜</span>
-                        <p style="font-family: var(--font-display); font-size: 20px; color: var(--ink-soft); margin-top: 20px;">{{ t.no_books }}</p>
-                        <a href="{% url 'store:book_list' %}" class="btn-primary" style="margin-top: 20px;">{{ t.see_all }}</a>
-                    </div>
+                        {% include 'includes/book_card.html' with book=book %}
                     {% endfor %}
                 </div>
+                {% else %}
+                <!-- Empty Search / Filter State -->
+                <div class="shop-empty-wrapper">
+                    <div class="shop-empty-card">
+                        <div class="shop-empty-icon-circle">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                        </div>
+                        <h2 style="font-family: var(--font-display); font-size: 24px; color: var(--ink); margin-bottom: 8px;">
+                            {% if current_query %}
+                                No matches found for "<span style="color: var(--terracotta);">{{ current_query }}</span>"
+                            {% else %}
+                                No books found in this selection
+                            {% endif %}
+                        </h2>
+                        <p style="font-size: 15px; color: var(--ink-soft); max-width: 440px; margin: 0 auto 24px; line-height: 1.6;">
+                            We couldn't find exact matches. Try checking your spelling, exploring other genres, or discovering handpicked trending books below.
+                        </p>
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <a href="{% url 'store:book_list' %}" class="btn-primary" style="padding: 12px 24px; font-size: 14px;">
+                                Clear Filters & View All
+                            </a>
+                            <a href="{% url 'store:combos' %}" class="btn-secondary" style="padding: 12px 24px; font-size: 14px;">
+                                🎁 View Combo Offers
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if suggested_books %}
+                    <!-- Suggested / Recommended Books Shelf -->
+                    <div style="margin-top: 48px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1.5px solid var(--gold-pale); padding-bottom: 12px;">
+                            <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--ink); margin: 0;">
+                                🔥 Popular Odisha Reads You Might Like
+                            </h3>
+                            <a href="{% url 'store:book_list' %}" style="font-size: 13px; font-weight: 700; color: var(--terracotta); text-decoration: none;">
+                                See All Books →
+                            </a>
+                        </div>
+                        <div class="books-grid">
+                            {% for book in suggested_books %}
+                                {% include 'includes/book_card.html' with book=book %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleMobileFilters() {
+        const sidebar = document.getElementById('shopSidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('mob-expanded');
+            if (sidebar.classList.contains('mob-expanded')) {
+                sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+</script>
 {% endblock %}

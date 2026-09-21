@@ -46,15 +46,6 @@ TRANSLATIONS = {
         'heritage_body': "From the timeless verses of Sarala Das to the modern brilliance of Gopinath Mohanty — Bahi Hata celebrates Odisha's literary heritage with over 1,200 carefully curated Odia titles.",
         'btn_explore_odia': "Explore Odia Books →",
 
-        # Bahi Club
-        'club_eyebrow': "Bahi Club",
-        'club_title': "Build Your <em>Reading Life</em>",
-        'club_desc': "Join thousands of Odisha readers who receive handpicked books every month. Cancel anytime.",
-        'plan_starter': "Starter",
-        'plan_popular': "Most Popular",
-        'plan_premium': "Premium",
-        'btn_join': "Join",
-
         # Delivery & Tracking
         'delivery_eyebrow': "Always In the Know",
         'delivery_title': "Track Your Books, <em>Live</em>",
@@ -157,15 +148,6 @@ TRANSLATIONS = {
         'heritage_title': "ଓଡ଼ିଆ ପ୍ରାଣକୁ <em>ଆବିଷ୍କାର କରନ୍ତୁ</em>",
         'heritage_body': "ସାରଳା ଦାସଙ୍କ ଅମ୍ଳାନ ସୃଷ୍ଟିରୁ ଗୋପୀନାଥ ମହାନ୍ତିଙ୍କ ଆଧୁନିକ ପ୍ରତିଭା ପର୍ଯ୍ୟନ୍ତ — ବହି ହାଟ ଓଡ଼ିଶାର ସାରସ୍ୱତ ଐତିହ୍ୟକୁ ୧,୨୦୦ରୁ ଅଧିକ ପୁସ୍ତକ ସହ ସମ୍ମାନ ଜଣାଉଛି।",
         'btn_explore_odia': "ଓଡ଼ିଆ ସାହିତ୍ୟକୁ ଯାଆନ୍ତୁ →",
-
-        # Bahi Club
-        'club_eyebrow': "ବହି କ୍ଲବ୍",
-        'club_title': "ଆପଣଙ୍କ <em>ପଠନ ଜୀବନ</em> ଗଢନ୍ତୁ",
-        'club_desc': "ଓଡ଼ିଶାର ହଜାର ହଜାର ପାଠକଙ୍କ ସହ ସାମିଲ ହୁଅନ୍ତୁ ଯେଉଁମାନେ ପ୍ରତି ମାସରେ ମନପସନ୍ଦର ବହି ପାଇଥାନ୍ତି।",
-        'plan_starter': "ପାଟ କ୍ଲବ",
-        'plan_popular': "ବହି କ୍ଲବ",
-        'plan_premium': "ସାହିତ୍ୟ କ୍ଲବ",
-        'btn_join': "ସାମିଲ ହୁଅନ୍ତୁ",
 
         # Delivery & Tracking
         'delivery_eyebrow': "ସୂଚନା ସର୍ବଦା ପାଖରେ",

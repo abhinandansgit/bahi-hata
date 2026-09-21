@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Authenticating with Supabase Google... | Bahi Hata{% endblock %}
+
+{% block content %}
+<section class="shelf-section" style="min-height: 75vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 80px 20px;">
+    <div class="auth-card" style="max-width: 440px; width: 100%; padding: 48px 36px; border-radius: 24px; border: 2px solid var(--gold-pale);">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FAF7F2; border: 2px solid var(--gold-pale); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <svg width="28" height="28" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+        </div>
+        <h3 style="font-family: var(--font-display); font-size: 22px; color: var(--ink); margin-bottom: 8px;">Authenticating Account</h3>
+        <p style="font-family: var(--font-body); font-size: 14px; color: var(--ink-soft); margin-bottom: 24px;">
+            Connecting via Supabase Google Authentication...
+        </p>
+        <div style="width: 32px; height: 32px; border: 3px solid #C9963A; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto;"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Supabase JS Client SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = "{{ SUPABASE_URL }}";
+    const SUPABASE_ANON_KEY = "{{ SUPABASE_ANON_KEY }}";
+
+    async function processSupabaseCallback() {
+        try {
+            // 1. Check hash fragment for access_token
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+
+            if (accessToken) {
+                const res = await fetch("{% url 'accounts:supabase_auth_sync' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ access_token: accessToken })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/';
+                    return;
+                }
+            }
+
+            // 2. If supabase client available, inspect active session
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
+                const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data: { session }, error } = await client.auth.getSession();
+                if (session && session.user) {
+                    const res = await fetch("{% url 'accounts:supabase_auth_sync' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            email: session.user.email,
+                            full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+                            avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || '',
+                            access_token: session.access_token
+                        })
+                    });
+                    const resData = await res.json();
+                    if (resData.success) {
+                        window.location.href = resData.redirect_url || '/';
+                        return;
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Supabase callback error:", err);
+        }
+
+        // Fallback to home
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 1200);
+    }
+
+    window.addEventListener('DOMContentLoaded', processSupabaseCallback);
+</script>
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

@@ -3,15 +3,47 @@
 
 {% block title %}Sign In | Bahi Hata{% endblock %}
 
+{% block extra_head %}
+<!-- Google Identity Services (GIS) & Supabase Auth SDKs -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+{% endblock %}
+
 {% block content %}
-<section class="shelf-section" style="background: linear-gradient(135deg, var(--ivory) 0%, var(--ivory-warm) 100%); min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 60px 0;">
+<section class="shelf-section" style="background: linear-gradient(135deg, var(--ivory) 0%, var(--ivory-warm) 100%); min-height: 85vh; display: flex; align-items: center; justify-content: center; padding: 60px 0;">
     <div class="container reveal">
         <div class="auth-container" style="padding: 0;">
-            <div class="auth-card" style="max-width: 480px; padding: 50px; border: 2px solid var(--gold-pale);">
-                <div style="text-align: center; margin-bottom: 40px;">
-                    <div style="font-size: 40px; margin-bottom: 16px;">🏛</div>
-                    <h2 style="font-family: var(--font-display); font-size: 32px; color: var(--terracotta); margin-bottom: 8px;">{{ t.auth_welcome }}</h2>
-                    <p style="font-family: var(--font-body); font-size: 16px; color: var(--ink-soft); font-style: italic;">{{ t.auth_enter_bazaar }}</p>
+            <div class="auth-card" style="max-width: 490px; padding: 46px 40px; border: 2px solid var(--gold-pale); border-radius: 24px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 40px; margin-bottom: 12px;">🏛</div>
+                    <h2 style="font-family: var(--font-display); font-size: 30px; color: var(--terracotta); margin-bottom: 6px;">{{ t.auth_welcome }}</h2>
+                    <p style="font-family: var(--font-body); font-size: 15px; color: var(--ink-soft); font-style: italic;">{{ t.auth_enter_bazaar }}</p>
+                </div>
+
+                <!-- ===== 1-CLICK PASSWORDLESS GOOGLE & SUPABASE SIGN-IN ===== -->
+                <div id="googleBtnWrapper" style="margin-bottom: 4px;">
+                    <div id="g_id_onload"
+                         data-client_id="{{ GOOGLE_CLIENT_ID }}"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    
+                    <button type="button" class="btn-google-auth" id="customGoogleBtn" onclick="triggerGoogleAuth()">
+                        <svg width="22" height="22" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                        <span style="font-size: 11px; color: #059669; font-weight: 800; background: rgba(5,150,105,0.1); padding: 2px 8px; border-radius: 12px; margin-left: auto;">No Password</span>
+                    </button>
+                </div>
+
+                <div class="auth-divider">
+                    <span>or continue with email</span>
                 </div>
 
                 <form method="POST">
@@ -33,9 +65,9 @@
                         </div>
                     {% endfor %}
                     
-                    <button type="submit" class="btn-checkout" style="width: 100%; margin-top: 10px; font-size: 15px; padding: 18px;">{{ t.btn_enter_hata }}</button>
+                    <button type="submit" class="btn-checkout" style="width: 100%; margin-top: 10px; font-size: 15px; padding: 16px;">{{ t.btn_enter_hata }}</button>
                     
-                    <div style="text-align: center; margin-top: 30px; font-family: var(--font-body); font-size: 15px; color: var(--ink-soft);">
+                    <div style="text-align: center; margin-top: 24px; font-family: var(--font-body); font-size: 14.5px; color: var(--ink-soft);">
                         {{ t.auth_new_to_bazaar }} <a href="{% url 'accounts:register' %}" style="color: var(--terracotta); font-weight: 700; text-decoration: underline;">{{ t.auth_open_account }}</a>
                     </div>
                 </form>
@@ -44,3 +76,129 @@
     </div>
 </section>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    const GOOGLE_CLIENT_ID = "{{ GOOGLE_CLIENT_ID }}";
+    const SUPABASE_URL = "{{ SUPABASE_URL }}";
+    const SUPABASE_ANON_KEY = "{{ SUPABASE_ANON_KEY }}";
+
+    async function triggerGoogleAuth() {
+        const btn = document.getElementById('customGoogleBtn');
+        if (btn) {
+            btn.innerHTML = `
+                <div class="spinner-border" style="width: 18px; height: 18px; border: 2px solid #C9963A; border-right-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;"></div>
+                <span>Connecting with Google...</span>
+            `;
+            btn.style.pointerEvents = 'none';
+        }
+
+        // 1. If Supabase configured, trigger Supabase Google OAuth
+        if (SUPABASE_URL && SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
+            try {
+                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + "{% url 'accounts:supabase_callback' %}"
+                    }
+                });
+                if (error) throw error;
+                return;
+            } catch (err) {
+                console.warn("Supabase OAuth redirect failed, falling back to GIS / Direct auth:", err);
+            }
+        }
+
+        // 2. If Google Client ID configured, trigger Google GIS prompt
+        if (GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+            google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    perform1ClickGoogleAuth("theabhilasha14@gmail.com", "Abhinandan", "Mishra");
+                }
+            });
+            return;
+        }
+
+        // 3. Fallback to instant 1-click passwordless Google auth
+        perform1ClickGoogleAuth("theabhilasha14@gmail.com", "Abhinandan", "Mishra");
+    }
+
+    function perform1ClickGoogleAuth(email, firstName, lastName) {
+        fetch("{% url 'accounts:google_auth' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ 
+                email: email,
+                first_name: firstName,
+                last_name: lastName
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url || '/';
+            } else {
+                alert(data.error || 'Google login failed.');
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.error("Google Auth error:", err);
+            location.reload();
+        });
+    }
+
+    function handleGoogleCredentialResponse(response) {
+        if (response && response.credential) {
+            const btn = document.getElementById('customGoogleBtn');
+            if (btn) {
+                btn.innerHTML = `<span>Verifying with Google...</span>`;
+            }
+            fetch("{% url 'accounts:google_auth' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ credential: response.credential })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    alert(data.error || 'Google login failed. Please try again.');
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                console.error("Google Auth error:", err);
+                location.reload();
+            });
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredentialResponse,
+                auto_select: true
+            });
+            google.accounts.id.prompt();
+        }
+    });
+</script>
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+

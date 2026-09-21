@@ -324,19 +324,59 @@
 
         <!-- RIGHT: Sidebar -->
         <div>
-            <!-- CARD: Cover Image -->
+            <!-- CARD: Product Images (up to 3) -->
             <div class="admin-card" style="margin-bottom: 24px;">
-                <div class="section-title"><span>🖼️</span> Cover Image</div>
-                <div class="form-group">
-                    <label class="form-label" for="cover_image">Cover Image URL *</label>
-                    <input type="url" name="cover_image" id="cover_image" class="form-control" value="{{ book.cover_image.url }}" placeholder="https://example.com/cover.jpg" required oninput="previewImageUrl(this.value)">
+                <div class="section-title"><span>🖼️</span> Product Images (Max 3 · 500×500)</div>
+                <div style="font-size: 12px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5;">
+                    Add up to 3 high-res product photos. The storefront cards will automatically swipe through these images.
                 </div>
-                <div style="border: 1px dashed var(--beige-warm); border-radius: var(--radius-md); padding: 15px; text-align: center; background: var(--ivory); margin-top: 15px;">
-                    <div id="cover-placeholder" style="{% if book.cover_image %}display:none;{% endif %} padding: 20px 0;">
-                        <div style="font-size: 36px; margin-bottom: 10px;">📷</div>
-                        <div style="font-size: 12px; color: var(--ink-softer); font-weight:600;">Enter image URL above to see preview</div>
+                
+                <!-- Image 1: Primary Cover -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" for="cover_image" style="margin: 0;">1. Primary Cover Image URL *</label>
+                        <label class="btn-upload-file" title="Upload and convert to WebP on Supabase Storage">
+                            ☁️ Upload File
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'cover_image', 'cover-preview', 'cover-ph', 'books', 'cover')">
+                        </label>
                     </div>
-                    <img src="{% if book.cover_image %}{{ book.cover_image.url }}{% endif %}" id="cover-preview" alt="Book cover" style="{% if not book.cover_image %}display:none;{% endif %} max-width: 100%; max-height: 220px; object-fit: contain; border-radius: var(--radius-sm);">
+                    <input type="url" name="cover_image" id="cover_image" class="form-control" value="{{ book.cover_image.url }}" placeholder="https://.../cover.jpg or click Upload File" required oninput="previewUrl(this.value, 'cover-preview', 'cover-ph')">
+                    <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                        <img src="{% if book.cover_image %}{{ book.cover_image.url }}{% endif %}" id="cover-preview" alt="Cover 1" style="{% if not book.cover_image %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="cover-ph" style="{% if book.cover_image %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 1</span>
+                    </div>
+                </div>
+
+                <!-- Image 2: Preview / Back -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" for="image_2_url" style="margin: 0;">2. Image 2 URL (Back / Pages)</label>
+                        <label class="btn-upload-file" title="Upload and convert to WebP on Supabase Storage">
+                            ☁️ Upload File
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'image_2_url', 'img2-preview', 'img2-ph', 'books', 'img2')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_2_url" id="image_2_url" class="form-control" value="{{ book.image_2_url|default:'' }}" placeholder="https://.../back.jpg or click Upload File" oninput="previewUrl(this.value, 'img2-preview', 'img2-ph')">
+                    <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                        <img src="{{ book.image_2_url|default:'' }}" id="img2-preview" alt="Image 2" style="{% if not book.image_2_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="img2-ph" style="{% if book.image_2_url %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 2</span>
+                    </div>
+                </div>
+
+                <!-- Image 3: Detail / Spine -->
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" for="image_3_url" style="margin: 0;">3. Image 3 URL (Spine / Inside)</label>
+                        <label class="btn-upload-file" title="Upload and convert to WebP on Supabase Storage">
+                            ☁️ Upload File
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'image_3_url', 'img3-preview', 'img3-ph', 'books', 'img3')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_3_url" id="image_3_url" class="form-control" value="{{ book.image_3_url|default:'' }}" placeholder="https://.../spine.jpg or click Upload File" oninput="previewUrl(this.value, 'img3-preview', 'img3-ph')">
+                    <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                        <img src="{{ book.image_3_url|default:'' }}" id="img3-preview" alt="Image 3" style="{% if not book.image_3_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="img3-ph" style="{% if book.image_3_url %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 3</span>
+                    </div>
                 </div>
             </div>
 
@@ -460,10 +500,9 @@
 </div>
 
 <script>
-// Image URL preview
-function previewImageUrl(url) {
-    const preview = document.getElementById('cover-preview');
-    const placeholder = document.getElementById('cover-placeholder');
+function previewUrl(url, imgId, phId) {
+    const preview = document.getElementById(imgId);
+    const placeholder = document.getElementById(phId);
     if (url && url.trim() !== '') {
         preview.src = url;
         preview.style.display = 'inline-block';
@@ -471,8 +510,13 @@ function previewImageUrl(url) {
     } else {
         preview.src = '';
         preview.style.display = 'none';
-        if (placeholder) placeholder.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'inline';
     }
+}
+
+// Image URL preview (backward compatibility)
+function previewImageUrl(url) {
+    previewUrl(url, 'cover-preview', 'cover-placeholder');
 }
 
 // Toggle switch with proper checkbox handling

@@ -12,3 +12,33 @@ class SiteStat(models.Model):
 
     def __str__(self):
         return f"{self.label}: {self.value}"
+
+
+class ReaderStory(models.Model):
+    """
+    Public customer reviews and stories for Bahi Hata.
+    Displayed on the homepage Reader Stories page-curl carousel.
+    """
+    name = models.CharField(max_length=150)
+    location = models.CharField(max_length=150, default="Bhubaneswar, Odisha")
+    rating = models.PositiveIntegerField(default=5)
+    review_text = models.TextField()
+    is_approved = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def initial(self):
+        return self.name[0].upper() if self.name else 'R'
+
+    @property
+    def stars(self):
+        return '★' * min(max(self.rating, 1), 5)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Reader Story"
+        verbose_name_plural = "Reader Stories"
+
+    def __str__(self):
+        return f"{self.name} ({self.location}) - {self.rating}★"
+

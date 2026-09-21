@@ -1,0 +1,238 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}Offers & Coupons — Bahi Hata Admin{% endblock %}
+{% block header_title %}Offers & Coupons{% endblock %}
+{% block header_subtitle %}Create and manage discount offers, coupons, and promotional codes{% endblock %}
+
+{% block admin_content %}
+<style>
+    .offer-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .offer-stat { background: white; border-radius: 16px; padding: 20px; text-align: center; border: 1.5px solid var(--ivory-warm); }
+    .offer-stat-num { font-size: 32px; font-weight: 700; font-family: 'Outfit', sans-serif; color: var(--terracotta); }
+    .offer-stat-label { font-size: 11px; color: var(--ink-softer); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-top: 4px; }
+
+    .offer-card { background: white; border-radius: 16px; border: 1.5px solid var(--ivory-warm); padding: 20px 24px; margin-bottom: 14px; display: flex; gap: 20px; align-items: flex-start; transition: var(--transition); }
+    .offer-card:hover { border-color: var(--gold-pale); box-shadow: var(--shadow-float); }
+    .offer-card.inactive { opacity: 0.6; }
+    .offer-card.expired { background: #fafafa; border-color: #e2e8f0; }
+
+    .offer-type-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .type-percent { background: #e9d8fd; color: #6b46c1; }
+    .type-flat { background: #bee3f8; color: #2b6cb0; }
+    .type-combo { background: #fefcbf; color: #744210; }
+
+    .offer-code { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--terracotta); background: var(--ivory-warm); padding: 4px 12px; border-radius: 6px; display: inline-block; }
+
+    .validity-bar { height: 4px; background: var(--ivory-warm); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .validity-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.5s; }
+
+    .create-form { background: white; border-radius: 20px; border: 1.5px solid var(--gold-pale); padding: 28px; margin-bottom: 32px; }
+    .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    @media (max-width: 991px) {
+        .offer-stats { grid-template-columns: 1fr 1fr 1fr; }
+        .form-row-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+        .offer-stats { grid-template-columns: 1fr; }
+        .form-row-3, .form-row-2 { grid-template-columns: 1fr; }
+        .offer-card { flex-direction: column; }
+    }
+</style>
+
+<!-- Stats -->
+{% with active_count=offers|length %}
+<div class="offer-stats">
+    <div class="offer-stat">
+        <div class="offer-stat-num">{{ offers|length }}</div>
+        <div class="offer-stat-label">Total Offers</div>
+    </div>
+    <div class="offer-stat">
+        <div class="offer-stat-num" style="color: #276749;">
+            {% with cnt=0 %}
+            {% for o in offers %}{% if o.is_valid_now %}{% with cnt=cnt|add:1 %}{% endwith %}{% endif %}{% endfor %}
+            {{ offers|length }}
+            {% endwith %}
+        </div>
+        <div class="offer-stat-label">Active & Valid</div>
+    </div>
+    <div class="offer-stat">
+        <div class="offer-stat-num" style="color: var(--gold);">
+            {% for o in offers %}{% if o.times_used > 0 %}{{ o.times_used }}{% endif %}{% endfor %}0
+        </div>
+        <div class="offer-stat-label">Total Redemptions</div>
+    </div>
+</div>
+{% endwith %}
+
+<!-- Create Offer Form -->
+<div class="create-form" id="create-section">
+    <div class="section-title" style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+        <span>🏷️</span> Create New Offer / Coupon
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_offer">
+
+        <div class="form-row-2" style="margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="form-label">Offer Name *</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Odia Literature Month" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Coupon Code <span style="color: var(--ink-softer); font-weight: 400;">(auto-generated if blank)</span></label>
+                <input type="text" name="code" class="form-control" placeholder="e.g. ODIA20" style="font-family: monospace; letter-spacing: 2px; text-transform: uppercase;">
+            </div>
+        </div>
+
+        <div class="form-row-3" style="margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="form-label">Discount Type *</label>
+                <select name="offer_type" class="form-control" id="offerTypeSelect" onchange="toggleCapField()">
+                    {% for val, label in offer_types %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Discount Value * <span id="valueHint" style="color: var(--gold); font-weight: 400;">(%)</span></label>
+                <input type="number" name="discount_value" class="form-control" step="0.01" min="0" required placeholder="e.g. 20">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Min. Order Value (₹) <span style="color: var(--ink-softer); font-weight: 400;">(0 = no min)</span></label>
+                <input type="number" name="minimum_order_value" class="form-control" step="0.01" min="0" value="0" placeholder="e.g. 299">
+            </div>
+        </div>
+
+        <div class="form-row-3" style="margin-bottom: 16px;">
+            <div class="form-group" id="capField">
+                <label class="form-label">Max Discount Cap (₹) <span style="color: var(--ink-softer); font-weight: 400;">(blank = unlimited)</span></label>
+                <input type="number" name="max_discount_cap" class="form-control" step="0.01" min="0" placeholder="e.g. 100">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Total Usage Limit <span style="color: var(--ink-softer); font-weight: 400;">(blank = unlimited)</span></label>
+                <input type="number" name="usage_limit" class="form-control" min="1" placeholder="e.g. 500">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Per-User Limit</label>
+                <input type="number" name="per_user_limit" class="form-control" min="1" value="1">
+            </div>
+        </div>
+
+        <div class="form-row-2" style="margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="form-label">Valid From *</label>
+                <input type="datetime-local" name="valid_from" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Valid Until *</label>
+                <input type="datetime-local" name="valid_until" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-row-2" style="margin-bottom: 20px;">
+            <div class="form-group">
+                <label class="form-label">Restrict to Category <span style="color: var(--ink-softer); font-weight: 400;">(blank = store-wide)</span></label>
+                <select name="applies_to_category" class="form-control">
+                    <option value="">— All Categories —</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="display: flex; flex-direction: column; justify-content: center; gap: 14px; padding-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="applies_to_combos_only" style="width: 16px; height: 16px;">
+                    <span style="font-size: 13px; font-weight: 600; color: var(--ink-soft);">Combos only</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="is_active" checked style="width: 16px; height: 16px;">
+                    <span style="font-size: 13px; font-weight: 600; color: var(--ink-soft);">Active immediately</span>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-topbar btn-gold" style="padding: 12px 32px;">
+            🏷️ Create Offer
+        </button>
+    </form>
+</div>
+
+<!-- Offers List -->
+<div style="font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: var(--ink-softer); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;">
+    Existing Offers
+</div>
+
+{% for offer in offers %}
+<div class="offer-card {% if not offer.is_active %}inactive{% endif %} {% if not offer.is_valid_now and offer.is_active %}expired{% endif %}">
+    <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
+            <span class="offer-code">{{ offer.code }}</span>
+            <span class="offer-type-badge {% if offer.offer_type == 'PERCENTAGE' %}type-percent{% elif offer.offer_type == 'FLAT' %}type-flat{% else %}type-combo{% endif %}">
+                {{ offer.get_offer_type_display }}
+            </span>
+            {% if offer.is_valid_now %}
+            <span style="background: #c6f6d5; color: #276749; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">✓ ACTIVE</span>
+            {% elif offer.is_active %}
+            <span style="background: #fed7d7; color: #c53030; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">EXPIRED</span>
+            {% else %}
+            <span style="background: var(--ivory-warm); color: var(--ink-softer); padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">PAUSED</span>
+            {% endif %}
+        </div>
+
+        <div style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">{{ offer.name }}</div>
+        <div style="font-size: 13px; color: var(--ink-soft);">
+            <strong>
+            {% if offer.offer_type == 'FLAT' %}₹{{ offer.discount_value }} off{% else %}{{ offer.discount_value }}% off{% endif %}
+            </strong>
+            {% if offer.minimum_order_value > 0 %} · Min order ₹{{ offer.minimum_order_value }}{% endif %}
+            {% if offer.max_discount_cap %} · Cap ₹{{ offer.max_discount_cap }}{% endif %}
+            {% if offer.applies_to_combos_only %} · 🎁 Combos only{% endif %}
+            {% if offer.applies_to_category %} · {{ offer.applies_to_category.name }}{% endif %}
+        </div>
+        <div style="font-size: 12px; color: var(--ink-softer); margin-top: 6px;">
+            📅 {{ offer.valid_from|date:"M d, Y H:i" }} → {{ offer.valid_until|date:"M d, Y H:i" }}
+            &nbsp;·&nbsp; Used {{ offer.times_used }}{% if offer.usage_limit %}/{{ offer.usage_limit }}{% endif %} times
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; align-items: flex-end;">
+        <a href="{% url 'admin_panel:edit_offer' offer.id %}" class="btn-sm btn-outline" style="text-decoration:none;">✏️ Edit</a>
+        <form method="POST" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_offer">
+            <input type="hidden" name="offer_id" value="{{ offer.id }}">
+            <button type="submit" class="btn-sm {% if offer.is_active %}btn-outline{% else %}btn-gold-sm{% endif %}">
+                {% if offer.is_active %}⏸ Pause{% else %}▶ Activate{% endif %}
+            </button>
+        </form>
+        <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this offer permanently?')">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_offer">
+            <input type="hidden" name="offer_id" value="{{ offer.id }}">
+            <button type="submit" class="btn-sm btn-danger">🗑</button>
+        </form>
+    </div>
+</div>
+{% empty %}
+<div style="text-align: center; padding: 60px; color: var(--ink-softer);">
+    <div style="font-size: 48px; margin-bottom: 12px;">🏷️</div>
+    <div style="font-size: 16px; font-weight: 600;">No offers yet</div>
+    <div style="font-size: 13px; margin-top: 6px;">Create your first offer above to attract more customers.</div>
+</div>
+{% endfor %}
+
+<script>
+function toggleCapField() {
+    const type = document.getElementById('offerTypeSelect').value;
+    const capField = document.getElementById('capField');
+    const hint = document.getElementById('valueHint');
+    capField.style.display = type === 'FLAT' ? 'none' : '';
+    hint.textContent = type === 'FLAT' ? '(₹)' : '(%)';
+}
+toggleCapField();
+</script>
+{% endblock %}

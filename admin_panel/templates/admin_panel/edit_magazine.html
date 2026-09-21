@@ -1,0 +1,172 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}Edit Magazine Edition — {{ edition.title }}{% endblock %}
+{% block header_title %}Edit Magazine Edition{% endblock %}
+{% block header_subtitle %}{{ edition.title }} ({{ edition.edition_year }}){% endblock %}
+
+{% block admin_content %}
+<div class="admin-card" style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--beige-warm); padding-bottom: 16px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ink);">
+            Edit Magazine Details & Inventory
+        </h3>
+        <a href="{% url 'admin_panel:manage_magazine' %}" class="btn-sm btn-outline">
+            ← Back to Magazine Dashboard
+        </a>
+    </div>
+
+    <form method="POST" action="">
+        {% csrf_token %}
+
+        <div class="form-row-2" style="margin-bottom: 16px;">
+            <div>
+                <label class="form-label">Edition Title *</label>
+                <input type="text" name="title" class="form-control" value="{{ edition.title }}" required>
+            </div>
+            <div>
+                <label class="form-label">Edition Year *</label>
+                <input type="text" name="edition_year" class="form-control" value="{{ edition.edition_year }}" required>
+            </div>
+        </div>
+
+        <div class="form-row-3" style="margin-bottom: 16px;">
+            <div>
+                <label class="form-label">Issue / Volume</label>
+                <input type="text" name="issue_number" class="form-control" value="{{ edition.issue_number }}">
+            </div>
+            <div>
+                <label class="form-label">Language</label>
+                <select name="language" class="form-control">
+                    {% for code, label in language_choices %}
+                    <option value="{{ code }}" {% if edition.language == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Chief Editor</label>
+                <input type="text" name="chief_editor" class="form-control" value="{{ edition.chief_editor }}">
+            </div>
+        </div>
+
+        <div class="form-row-3" style="margin-bottom: 20px;">
+            <div>
+                <label class="form-label">Base Price (₹) *</label>
+                <input type="number" step="0.01" name="price" class="form-control" value="{{ edition.price }}" required>
+            </div>
+            <div>
+                <label class="form-label">Discount (%)</label>
+                <input type="number" step="0.01" name="discount_percentage" class="form-control" value="{{ edition.discount_percentage }}">
+            </div>
+            <div>
+                <label class="form-label">Print Stock (Copies) *</label>
+                <input type="number" name="stock" class="form-control" value="{{ edition.stock }}" required>
+            </div>
+        </div>
+
+        <!-- 3 Product Images (500x500) with Live Previews -->
+        <div style="background: var(--ivory-warm); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; border: 1px solid var(--card-border);">
+            <div style="font-weight: 700; font-size: 13px; color: var(--terracotta); text-transform: uppercase; margin-bottom: 14px;">
+                📸 Magazine Images (500×500 px Aspect Ratio)
+            </div>
+
+            <div class="form-row-3">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">Primary Cover URL</label>
+                        <label class="btn-upload-file" title="Upload to Supabase Storage">
+                            ☁️ Upload
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'coverUrl', 'previewCoverImg', null, 'magazines', 'cover')">
+                        </label>
+                    </div>
+                    <input type="url" name="cover_image_url" id="coverUrl" class="form-control" value="{{ edition.cover_image_url|default:'' }}" oninput="previewImage('previewCover', this.value)">
+                    <div id="previewCover" style="margin-top: 10px; text-align: center;">
+                        <img id="previewCoverImg" src="{{ edition.cover_image_url|default:'' }}" style="{% if not edition.cover_image_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">Inner TOC Preview</label>
+                        <label class="btn-upload-file" title="Upload to Supabase Storage">
+                            ☁️ Upload
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'image2Url', 'previewImg2Img', null, 'magazines', 'toc')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_2_url" id="image2Url" class="form-control" value="{{ edition.image_2_url|default:'' }}" oninput="previewImage('previewImg2', this.value)">
+                    <div id="previewImg2" style="margin-top: 10px; text-align: center;">
+                        <img id="previewImg2Img" src="{{ edition.image_2_url|default:'' }}" style="{% if not edition.image_2_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">Back Cover Preview</label>
+                        <label class="btn-upload-file" title="Upload to Supabase Storage">
+                            ☁️ Upload
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'image3Url', 'previewImg3Img', null, 'magazines', 'back')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_3_url" id="image3Url" class="form-control" value="{{ edition.image_3_url|default:'' }}" oninput="previewImage('previewImg3', this.value)">
+                    <div id="previewImg3" style="margin-top: 10px; text-align: center;">
+                        <img id="previewImg3Img" src="{{ edition.image_3_url|default:'' }}" style="{% if not edition.image_3_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row-2" style="margin-bottom: 20px;">
+            <div>
+                <label class="form-label">Total Pages</label>
+                <input type="number" name="total_pages" class="form-control" value="{{ edition.total_pages|default:128 }}">
+            </div>
+            <div style="display: flex; gap: 24px; align-items: center; margin-top: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="is_current_edition" {% if edition.is_current_edition %}checked{% endif %}>
+                    <span>⭐ Flagship Annual Edition</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" name="is_active" {% if edition.is_active %}checked{% endif %}>
+                    <span>Active & Visible</span>
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <label class="form-label">Theme, Editorial Note & Table of Contents</label>
+            <textarea name="description" rows="5" class="form-control">{{ edition.description }}</textarea>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--beige-warm); flex-wrap: wrap; gap: 16px;">
+            <button type="submit" class="btn-sm btn-gold" style="padding: 10px 28px; font-size: 14px;">
+                💾 Save Changes
+            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{% url 'admin_panel:manage_magazine' %}" class="btn-sm btn-outline">Cancel</a>
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed #fed7d7; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--ink-softer);">Danger Zone: Once deleted, this edition and stock data cannot be recovered.</span>
+        <form method="POST" action="{% url 'admin_panel:delete_magazine_edition' edition.id %}" onsubmit="return confirm('Are you sure you want to permanently delete edition: {{ edition.title|escapejs }}?');" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm" style="background: #fff5f5; color: #c53030; border: 1.5px solid #feb2b2; padding: 8px 18px; font-weight: 700; cursor: pointer;">
+                🗑️ Permanently Delete Edition
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewImage(containerId, url) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (url && url.startsWith('http')) {
+        container.innerHTML = `<img src="${url}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">`;
+    } else {
+        container.innerHTML = '';
+    }
+}
+</script>
+{% endblock %}

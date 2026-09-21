@@ -1,4 +1,6 @@
-from bahihata.wsgi import application
+import os
+from django.core.wsgi import get_wsgi_application
 
-# Vercel serverless entry point uses this 'app' variable
-app = application
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bahihata.settings")
+
+app = get_wsgi_application()

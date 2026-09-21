@@ -1,0 +1,89 @@
+{% load static %}
+<div class="book-card shop-book-card" data-book-id="{{ book.id }}">
+    <!-- 500x500 Square Product Image Container with Auto-Swipe Carousel -->
+    <div class="book-img-wrap" onmouseenter="pauseCardSlider(this)" onmouseleave="resumeCardSlider(this)">
+        <a href="{% url 'store:book_detail' book.slug %}" class="book-card-slider-link">
+            <div class="book-card-slider" data-current-slide="0" data-total-slides="{{ book.all_images|length }}">
+                <div class="book-slider-track">
+                    {% for img_url in book.all_images %}
+                    <div class="book-slide {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img_url }}" alt="{{ book.title }} - Photo {{ forloop.counter }}" loading="lazy" width="500" height="500">
+                    </div>
+                    {% empty %}
+                    <div class="book-slide active">
+                        <div class="book-cover-placeholder">📖</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </a>
+
+        <!-- Badges -->
+        <div class="book-badge-stack">
+            {% if book.is_odisha_heritage %}
+                <div class="book-ribbon ribbon-heritage">Odisha Heritage</div>
+            {% elif book.discount_percentage > 0 %}
+                <div class="book-ribbon discount-ribbon">-{{ book.discount_percentage|floatformat:0 }}% OFF</div>
+            {% endif %}
+            {% if book.stock <= 3 and book.stock > 0 %}
+                <div class="book-stock-badge">Only {{ book.stock }} Left</div>
+            {% endif %}
+        </div>
+
+        <!-- Wishlist Button -->
+        <button type="button" class="book-wishlist {% if user.is_authenticated and book in user.wishlists.all %}active{% endif %}"
+                onclick="toggleWishlist(event, '{{ book.id }}')" title="Save to Wishlist" aria-label="Save to Wishlist">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if user.is_authenticated and book in user.wishlists.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        </button>
+
+        <!-- Multi-image Indicator Dots & Manual Controls (if > 1 image) -->
+        {% if book.all_images|length > 1 %}
+        <div class="slider-dots" onclick="event.stopPropagation();">
+            {% for img_url in book.all_images %}
+            <button type="button" class="slider-dot {% if forloop.first %}active{% endif %}"
+                    onclick="goToSlide(event, this, {{ forloop.counter0 }})" aria-label="Go to slide {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        <button type="button" class="slider-arrow slider-prev" onclick="manualSlide(event, this, -1)" aria-label="Previous image">‹</button>
+        <button type="button" class="slider-arrow slider-next" onclick="manualSlide(event, this, 1)" aria-label="Next image">›</button>
+        {% endif %}
+    </div>
+
+    <!-- Product Info Details -->
+    <div class="book-info">
+        <div class="book-genre-row">
+            <span class="book-genre">{{ book.category.name }}</span>
+            <span class="book-lang-badge">{{ book.get_language_display }}</span>
+        </div>
+        
+        <h3 class="book-title">
+            <a href="{% url 'store:book_detail' book.slug %}" title="{{ book.title }}">{{ book.title }}</a>
+        </h3>
+        
+        <div class="book-author">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px; opacity:0.7;"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+            By {{ book.author }}
+        </div>
+        
+        <div class="book-rating">
+            <span class="stars">★★★★★</span>
+            <span class="rating-num">Verified Pick</span>
+        </div>
+
+        <div class="book-price-row">
+            <div class="price-wrap">
+                <span class="price-now">₹{{ book.final_price|floatformat:2 }}</span>
+                {% if book.discount_percentage > 0 %}
+                <span class="price-was">₹{{ book.price|floatformat:2 }}</span>
+                {% endif %}
+            </div>
+            {% if book.stock > 0 %}
+            <a href="{% url 'orders:add_to_cart' book.id %}" class="btn-cart" title="Add to Cart">Add +</a>
+            {% else %}
+            <span class="out-of-stock-pill">Sold Out</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

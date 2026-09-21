@@ -21,4 +21,5 @@ urlpatterns = [
     path('auth/logout/', views.logout_view, name='logout'),
     path('auth/profile/update/', views.profile_update, name='profile_update'),
     path('auth/password/change/', views.change_password, name='change_password'),
+    path('upload-image/', views.upload_image_api, name='upload_image'),
 ]

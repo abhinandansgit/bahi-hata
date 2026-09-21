@@ -337,7 +337,7 @@ def checkout(request):
             )
             
             encoded_message = urllib.parse.quote(message)
-            whatsapp_url = f"https://wa.me/917978398598?text={encoded_message}"
+            whatsapp_url = f"https://wa.me/916372202830?text={encoded_message}"
             
             return JsonResponse({
                 'success': True,
@@ -480,5 +480,29 @@ def change_password(request):
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'POST method required'}, status=405)
+
+
+@csrf_exempt
+def upload_image_api(request):
+    """
+    Public / Authenticated image upload endpoint converting to WebP for minimal latency.
+    """
+    if request.method == 'POST':
+        image_file = request.FILES.get('image') or request.FILES.get('file')
+        if not image_file:
+            return JsonResponse({'status': 'error', 'message': 'No image file uploaded'}, status=400)
+            
+        folder = request.POST.get('folder', 'uploads').strip()
+        prefix = request.POST.get('prefix', 'file').strip()
+        
+        from core.supabase_storage import upload_to_supabase
+        result = upload_to_supabase(image_file, folder=folder, filename_prefix=prefix)
+        
+        if result.get('success'):
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'status': 'error', 'message': result.get('error')}, status=500)
             
     return JsonResponse({'status': 'error', 'message': 'POST method required'}, status=405)

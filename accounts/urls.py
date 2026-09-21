@@ -11,4 +11,7 @@ urlpatterns = [
     path('wishlist/toggle/<int:book_id>/', views.toggle_wishlist, name='toggle_wishlist'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('change-password/', views.change_password, name='change_password'),
+    path('google-auth/', views.google_auth_view, name='google_auth'),
+    path('supabase-auth-sync/', views.supabase_auth_sync, name='supabase_auth_sync'),
+    path('supabase-callback/', views.supabase_callback_view, name='supabase_callback'),
 ]
