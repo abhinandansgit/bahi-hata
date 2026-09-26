@@ -31,5 +31,10 @@ urlpatterns = [
     # path('vendors/', include('vendors.urls', namespace='vendors')),
 ]
 
+handler404 = 'core.views.custom_404'
+handler500 = 'core.views.custom_500'
+handler403 = 'core.views.custom_403'
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
