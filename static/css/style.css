@@ -5522,16 +5522,7 @@ footer {
    REDESIGNED PRODUCT DETAIL PAGE
    =================================================== */
 .book-breadcrumb {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--ink-soft);
-    padding: 6px 0;
-    margin-bottom: 24px;
+    display: none !important;
 }
 
 .book-breadcrumb a {

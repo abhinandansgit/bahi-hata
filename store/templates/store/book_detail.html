@@ -6,17 +6,6 @@
 {% block content %}
 <section class="shelf-section" style="background: var(--ivory); padding-top: 30px; padding-bottom: 90px; min-height: 85vh;">
     <div class="container">
-        <!-- Breadcrumb Navigation -->
-        <nav class="book-breadcrumb">
-            <a href="{% url 'home' %}">Home</a>
-            <span class="bc-sep">/</span>
-            <a href="{% url 'store:book_list' %}">Shop</a>
-            <span class="bc-sep">/</span>
-            <a href="{% url 'store:book_list' %}?category={{ book.category.slug }}">{{ book.category.name }}</a>
-            <span class="bc-sep">/</span>
-            <span class="bc-current">{{ book.title|truncatechars:35 }}</span>
-        </nav>
-
         <div class="detail-product-layout">
             <!-- ==============================================
                  LEFT: 500x500 Interactive Multi-Photo Gallery
