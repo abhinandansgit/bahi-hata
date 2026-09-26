@@ -102,6 +102,13 @@ def custom_403(request, exception=None):
     """
     return render(request, '404.html', status=403)
 
+def csrf_failure(request, reason=""):
+    """
+    Custom CSRF Failure view for expired sessions or origin mismatches.
+    """
+    return render(request, '403_csrf.html', {'reason': reason}, status=403)
+
+
 
 
 

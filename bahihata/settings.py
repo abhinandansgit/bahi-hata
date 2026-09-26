@@ -30,31 +30,49 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 DEFAULT_CSRF_ORIGINS = [
     'https://bahi-hata.theabhilasha.in',
+    'http://bahi-hata.theabhilasha.in',
     'https://*.theabhilasha.in',
+    'http://*.theabhilasha.in',
     'https://theabhilasha.in',
+    'http://theabhilasha.in',
     'https://*.vercel.app',
+    'http://*.vercel.app',
     'https://*.now.sh',
+    'http://*.now.sh',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
 ]
 CSRF_TRUSTED_ORIGINS.extend(DEFAULT_CSRF_ORIGINS)
 
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+    CSRF_TRUSTED_ORIGINS.append(f'http://{RENDER_EXTERNAL_HOSTNAME}')
 if VERCEL_URL:
     CSRF_TRUSTED_ORIGINS.append(f'https://{VERCEL_URL}')
+    CSRF_TRUSTED_ORIGINS.append(f'http://{VERCEL_URL}')
 
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
+# CSRF Cookie & Header Settings
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+
+# Proxy Header Handling
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Production Security & SSL
 if not DEBUG:
-    # On Vercel, HTTPS termination is performed at the Edge CDN
     SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
+    CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
     # HSTS (HTTP Strict Transport Security)
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
