@@ -69,7 +69,7 @@ class Mood(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, db_index=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
@@ -99,7 +99,7 @@ class Book(models.Model):
         return len(self.all_images) > 1
 
     # vendor nullable — admin-managed inventory, no vendor portal
-    category = models.ForeignKey(Category, related_name='books', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='books', on_delete=models.CASCADE, db_index=True)
     moods = models.ManyToManyField(Mood, related_name='books', blank=True)
     vendor = models.ForeignKey('vendors.Vendor', related_name='books',
                                on_delete=models.SET_NULL, null=True, blank=True)
@@ -109,16 +109,16 @@ class Book(models.Model):
         ('EN', 'English'),
         ('HI', 'Hindi'),
     )
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='EN')
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='EN', db_index=True)
 
     # Bahi Hata Highlights
-    is_trending_in_odisha = models.BooleanField(default=False)
-    is_odisha_heritage = models.BooleanField(default=False)
-    is_bestseller = models.BooleanField(default=False)
-    is_popular = models.BooleanField(default=False)
+    is_trending_in_odisha = models.BooleanField(default=False, db_index=True)
+    is_odisha_heritage = models.BooleanField(default=False, db_index=True)
+    is_bestseller = models.BooleanField(default=False, db_index=True)
+    is_popular = models.BooleanField(default=False, db_index=True)
 
-    stock = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    stock = models.PositiveIntegerField(default=0, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):

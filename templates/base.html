@@ -32,13 +32,7 @@
     <!-- Reading Progress -->
     <div class="reading-progress" id="readingProgress"></div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <span class="toast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-        </span>
-        <span id="toastMsg">Action successful!</span>
-    </div>    <!-- Announcement Bar -->ement Bar -->
+    <!-- Announcement Bar -->
     <div class="announce-bar">
         <div class="announce-track" id="announceTrack">
             <div class="announce-item"><span class="announce-dot">✦</span> Express Delivery across Odisha & Nationwide <span class="announce-dot">✦</span></div>
@@ -239,10 +233,11 @@
         </div>
     </aside>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <span style="font-size: 18px;">✨</span>
-        <span id="toastMsg">Notification message</span>
+    <!-- Clean Fast Toast Notification -->
+    <div class="toast" id="toast" role="alert" aria-live="polite">
+        <span class="toast-badge">✓</span>
+        <span id="toastMsg" class="toast-text">Added to your reading shelf</span>
+        <button class="toast-btn" onclick="openCart()">View Shelf →</button>
     </div>
 
     <!-- Main Content -->

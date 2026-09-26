@@ -6,16 +6,16 @@ from .models import SiteStat, ReaderStory
 
 def home(request):
     # Order trending books by sales count (Count of associated OrderItems)
-    trending_books = Book.objects.filter(is_trending_in_odisha=True)\
+    trending_books = Book.objects.select_related('category').filter(is_trending_in_odisha=True)\
         .annotate(order_count=Count('orderitem'))\
         .order_by('-order_count', '-created_at')[:8]
         
-    heritage_picks = Book.objects.filter(is_odisha_heritage=True).order_by('?')[:8]
-    bestseller_books = Book.objects.filter(is_bestseller=True).order_by('-created_at')[:8]
-    popular_books = Book.objects.filter(is_popular=True).order_by('-created_at')[:8]
+    heritage_picks = Book.objects.select_related('category').filter(is_odisha_heritage=True).order_by('-created_at')[:8]
+    bestseller_books = Book.objects.select_related('category').filter(is_bestseller=True).order_by('-created_at')[:8]
+    popular_books = Book.objects.select_related('category').filter(is_popular=True).order_by('-created_at')[:8]
     moods = Mood.objects.all()
     site_stats = SiteStat.objects.all()
-    reader_stories = ReaderStory.objects.filter(is_approved=True).order_by('-created_at')
+    reader_stories = ReaderStory.objects.filter(is_approved=True).order_by('-created_at')[:10]
     
     context = {
         'trending_books': trending_books,

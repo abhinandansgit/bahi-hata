@@ -71,14 +71,14 @@ def explore_hata(request):
     else:
         books = books.order_by('-created_at')
         
-    categories = Category.objects.all()
+    categories = Category.objects.prefetch_related('books').all()
     moods = Mood.objects.all()
     
-    # Group books by category for the "Flipkart" sections feel
+    # Group books by category efficiently
     categorized_books = []
     for cat in categories:
-        cat_books = books.filter(category=cat)[:10]
-        if cat_books.exists():
+        cat_books = list(cat.books.all()[:10])
+        if cat_books:
             categorized_books.append({
                 'category': cat,
                 'books': cat_books

@@ -1,26 +1,15 @@
-// ===== CURSOR =====
+// ===== HARDWARE ACCELERATED FAST CURSOR =====
 const cursor = document.getElementById('cursor');
 const follower = document.getElementById('cursorFollower');
-let mx = 0, my = 0, fx = 0, fy = 0;
 
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  if(cursor) {
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-  }
-});
-
-function animateFollower() {
-  fx += (mx - fx) * 0.12;
-  fy += (my - fy) * 0.12;
-  if(follower) {
-    follower.style.left = fx + 'px';
-    follower.style.top = fy + 'px';
-  }
-  requestAnimationFrame(animateFollower);
+if (cursor && follower) {
+  document.addEventListener('mousemove', e => {
+    const x = e.clientX;
+    const y = e.clientY;
+    cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    follower.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  }, { passive: true });
 }
-animateFollower();
 
 document.querySelectorAll('a, button, .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .quiz-option, .shelf-tab').forEach(el => {
   el.addEventListener('mouseenter', () => { 
@@ -553,5 +542,21 @@ function initPage() {
 document.addEventListener('DOMContentLoaded', initPage);
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
   initPage();
+}
+
+// ===== FAST CLEAN TOAST NOTIFICATION =====
+let toastTimer = null;
+function showToast(msg, duration = 3200) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  if (!toast) return;
+
+  if (toastMsg) toastMsg.textContent = msg;
+  toast.classList.add('show');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
 
