@@ -84,10 +84,5 @@ def cookies_policy(request):
     """
     return render(request, 'legal/cookies_policy.html')
 
-def refund_policy(request):
-    """
-    Renders Refund, Return & Cancellation Policy page.
-    """
-    return render(request, 'legal/refund_policy.html')
 
 
