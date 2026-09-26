@@ -396,27 +396,85 @@ nav#mainNav.scrolled {
     box-shadow: var(--shadow-float);
 }
 
+/* ========== REBUILT ODIA LANGUAGE SWITCHER BUTTON ========== */
 .lang-toggle-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: linear-gradient(135deg, rgba(231, 111, 81, 0.08), rgba(212, 175, 55, 0.12));
+    border: 1.5px solid rgba(231, 111, 81, 0.35);
+    border-radius: 30px;
+    color: var(--terracotta-deep);
     font-family: var(--font-ui);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--terracotta);
-    background: rgba(155, 58, 26, 0.08);
-    padding: 6px 12px;
-    border-radius: 4px;
-    border: 1px solid rgba(155, 58, 26, 0.2);
-    transition: var(--transition-fast);
+    letter-spacing: 0.4px;
     text-decoration: none;
-    display: inline-block;
-    margin-right: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(231, 111, 81, 0.08);
+}
+
+.lang-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 70%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    transition: left 0.5s ease;
+}
+
+.lang-toggle-btn:hover::before {
+    left: 140%;
 }
 
 .lang-toggle-btn:hover {
     background: var(--terracotta);
-    color: white;
+    color: #FFFFFF;
     border-color: var(--terracotta);
     transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(231, 111, 81, 0.28);
+}
+
+.lang-globe-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lang-toggle-btn:hover .lang-globe-icon {
+    transform: rotate(20deg) scale(1.1);
+}
+
+.lang-label-text {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.lang-live-pulse {
+    width: 6px;
+    height: 6px;
+    background: #E9C46A;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #E9C46A;
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.5; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.25); }
+}
+
+.lang-toggle-btn:active {
+    transform: scale(0.96);
 }
 
 [lang="or"] {

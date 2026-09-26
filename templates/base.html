@@ -70,9 +70,12 @@
 
             <!-- DESKTOP: Action Buttons -->
             <div class="nav-actions">
-                <a href="{% url 'toggle_language' %}" class="lang-toggle-btn" title="Switch Language">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                    <span>{{ t.toggle_lang }}</span>
+                <a href="{% url 'toggle_language' %}" class="lang-toggle-btn" title="Switch Language Edition">
+                    <span class="lang-globe-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    </span>
+                    <span class="lang-label-text">{{ t.toggle_lang }}</span>
+                    <span class="lang-live-pulse"></span>
                 </a>
 
                 {% if request.user.is_authenticated %}

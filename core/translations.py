@@ -15,7 +15,7 @@ TRANSLATIONS = {
         'btn_signin': 'Sign In',
         'btn_profile': 'Profile',
         'btn_logout': 'Logout',
-        'toggle_lang': 'ଓଡ଼ିଆ',
+        'toggle_lang': 'ଓଡ଼ିଆରେ ପଢ଼ନ୍ତୁ',
 
         # Home Page Hero
         'hero_eyebrow': "Odisha's Digital Book Bazaar",
@@ -118,7 +118,7 @@ TRANSLATIONS = {
         'btn_signin': 'ପ୍ରବେଶ',
         'btn_profile': 'ପ୍ରୋଫାଇଲ୍',
         'btn_logout': 'ପ୍ରସ୍ଥାନ',
-        'toggle_lang': 'English',
+        'toggle_lang': 'English Edition',
 
         # Home Page Hero (Poetic)
         'hero_eyebrow': "ଓଡ଼ିଶାର ପାରମ୍ପରିକ ଡିଜିଟାଲ୍ ପୁସ୍ତକ ମେଳା",
