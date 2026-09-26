@@ -66,3 +66,28 @@ def toggle_language(request):
     # Redirect back to the previous page
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+def privacy_policy(request):
+    """
+    Renders DPDP Act 2023 compliant Privacy Policy.
+    """
+    return render(request, 'legal/privacy_policy.html')
+
+def terms_and_conditions(request):
+    """
+    Renders Terms & Conditions page.
+    """
+    return render(request, 'legal/terms.html')
+
+def cookies_policy(request):
+    """
+    Renders Cookies & Local Storage Policy page.
+    """
+    return render(request, 'legal/cookies_policy.html')
+
+def refund_policy(request):
+    """
+    Renders Refund, Return & Cancellation Policy page.
+    """
+    return render(request, 'legal/refund_policy.html')
+
+

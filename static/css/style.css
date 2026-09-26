@@ -6808,3 +6808,36 @@ footer {
 .google-modal-close:hover {
     color: var(--terracotta);
 }
+
+/* ==========================================================================
+   ACCESSIBILITY (a11y) & KEYBOARD FOCUS STYLES (WCAG 2.1 AA Compliant)
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2.5px solid var(--terracotta, #9B3A1A) !important;
+    outline-offset: 3px !important;
+}
+
+.skip-link:focus {
+    top: 12px !important;
+    outline: 3px solid var(--gold, #C9963A) !important;
+}
+
+/* Ensure contrast for badges and buttons */
+.badge, .f-badge, .book-ribbon {
+    font-weight: 700 !important;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

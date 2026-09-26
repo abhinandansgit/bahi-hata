@@ -13,10 +13,7 @@
 
         {% if messages %}
         {% for msg in messages %}
-        <div style="padding: 12px 20px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 600;
-                    background: {% if msg.tags == 'error' %}#fff5f5{% elif msg.tags == 'warning' %}#fffaf0{% else %}#f0fff4{% endif %};
-                    color: {% if msg.tags == 'error' %}#c53030{% elif msg.tags == 'warning' %}#c05621{% else %}#276749{% endif %};
-                    border: 1px solid {% if msg.tags == 'error' %}#fed7d7{% elif msg.tags == 'warning' %}#feebc8{% else %}#c6f6d5{% endif %};">
+        <div class="cart-alert alert-{% if msg.tags %}{{ msg.tags }}{% else %}info{% endif %}">
             {{ msg }}
         </div>
         {% endfor %}
@@ -194,7 +191,7 @@
 </section>
 
 <!-- Mobile sticky bottom bar -->
-{% if items or combo_items %}
+{% if items or combo_items or magazine_items %}
 <div class="mobile-cart-bar">
     <div>
         <div style="font-size: 11px; color: var(--ink-softer); font-weight: 600; text-transform: uppercase;">Total</div>
@@ -206,6 +203,29 @@
 
 {% block extra_css %}
 <style>
+.cart-alert {
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+.cart-alert.alert-error {
+    background: #fff5f5;
+    color: #c53030;
+    border-color: #fed7d7;
+}
+.cart-alert.alert-warning {
+    background: #fffaf0;
+    color: #c05621;
+    border-color: #feebc8;
+}
+.cart-alert.alert-success, .cart-alert.alert-info {
+    background: #f0fff4;
+    color: #276749;
+    border-color: #c6f6d5;
+}
 .cart-item-card {
     display: flex;
     gap: 20px;

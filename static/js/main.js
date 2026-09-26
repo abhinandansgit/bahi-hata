@@ -386,15 +386,18 @@ async function toggleWishlist(e, bookId) {
     });
     const data = await response.json();
     
+    const svg = btn.querySelector('svg');
     if (data.added) {
-      showToast(`🔖 Saved "${data.book_title}" to your shelf!`);
-      btn.innerHTML = '❤️';
+      showToast(`🔖 Saved "${data.book_title || 'Book'}" to your wishlist!`);
+      btn.classList.add('active');
+      if (svg) svg.setAttribute('fill', 'currentColor');
     } else {
-      showToast(`🗑️ Removed from your shelf.`);
-      btn.innerHTML = '🔖';
+      showToast(`🗑️ Removed from your wishlist.`);
+      btn.classList.remove('active');
+      if (svg) svg.setAttribute('fill', 'none');
     }
   } catch (err) {
-    window.location.href = btn.href; // Fallback to normal link if AJAX fails
+    if (btn.href) window.location.href = btn.href;
   }
 }
 

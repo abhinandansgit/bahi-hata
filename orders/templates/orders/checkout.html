@@ -60,6 +60,13 @@
                             📮 We deliver across all 30 districts of Odisha via India Post Speed Post.
                         </p>
 
+                        <div style="margin-bottom: 20px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; font-family: var(--font-body);">
+                            <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="terms_consent" required style="margin-top: 3px; accent-color: var(--terracotta);">
+                                <span>I agree to the <a href="{% url 'terms_and_conditions' %}" target="_blank" style="color: var(--terracotta); text-decoration: underline;">Terms & Conditions</a>, <a href="{% url 'privacy_policy' %}" target="_blank" style="color: var(--terracotta); text-decoration: underline;">Privacy Policy</a>, and consent to order processing under DPDP Act 2023. *</span>
+                            </label>
+                        </div>
+
                         <!-- Place Order CTA -->
                         <button type="submit" class="btn-place-order" id="placeOrderBtn" style="font-size: 16px; padding: 18px 24px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
@@ -120,7 +127,7 @@
                             <div class="co-item-img" style="background: var(--gold-pale); font-size: 20px; display: flex; align-items: center; justify-content: center;">🎁</div>
                             <div style="flex: 1; min-width: 0;">
                                 <div class="co-item-title">{{ ci.combo.name }}</div>
-                                <div class="co-item-meta" style="color: var(--gold);">🎁 Combo Bundle · {{ ci.combo.books.count }} books</div>
+                                <div class="co-item-meta" style="color: var(--gold);">🎁 Combo Bundle · Qty: {{ ci.quantity }} ({{ ci.combo.books.count }} books)</div>
                             </div>
                             <div class="co-item-subtotal">₹{{ ci.total_price }}</div>
                         </div>

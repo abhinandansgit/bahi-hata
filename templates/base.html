@@ -22,6 +22,8 @@
 </head>
 
 <body>
+    <!-- Accessibility: Skip to Main Content Link -->
+    <a href="#main-content" class="skip-link" style="position: absolute; top: -100px; left: 10px; background: var(--terracotta); color: white; padding: 12px 20px; border-radius: 6px; z-index: 100000; text-decoration: none; font-weight: 700; transition: top 0.2s;" onfocus="this.style.top='10px'" onblur="this.style.top='-100px'">Skip to main content</a>
 
     <!-- Custom Cursor -->
     <div class="cursor" id="cursor"></div>
@@ -298,12 +300,12 @@
     </div>
 
     <!-- Main Content -->
-    <main>
+    <main id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 
     <!-- ===== FOOTER ===== -->
-    <footer>
+    <footer role="contentinfo">
         <div class="footer-grid">
             <div class="footer-brand">
                 <img src="{% static 'images/logo.png' %}" alt="Bahi Hata Logo" class="footer-logo-img">
@@ -360,9 +362,13 @@
             <div class="footer-rights-wrap" style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 16px;">
                 <span>{{ t.footer_rights }}</span>
                 <div class="footer-legal-links">
-                    <a href="{% url 'home' %}">Privacy Policy</a>
+                    <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
                     <span>•</span>
-                    <a href="{% url 'home' %}">Terms of Service</a>
+                    <a href="{% url 'terms_and_conditions' %}">Terms & Conditions</a>
+                    <span>•</span>
+                    <a href="{% url 'cookies_policy' %}">Cookie Policy</a>
+                    <span>•</span>
+                    <a href="{% url 'refund_policy' %}">Refund Policy</a>
                 </div>
             </div>
         </div>
@@ -426,6 +432,35 @@
                 btn.classList.add('open');
                 document.body.style.overflow = 'hidden';
             }
+        }
+    </script>
+    <!-- Cookie & DPDP Consent Banner -->
+    <div id="cookieConsentBanner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Cookie & Privacy Consent" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 520px; background: var(--ink-deep, #1A0A04); color: #FAF7F2; padding: 20px 24px; border-radius: 16px; border: 1px solid rgba(201,150,58,0.4); box-shadow: 0 12px 32px rgba(0,0,0,0.35); z-index: 99999;">
+        <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px;">
+            <span style="font-size: 24px;">🍪</span>
+            <div>
+                <h4 style="margin: 0 0 6px; font-family: var(--font-title); color: #E6B84A; font-size: 16px;">Cookie & Privacy Notice</h4>
+                <p style="margin: 0; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85);">
+                    We use cookies & local storage to remember your reading shelf items, enhance site security, and deliver an authentic Odia literary experience in compliance with the DPDP Act 2023. Learn more in our <a href="{% url 'privacy_policy' %}" style="color: #E6B84A; text-decoration: underline;">Privacy Policy</a>.
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+            <button onclick="acceptCookies('essential')" style="background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #FAF7F2; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">Essential Only</button>
+            <button onclick="acceptCookies('all')" style="background: var(--terracotta, #9B3A1A); border: none; color: #FFF; padding: 8px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Accept All</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('cookie_consent')) {
+                const banner = document.getElementById('cookieConsentBanner');
+                if (banner) banner.style.display = 'block';
+            }
+        });
+        function acceptCookies(type) {
+            localStorage.setItem('cookie_consent', type);
+            const banner = document.getElementById('cookieConsentBanner');
+            if (banner) banner.style.display = 'none';
         }
     </script>
     {% block extra_js %}{% endblock %}

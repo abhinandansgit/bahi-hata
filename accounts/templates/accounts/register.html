@@ -76,7 +76,14 @@
                         </div>
                     {% endfor %}
                     
-                    <button type="submit" class="btn-checkout" style="width: 100%; margin-top: 16px; font-size: 15px; padding: 16px;">{{ t.btn_create_profile }}</button>
+                    <div style="margin-bottom: 20px; font-size: 13px; color: var(--ink-soft); line-height: 1.5; font-family: var(--font-body);">
+                        <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="terms_consent" required style="margin-top: 3px; accent-color: var(--terracotta);">
+                            <span>I agree to the <a href="{% url 'terms_and_conditions' %}" target="_blank" style="color: var(--terracotta); text-decoration: underline;">Terms & Conditions</a>, <a href="{% url 'privacy_policy' %}" target="_blank" style="color: var(--terracotta); text-decoration: underline;">Privacy Policy</a>, and consent to data processing under the DPDP Act 2023. *</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-checkout" style="width: 100%; font-size: 15px; padding: 16px;">{{ t.btn_create_profile }}</button>
                     
                     <div style="text-align: center; margin-top: 24px; font-family: var(--font-body); font-size: 14.5px; color: var(--ink-soft);">
                         {{ t.auth_already_member }} <a href="{% url 'accounts:login' %}" style="color: var(--terracotta); font-weight: 700; text-decoration: underline;">{{ t.btn_signin }}</a>

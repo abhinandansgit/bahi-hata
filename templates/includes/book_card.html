@@ -1,5 +1,5 @@
 {% load static %}
-<div class="book-card shop-book-card" data-book-id="{{ book.id }}">
+<div class="book-card shop-book-card" data-book-id="{{ book.id }}" data-category="{{ book.category.name|lower }}" data-language="{{ book.get_language_display|lower }}">
     <!-- 500x500 Square Product Image Container with Auto-Swipe Carousel -->
     <div class="book-img-wrap" onmouseenter="pauseCardSlider(this)" onmouseleave="resumeCardSlider(this)">
         <a href="{% url 'store:book_detail' book.slug %}" class="book-card-slider-link">

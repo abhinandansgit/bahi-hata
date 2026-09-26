@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cookies & Local Storage Policy | Bahi Hata{% endblock %}
+
+{% block content %}
+<div class="legal-container" style="max-width: 900px; margin: 40px auto 80px; padding: 0 24px; color: var(--ink-deep); line-height: 1.8;">
+    <div style="border-bottom: 2px solid var(--terracotta); padding-bottom: 20px; margin-bottom: 32px;">
+        <span style="color: var(--terracotta); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px;">Cookie Transparency</span>
+        <h1 style="font-family: var(--font-title); font-size: 36px; margin: 8px 0; color: var(--ink-black);">Cookies & Local Storage Policy</h1>
+        <p style="color: var(--ink-soft); font-size: 14px;">Effective Date: September 26, 2026</p>
+    </div>
+
+    <p>
+        Bahi Hata uses cookies and HTML5 local storage technologies to ensure seamless site functionality, store your active reading shelf items, and deliver an optimized browsing experience.
+    </p>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-family: var(--font-title); color: var(--terracotta); font-size: 22px;">1. What Are Cookies?</h2>
+        <p>
+            Cookies are small text files stored on your browser or device when you visit websites. They help remember your preferences, keep you logged in, and keep track of items added to your cart or reading shelf.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-family: var(--font-title); color: var(--terracotta); font-size: 22px;">2. Types of Cookies We Use</h2>
+        <div style="display: grid; gap: 16px; margin-top: 16px;">
+            <div style="background: var(--beige-warm); padding: 16px 20px; border-radius: 12px;">
+                <h4 style="margin: 0 0 4px; color: var(--terracotta);">1. Essential Session Cookies (Strictly Necessary)</h4>
+                <p style="margin: 0; font-size: 14px;">Required for site login (`sessionid`), CSRF security protection (`csrftoken`), and user authentication. These cannot be disabled.</p>
+            </div>
+            <div style="background: var(--beige-warm); padding: 16px 20px; border-radius: 12px;">
+                <h4 style="margin: 0 0 4px; color: var(--terracotta);">2. Functionality & Preferences Cookies</h4>
+                <p style="margin: 0; font-size: 14px;">Remembers your language choice (English vs. Odia) and display settings.</p>
+            </div>
+            <div style="background: var(--beige-warm); padding: 16px 20px; border-radius: 12px;">
+                <h4 style="margin: 0 0 4px; color: var(--terracotta);">3. Local Storage (Client-side Data)</h4>
+                <p style="margin: 0; font-size: 14px;">Stores your client-side mini-cart items and cookie consent preference (`cookie_consent`) locally on your device for fast performance without tracking.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-family: var(--font-title); color: var(--terracotta); font-size: 22px;">3. Managing Your Cookie Preferences</h2>
+        <p>
+            You can modify your cookie settings at any time using your browser settings or by clearing your browser's site data. Note that disabling essential cookies may impact your ability to log in or complete orders.
+        </p>
+    </section>
+
+    <div style="background: var(--beige-light); border-left: 4px solid var(--terracotta); padding: 20px; border-radius: 8px;">
+        <h4 style="margin: 0 0 4px; color: var(--ink-black);">Contact Us</h4>
+        <p style="margin: 0; font-size: 14px;">For cookie policy inquiries, email <a href="mailto:bahihata2026@gmail.com" style="color: var(--terracotta);">bahihata2026@gmail.com</a>.</p>
+    </div>
+</div>
+{% endblock %}
