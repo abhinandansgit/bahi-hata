@@ -23,7 +23,14 @@ def _get_cart(user):
 
 def _serialize_cart(cart):
     items = []
-    for item in cart.items.select_related('book', 'book__category').all():
+    book_items = list(cart.items.select_related('book', 'book__category').all())
+    cart_subtotal = 0.0
+    total_qty = 0
+
+    for item in book_items:
+        subtotal = float(item.total_price)
+        cart_subtotal += subtotal
+        total_qty += item.quantity
         items.append({
             'id': item.id,
             'type': 'book',
@@ -34,7 +41,7 @@ def _serialize_cart(cart):
             'price': float(item.book.final_price),
             'original_price': float(item.book.price),
             'quantity': item.quantity,
-            'subtotal': float(item.total_price),
+            'subtotal': subtotal,
             'cover_image_url': item.book.cover_image_url or '',
             'stock': item.book.stock,
             'update_url': f"/orders/cart/update/{item.id}/",
@@ -42,7 +49,11 @@ def _serialize_cart(cart):
         })
 
     combo_items = []
-    for ci in cart.combo_items.select_related('combo').prefetch_related('combo__books').all():
+    combo_list = list(cart.combo_items.select_related('combo').prefetch_related('combo__books').all())
+    for ci in combo_list:
+        subtotal = float(ci.total_price)
+        cart_subtotal += subtotal
+        total_qty += ci.quantity
         combo_items.append({
             'id': ci.id,
             'type': 'combo',
@@ -50,13 +61,17 @@ def _serialize_cart(cart):
             'books_included': [b.title for b in ci.combo.books.all()],
             'price': float(ci.combo.combo_price),
             'quantity': ci.quantity,
-            'subtotal': float(ci.total_price),
+            'subtotal': subtotal,
             'cover_image_url': ci.combo.cover_image_url or '',
             'remove_url': f"/orders/cart/remove-combo/{ci.id}/",
         })
 
     magazine_items = []
-    for mi in cart.magazine_items.select_related('edition').all():
+    mag_list = list(cart.magazine_items.select_related('edition').all())
+    for mi in mag_list:
+        subtotal = float(mi.total_price)
+        cart_subtotal += subtotal
+        total_qty += mi.quantity
         magazine_items.append({
             'id': mi.id,
             'type': 'magazine',
@@ -66,7 +81,7 @@ def _serialize_cart(cart):
             'language': mi.edition.get_language_display(),
             'price': float(mi.edition.final_price),
             'quantity': mi.quantity,
-            'subtotal': float(mi.total_price),
+            'subtotal': subtotal,
             'cover_image_url': mi.edition.cover_image_url or '',
             'stock': mi.edition.stock,
             'update_url': f"/orders/cart/update-magazine/{mi.id}/",
@@ -77,8 +92,8 @@ def _serialize_cart(cart):
         'items': items,
         'combo_items': combo_items,
         'magazine_items': magazine_items,
-        'total_items_count': cart.item_count,
-        'subtotal': float(cart.total_price),
+        'total_items_count': total_qty,
+        'subtotal': round(cart_subtotal, 2),
     }
 
 

@@ -257,16 +257,21 @@ def inventory_management(request):
     in_stock = Book.objects.filter(stock__gt=5).count()
 
     if request.method == 'POST':
-        updated = 0
-        for book in Book.objects.all():
-            new_stock = request.POST.get(f'stock_{book.id}')
-            if new_stock is not None and new_stock.strip().isdigit():
-                new_val = int(new_stock)
-                if new_val != book.stock:
-                    book.stock = new_val
-                    book.save(update_fields=['stock'])
-                    updated += 1
-        messages.success(request, f'✅ Inventory updated — {updated} book(s) changed.')
+        updated_books = []
+        posted_items = {k.replace('stock_', ''): v for k, v in request.POST.items() if k.startswith('stock_')}
+        if posted_items:
+            book_ids = [int(bid) for bid in posted_items.keys() if bid.isdigit()]
+            existing_books = Book.objects.filter(id__in=book_ids)
+            for book in existing_books:
+                raw_val = posted_items.get(str(book.id))
+                if raw_val and raw_val.strip().isdigit():
+                    new_val = int(raw_val)
+                    if new_val != book.stock:
+                        book.stock = new_val
+                        updated_books.append(book)
+            if updated_books:
+                Book.objects.bulk_update(updated_books, ['stock'])
+        messages.success(request, f'✅ Inventory updated — {len(updated_books)} book(s) changed.')
         return redirect('admin_panel:inventory')
 
     context = {

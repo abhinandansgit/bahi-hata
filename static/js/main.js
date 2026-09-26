@@ -257,7 +257,7 @@ async function updateShelfItem(url) {
   }
 }
 
-// Global AJAX interceptor for Add to Cart buttons
+// Global Optimistic AJAX interceptor for Add to Cart buttons
 async function handleAddToCartClick(e, btn) {
   e.preventDefault();
   const href = btn.getAttribute('href');
@@ -265,8 +265,14 @@ async function handleAddToCartClick(e, btn) {
 
   const originalContent = btn.innerHTML;
   btn.style.pointerEvents = 'none';
-  btn.style.opacity = '0.8';
-  btn.innerHTML = `<span style="display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; margin-right:6px;"></span> Adding…`;
+  btn.style.opacity = '0.9';
+
+  // 1. Optimistic UI Updates (0ms Instant Feedback)
+  const currentBadgeCount = parseInt(document.getElementById('cartCount')?.textContent || '0', 10);
+  const newCount = currentBadgeCount + 1;
+  updateCartBadges(newCount);
+  btn.innerHTML = `✓ Added`;
+  showToast('✓ Added to your reading shelf!');
 
   try {
     const res = await fetch(href, {
@@ -287,18 +293,22 @@ async function handleAddToCartClick(e, btn) {
     const data = await res.json();
     if (data.success && data.cart) {
       renderShelfDrawer(data.cart);
-      showToast(data.message || 'Added to your reading shelf!');
-      openCart();
+      if (data.message) {
+        showToast(data.message);
+      }
     } else if (data.message) {
+      updateCartBadges(currentBadgeCount); // Revert on warning
       showToast(data.message);
     }
   } catch (err) {
-    // Fallback normal navigation if AJAX fails
+    updateCartBadges(currentBadgeCount);
     window.location.href = href;
   } finally {
-    btn.style.pointerEvents = '';
-    btn.style.opacity = '';
-    btn.innerHTML = originalContent;
+    setTimeout(() => {
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+      btn.innerHTML = originalContent;
+    }, 1200);
   }
 }
 
