@@ -38,61 +38,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         </span>
         <span id="toastMsg">Action successful!</span>
-    </div>
-
-    <!-- Mini Cart Overlay & Drawer -->
-    <div class="mini-cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-    <div class="mini-cart" id="miniCart">
-        <div class="mini-cart-header">
-            <div class="mini-cart-title-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                <span class="mini-cart-title">{{ t.cart_title }}</span>
-            </div>
-            <button class="mini-cart-close" onclick="toggleCart()" aria-label="Close Cart">✕</button>
-        </div>
-        <div class="mini-cart-items" id="cartItems">
-            {% if request.user.cart and request.user.cart.items.exists %}
-            {% for item in request.user.cart.items.all %}
-            <div class="mini-cart-item">
-                <div class="mini-cart-book-img">
-                    {% if item.book.cover_image %}
-                    <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}">
-                    {% else %}
-                    <div class="placeholder-cover">📖</div>
-                    {% endif %}
-                </div>
-                <div class="mini-cart-info">
-                    <div class="mini-cart-book-title">{{ item.book.title }}</div>
-                    <div class="mini-cart-book-author">{{ item.book.author }}</div>
-                    <div class="mini-cart-book-price">₹ {{ item.book.final_price|floatformat:2 }}</div>
-                    <a href="{% url 'orders:remove_from_cart' item.id %}" class="mini-cart-remove">Remove item</a>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="empty-cart-state">
-                <div class="empty-cart-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                </div>
-                <p class="empty-cart-text">{{ t.cart_empty }}</p>
-                <a href="{% url 'store:book_list' %}" class="btn-browse-shelf" onclick="toggleCart()">Browse Literary Treasury</a>
-            </div>
-            {% endif %}
-        </div>
-        <div class="mini-cart-footer">
-            {% if request.user.cart and request.user.cart.items.exists %}
-            <div class="cart-total-row">
-                <span class="cart-total-label">{{ t.cart_total }} ({{ request.user.cart.items.count }} items)</span>
-                <span class="cart-total-amount">₹ {{ request.user.cart.total_price }}</span>
-            </div>
-            <a href="{% url 'orders:checkout' %}" class="btn-checkout">Proceed to Checkout →</a>
-            {% else %}
-            <button class="btn-checkout-secondary" onclick="toggleCart()">Continue Browsing</button>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Announcement Bar -->
+    </div>    <!-- Announcement Bar -->ement Bar -->
     <div class="announce-bar">
         <div class="announce-track" id="announceTrack">
             <div class="announce-item"><span class="announce-dot">✦</span> Express Delivery across Odisha & Nationwide <span class="announce-dot">✦</span></div>

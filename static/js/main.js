@@ -255,8 +255,10 @@ async function handleAddToCartClick(e, btn) {
   const href = btn.getAttribute('href');
   if (!href) return;
 
+  const originalContent = btn.innerHTML;
   btn.style.pointerEvents = 'none';
-  btn.style.opacity = '0.7';
+  btn.style.opacity = '0.8';
+  btn.innerHTML = `<span style="display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; margin-right:6px;"></span> Adding…`;
 
   try {
     const res = await fetch(href, {
@@ -285,8 +287,10 @@ async function handleAddToCartClick(e, btn) {
   } finally {
     btn.style.pointerEvents = '';
     btn.style.opacity = '';
+    btn.innerHTML = originalContent;
   }
 }
+
 
 // Bind click event listener on document
 document.addEventListener('click', (e) => {
@@ -516,8 +520,13 @@ function initBookCardSliders() {
 }
 
 // Initialize on DOMContentLoaded and dynamic loads
-document.addEventListener('DOMContentLoaded', initBookCardSliders);
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
+function initPage() {
   initBookCardSliders();
+  fetchCartData();
+}
+
+document.addEventListener('DOMContentLoaded', initPage);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initPage();
 }
 
