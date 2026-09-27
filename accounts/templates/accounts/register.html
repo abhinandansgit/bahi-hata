@@ -56,21 +56,15 @@
                     {% endif %}
 
                     {% for field in form %}
-                        <div class="form-group {% if field.field.widget.input_type == 'checkbox' %}checkbox-group{% endif %}" style="margin-bottom: 18px;">
-                            {% if field.field.widget.input_type != 'checkbox' %}
-                                <label for="{{ field.id_for_label }}" style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 6px;">{{ field.label }}</label>
-                            {% endif %}
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="{{ field.id_for_label }}" style="font-family: var(--font-ui); text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--gold); display: block; margin-bottom: 6px;">{{ field.label }}</label>
                             
                             {{ field }}
-                            
-                            {% if field.field.widget.input_type == 'checkbox' %}
-                                <label for="{{ field.id_for_label }}" style="display:inline; margin-left: 8px; font-family: var(--font-body); font-size: 14px; color: var(--ink-soft);">{{ field.label }} (Register as a Seller)</label>
-                            {% endif %}
                             
                             {% if field.errors %}
                                 <div style="color: var(--terracotta); font-size: 11px; margin-top: 4px; font-family: var(--font-body);">{{ field.errors }}</div>
                             {% endif %}
-                            {% if field.help_text and field.field.widget.input_type != 'checkbox' %}
+                            {% if field.help_text %}
                                  <div style="color: rgba(26,16,8,0.4); font-size: 11px; margin-top: 4px;">{{ field.help_text }}</div>
                             {% endif %}
                         </div>

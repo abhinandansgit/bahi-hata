@@ -18,8 +18,6 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            if user.is_vendor:
-                Vendor.objects.create(user=user, shop_name=f"{user.username}'s Shop")
             login(request, user)
             return redirect('home')
     else:
