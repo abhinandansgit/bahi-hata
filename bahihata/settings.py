@@ -222,11 +222,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'accounts.User'
 
 # Google & Supabase Authentication & Storage
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
-SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
-SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
-SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
-SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', 'bahi-hata-images')
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '').strip()
+SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '').strip()
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '').strip()
+SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', 'bahi-hata-images').strip()
 
 if not SUPABASE_URL and 'DATABASE_URL' in os.environ:
     db_url = os.environ.get('DATABASE_URL', '')
@@ -235,6 +235,12 @@ if not SUPABASE_URL and 'DATABASE_URL' in os.environ:
         ref = match.group(1) or match.group(2)
         if ref:
             SUPABASE_URL = f"https://{ref}.supabase.co"
+
+if SUPABASE_URL:
+    SUPABASE_URL = SUPABASE_URL.strip().rstrip('/')
+    if not SUPABASE_URL.startswith(('http://', 'https://')):
+        SUPABASE_URL = f"https://{SUPABASE_URL}"
+
 
 
 # Razorpay Configuration

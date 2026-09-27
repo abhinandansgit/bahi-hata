@@ -65,9 +65,14 @@ def upload_to_supabase(file_obj, folder='books', filename_prefix='item') -> dict
             'error': None or error message
         }
     """
-    supabase_url = getattr(settings, 'SUPABASE_URL', '').rstrip('/')
-    supabase_key = getattr(settings, 'SUPABASE_SERVICE_ROLE_KEY', '') or getattr(settings, 'SUPABASE_ANON_KEY', '')
-    bucket_name = getattr(settings, 'SUPABASE_STORAGE_BUCKET', 'bahi-hata-images')
+    raw_url = (getattr(settings, 'SUPABASE_URL', '') or '').strip()
+    supabase_url = raw_url.rstrip('/')
+    if supabase_url and not supabase_url.startswith(('http://', 'https://')):
+        supabase_url = f"https://{supabase_url}"
+
+    raw_key = getattr(settings, 'SUPABASE_SERVICE_ROLE_KEY', '') or getattr(settings, 'SUPABASE_ANON_KEY', '') or ''
+    supabase_key = raw_key.strip()
+    bucket_name = (getattr(settings, 'SUPABASE_STORAGE_BUCKET', 'bahi-hata-images') or 'bahi-hata-images').strip()
 
     # 1. Optimize image to WebP
     optimized_bytes, mime_type = optimize_image(file_obj)

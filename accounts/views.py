@@ -239,8 +239,12 @@ def supabase_auth_sync(request):
     avatar_url = data.get('avatar_url') or data.get('picture') or ''
     access_token = data.get('access_token')
 
-    supabase_url = getattr(settings, 'SUPABASE_URL', '')
-    supabase_anon_key = getattr(settings, 'SUPABASE_ANON_KEY', '')
+    raw_url = (getattr(settings, 'SUPABASE_URL', '') or '').strip()
+    supabase_url = raw_url.rstrip('/')
+    if supabase_url and not supabase_url.startswith(('http://', 'https://')):
+        supabase_url = f"https://{supabase_url}"
+
+    supabase_anon_key = (getattr(settings, 'SUPABASE_ANON_KEY', '') or '').strip()
 
     if access_token and supabase_url and supabase_anon_key:
         try:
