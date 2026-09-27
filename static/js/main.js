@@ -11,12 +11,12 @@ if (cursor) {
 
   const interactiveSelector = 'a, button, .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .quiz-option, .shelf-tab, input, select, textarea, [role="button"]';
   document.addEventListener('mouseover', e => {
-    if (e.target.closest(interactiveSelector)) {
+    if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
       cursor.classList.add('hover');
     }
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest(interactiveSelector)) {
+    if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
       cursor.classList.remove('hover');
     }
   });
