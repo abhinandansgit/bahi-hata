@@ -6,10 +6,10 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 import urllib.parse
 from .models import (
-    Cart, CartItem, ComboCartItem, MagazineCartItem,
-    Order, OrderItem, ComboOrderItem, MagazineOrderItem
+    Cart, CartItem, ComboCartItem, MagazineCartItem, BookmarkCartItem,
+    Order, OrderItem, ComboOrderItem, MagazineOrderItem, BookmarkOrderItem
 )
-from store.models import Book, BookCombo, Offer, MagazineEdition
+from store.models import Book, BookCombo, Offer, MagazineEdition, Bookmark
 
 
 # ─────────────────────────────────────────────────
@@ -88,6 +88,26 @@ def _serialize_cart(cart):
             'remove_url': f"/orders/cart/remove-magazine/{mi.id}/",
         })
 
+    bookmark_items = []
+    bm_list = list(cart.bookmark_items.select_related('bookmark').all())
+    for bmi in bm_list:
+        subtotal = float(bmi.total_price)
+        cart_subtotal += subtotal
+        total_qty += bmi.quantity
+        bookmark_items.append({
+            'id': bmi.id,
+            'type': 'bookmark',
+            'title': bmi.bookmark.title,
+            'price': float(bmi.bookmark.final_price),
+            'original_price': float(bmi.bookmark.price),
+            'quantity': bmi.quantity,
+            'subtotal': subtotal,
+            'cover_image_url': bmi.bookmark.cover_image or '',
+            'stock': bmi.bookmark.stock,
+            'update_url': f"/orders/cart/update-bookmark/{bmi.id}/",
+            'remove_url': f"/orders/cart/remove-bookmark/{bmi.id}/",
+        })
+
     cart_subtotal = round(cart_subtotal, 2)
     free_shipping_threshold = 799.0
     has_free_shipping = cart_subtotal >= free_shipping_threshold
@@ -99,6 +119,7 @@ def _serialize_cart(cart):
         'items': items,
         'combo_items': combo_items,
         'magazine_items': magazine_items,
+        'bookmark_items': bookmark_items,
         'total_items_count': total_qty,
         'subtotal': cart_subtotal,
         'free_shipping_threshold': free_shipping_threshold,
@@ -117,6 +138,7 @@ def cart_data_api(request):
                 'items': [],
                 'combo_items': [],
                 'magazine_items': [],
+                'bookmark_items': [],
                 'total_items_count': 0,
                 'subtotal': 0.00
             }
@@ -242,12 +264,52 @@ def add_magazine_to_cart(request, edition_id):
     return redirect('orders:view_cart')
 
 
+def add_bookmark_to_cart(request, bookmark_id):
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+
+    if not request.user.is_authenticated:
+        if is_ajax:
+            login_url = f"/accounts/login/?next={urllib.parse.quote(request.META.get('HTTP_REFERER', '/'))}"
+            return JsonResponse({'success': False, 'login_required': True, 'login_url': login_url}, status=401)
+        return redirect(f"/accounts/login/?next={request.path}")
+
+    bookmark = get_object_or_404(Bookmark, id=bookmark_id, is_active=True)
+    if not bookmark.in_stock:
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': f'Sorry, "{bookmark.title}" is out of stock.'}, status=400)
+        messages.error(request, f'Sorry, "{bookmark.title}" is currently out of stock.')
+        return redirect('store:bookmarks')
+
+    cart = _get_cart(request.user)
+    item, created = BookmarkCartItem.objects.get_or_create(cart=cart, bookmark=bookmark)
+    if not created:
+        if item.quantity < bookmark.stock:
+            item.quantity += 1
+            item.save()
+            msg = f'Updated "{bookmark.title}" quantity in shelf.'
+        else:
+            msg = f'Maximum stock available reached for this bookmark.'
+    else:
+        msg = f'"{bookmark.title}" added to your shelf!'
+
+    if is_ajax:
+        return JsonResponse({
+            'success': True,
+            'message': msg,
+            'cart': _serialize_cart(cart)
+        })
+
+    messages.success(request, msg)
+    return redirect('orders:view_cart')
+
+
 @login_required(login_url='accounts:login')
 def view_cart(request):
     cart = _get_cart(request.user)
     items = cart.items.select_related('book', 'book__category').all()
     combo_items = cart.combo_items.select_related('combo').prefetch_related('combo__books').all()
     magazine_items = cart.magazine_items.select_related('edition').all()
+    bookmark_items = cart.bookmark_items.select_related('bookmark').all()
 
     total = cart.total_price
 
@@ -282,6 +344,7 @@ def view_cart(request):
         'items': items,
         'combo_items': combo_items,
         'magazine_items': magazine_items,
+        'bookmark_items': bookmark_items,
         'total': total,
         'coupon_discount': round(coupon_discount, 2),
         'shipping_charge': shipping_charge,
@@ -415,6 +478,49 @@ def remove_magazine_from_cart(request, item_id):
     return redirect('orders:view_cart')
 
 
+@login_required(login_url='accounts:login')
+def update_bookmark_cart_item(request, item_id):
+    item = get_object_or_404(BookmarkCartItem.objects.select_related('bookmark'), id=item_id, cart__user=request.user)
+    action = request.GET.get('action', '')
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+
+    if action == 'increase':
+        if item.quantity < item.bookmark.stock:
+            item.quantity += 1
+            item.save(update_fields=['quantity'])
+        else:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Maximum stock reached for "{item.bookmark.title}".',
+                    'cart': _serialize_cart(item.cart)
+                }, status=400)
+            messages.warning(request, f'Maximum stock reached for "{item.bookmark.title}".')
+    elif action == 'decrease':
+        if item.quantity > 1:
+            item.quantity -= 1
+            item.save(update_fields=['quantity'])
+        else:
+            item.delete()
+
+    if is_ajax:
+        cart = _get_cart(request.user)
+        return JsonResponse({'success': True, 'cart': _serialize_cart(cart)})
+
+    return redirect('orders:view_cart')
+
+
+@login_required(login_url='accounts:login')
+def remove_bookmark_from_cart(request, item_id):
+    item = get_object_or_404(BookmarkCartItem, id=item_id, cart__user=request.user)
+    item.delete()
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+    if is_ajax:
+        cart = _get_cart(request.user)
+        return JsonResponse({'success': True, 'message': 'Bookmark removed from shelf', 'cart': _serialize_cart(cart)})
+    return redirect('orders:view_cart')
+
+
 # ─────────────────────────────────────────────────
 # CHECKOUT
 # ─────────────────────────────────────────────────
@@ -425,8 +531,9 @@ def checkout(request):
     items = cart.items.select_related('book').all()
     combo_items = cart.combo_items.select_related('combo').prefetch_related('combo__books').all()
     magazine_items = cart.magazine_items.select_related('edition').all()
+    bookmark_items = cart.bookmark_items.select_related('bookmark').all()
 
-    if not items.exists() and not combo_items.exists() and not magazine_items.exists():
+    if not items.exists() and not combo_items.exists() and not magazine_items.exists() and not bookmark_items.exists():
         messages.info(request, 'Your cart is empty.')
         return redirect('orders:view_cart')
 
@@ -453,6 +560,15 @@ def checkout(request):
             messages.error(
                 request,
                 f'"{mi.edition.title}" only has {mi.edition.stock} copies left. '
+                'Please update your cart.'
+            )
+            return redirect('orders:view_cart')
+
+    for bmi in bookmark_items:
+        if bmi.bookmark.stock < bmi.quantity:
+            messages.error(
+                request,
+                f'"{bmi.bookmark.title}" only has {bmi.bookmark.stock} units left. '
                 'Please update your cart.'
             )
             return redirect('orders:view_cart')
@@ -562,10 +678,28 @@ def checkout(request):
             mi.edition.stock = max(0, mi.edition.stock - mi.quantity)
             mi.edition.save(update_fields=['stock'])
 
+        # Bookmark items
+        for bmi in bookmark_items:
+            BookmarkOrderItem.objects.create(
+                order=order,
+                bookmark=bmi.bookmark,
+                price=bmi.bookmark.final_price,
+                quantity=bmi.quantity,
+                title_snapshot=bmi.bookmark.title,
+            )
+            wa_lines.append(
+                f"- 🔖 BOOKMARK × {bmi.quantity}: {bmi.bookmark.title} @ ₹{bmi.bookmark.final_price} "
+                f"= ₹{bmi.total_price}"
+            )
+            # Deduct stock
+            bmi.bookmark.stock = max(0, bmi.bookmark.stock - bmi.quantity)
+            bmi.bookmark.save(update_fields=['stock'])
+
         # Clear cart
         cart.items.all().delete()
         cart.combo_items.all().delete()
         cart.magazine_items.all().delete()
+        cart.bookmark_items.all().delete()
         request.session.pop('coupon_code', None)
 
         # Build WhatsApp message
@@ -598,6 +732,7 @@ def checkout(request):
         'items': items,
         'combo_items': combo_items,
         'magazine_items': magazine_items,
+        'bookmark_items': bookmark_items,
         'subtotal': subtotal,
         'coupon_discount': round(coupon_discount, 2),
         'shipping_charge': shipping_charge,

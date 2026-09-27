@@ -653,6 +653,10 @@
                class="sidebar-link {% if 'magazine' in request.resolver_match.url_name %}active{% endif %}">
                 <span class="nav-icon">📖</span> Abhilasha Magazine
             </a>
+            <a href="{% url 'admin_panel:manage_bookmarks' %}" 
+               class="sidebar-link {% if 'bookmark' in request.resolver_match.url_name %}active{% endif %}">
+                <span class="nav-icon">🔖</span> Bookmarks
+            </a>
             <a href="{% url 'admin_panel:manage_categories' %}" 
                class="sidebar-link {% if request.resolver_match.url_name == 'manage_categories' %}active{% endif %}">
                 <span class="nav-icon">🏷️</span> Categories & Moods

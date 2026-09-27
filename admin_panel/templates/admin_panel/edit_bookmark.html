@@ -1,0 +1,145 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Edit {{ bookmark.title }}{% endblock %}
+{% block header_title %}Edit Bookmark SKU{% endblock %}
+{% block header_subtitle %}Modify details, pricing, stock, and images{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'admin_panel:manage_bookmarks' %}" style="color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 600;">← Back to Bookmarks</a>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--ivory-warm);">
+                🏷️ Bookmark Details
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label" for="title">Bookmark Title / Name *</label>
+                <input type="text" name="title" id="title" class="form-control" value="{{ bookmark.title }}" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label" for="description">Description & Features</label>
+                <textarea name="description" id="description" class="form-control" rows="4">{{ bookmark.description }}</textarea>
+            </div>
+
+            <div class="form-row-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label class="form-label" for="price">MRP Price (₹) *</label>
+                    <input type="number" step="1" min="1" name="price" id="price" class="form-control" value="{{ bookmark.price }}" required>
+                    <span style="font-size: 11px; color: var(--ink-softer);">Range: ₹35 – ₹99</span>
+                </div>
+                <div>
+                    <label class="form-label" for="discount_percentage">Discount (%)</label>
+                    <input type="number" min="0" max="100" name="discount_percentage" id="discount_percentage" class="form-control" value="{{ bookmark.discount_percentage }}">
+                </div>
+                <div>
+                    <label class="form-label" for="stock">Stock Quantity *</label>
+                    <input type="number" min="0" name="stock" id="stock" class="form-control" value="{{ bookmark.stock }}" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT IMAGES WITH DIRECT SUPABASE UPLOAD -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--ivory-warm);">
+                🖼️ Bookmark Images (Supabase Storage · WebP Optimized)
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label class="form-label" style="margin: 0;">1. Primary Image URL *</label>
+                    <label class="btn-upload-file">
+                        ☁️ Upload File
+                        <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'edit_cover', 'edit_cover_preview', 'edit_cover_ph', 'bookmarks', 'main')">
+                    </label>
+                </div>
+                <input type="url" name="cover_image_url" id="edit_cover" class="form-control" value="{{ bookmark.cover_image_url }}" oninput="previewUrl(this.value, 'edit_cover_preview', 'edit_cover_ph')">
+                <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                    <img id="edit_cover_preview" src="{{ bookmark.cover_image }}" alt="Cover Preview" style="{% if bookmark.cover_image %}display:inline-block;{% else %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                    <span id="edit_cover_ph" style="font-size: 11px; color: var(--ink-softer); {% if bookmark.cover_image %}display:none;{% endif %}">No image selected</span>
+                </div>
+            </div>
+
+            <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">2. Image 2 (Detail View)</label>
+                        <label class="btn-upload-file">
+                            ☁️ Upload File
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'edit_img2', 'edit_img2_preview', 'edit_img2_ph', 'bookmarks', 'img2')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_2_url" id="edit_img2" class="form-control" value="{{ bookmark.image_2_url }}" oninput="previewUrl(this.value, 'edit_img2_preview', 'edit_img2_ph')">
+                    <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                        <img id="edit_img2_preview" src="{{ bookmark.image_2_url }}" alt="Image 2" style="{% if bookmark.image_2_url %}display:inline-block;{% else %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="edit_img2_ph" style="font-size: 11px; color: var(--ink-softer); {% if bookmark.image_2_url %}display:none;{% endif %}">No image 2</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin: 0;">3. Image 3 (In Book View)</label>
+                        <label class="btn-upload-file">
+                            ☁️ Upload File
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadImageToSupabase(this, 'edit_img3', 'edit_img3_preview', 'edit_img3_ph', 'bookmarks', 'img3')">
+                        </label>
+                    </div>
+                    <input type="url" name="image_3_url" id="edit_img3" class="form-control" value="{{ bookmark.image_3_url }}" oninput="previewUrl(this.value, 'edit_img3_preview', 'edit_img3_ph')">
+                    <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
+                        <img id="edit_img3_preview" src="{{ bookmark.image_3_url }}" alt="Image 3" style="{% if bookmark.image_3_url %}display:inline-block;{% else %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="edit_img3_ph" style="font-size: 11px; color: var(--ink-softer); {% if bookmark.image_3_url %}display:none;{% endif %}">No image 3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISIBILITY & STATUS -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 14px;">
+                ⚙️ Status & Visibility
+            </div>
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; border: 1.5px solid var(--beige-warm); border-radius: 8px; flex: 1;">
+                    <input type="checkbox" name="is_active" {% if bookmark.is_active %}checked{% endif %}>
+                    <div>
+                        <div style="font-weight: 600; font-size: 13px;">👁️ Publicly Active</div>
+                        <div style="font-size: 11px; color: var(--ink-softer);">Display in customer store</div>
+                    </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; border: 1.5px solid var(--beige-warm); border-radius: 8px; flex: 1;">
+                    <input type="checkbox" name="is_featured" {% if bookmark.is_featured %}checked{% endif %}>
+                    <div>
+                        <div style="font-weight: 600; font-size: 13px;">⭐ Featured Bookmark</div>
+                        <div style="font-size: 11px; color: var(--ink-softer);">Highlight on homepage & bookmark banner</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-topbar btn-gold" style="width: 100%; padding: 16px; font-size: 16px; justify-content: center; cursor: pointer; border: none;">
+            💾 Save Bookmark Changes
+        </button>
+    </form>
+</div>
+
+<script>
+function previewUrl(url, imgId, phId) {
+    const preview = document.getElementById(imgId);
+    const ph = document.getElementById(phId);
+    if (url && url.trim() !== '') {
+        preview.src = url;
+        preview.style.display = 'inline-block';
+        if (ph) ph.style.display = 'none';
+    } else {
+        preview.src = '';
+        preview.style.display = 'none';
+        if (ph) ph.style.display = 'inline';
+    }
+}
+</script>
+{% endblock %}

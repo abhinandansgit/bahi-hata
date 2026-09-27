@@ -243,6 +243,37 @@ function renderShelfDrawer(cart) {
     });
   }
 
+  // 4. Bookmark SKUs
+  if (cart.bookmark_items && cart.bookmark_items.length > 0) {
+    cart.bookmark_items.forEach(bmi => {
+      html += `
+        <div class="shelf-item-card bookmark-item" data-item-id="${bmi.id}" data-item-type="bookmark">
+          ${bmi.cover_image_url ? 
+            `<img src="${bmi.cover_image_url}" alt="${bmi.title}" class="shelf-item-img">` : 
+            `<div class="shelf-item-img-placeholder">🔖</div>`
+          }
+          <div class="shelf-item-info">
+            <div>
+              <div class="shelf-item-tag" style="color: var(--gold);">🔖 Bookmark</div>
+              <h4 class="shelf-item-title" title="${bmi.title}">${bmi.title}</h4>
+            </div>
+            <div class="shelf-item-bottom">
+              <div class="shelf-item-price">₹${bmi.price}</div>
+              <div class="shelf-qty-stepper">
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${bmi.update_url}?action=decrease', this)">−</button>
+                <span class="shelf-qty-val">${bmi.quantity}</span>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${bmi.update_url}?action=increase', this)">+</button>
+              </div>
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${bmi.remove_url}', this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
   container.innerHTML = html;
 }
 

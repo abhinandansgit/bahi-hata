@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Handcrafted Bookmarks | Bahi Hata Collection{% endblock %}
+
+{% block content %}
+<section style="background: var(--ivory); padding: 80px 0; min-height: 75vh;">
+    <div class="container">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 50px;">
+            <div class="section-eyebrow">🔖 Unique Accessories</div>
+            <h1 class="section-title">Handcrafted <em>Bookmarks</em></h1>
+            <p class="section-desc" style="max-width: 550px; margin: 0 auto;">
+                Artisan Odia calligraphy & aesthetic reading bookmarks. Premium quality starting from ₹35 – ₹99.
+            </p>
+        </div>
+
+        {% if bookmarks %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px;">
+            {% for bm in bookmarks %}
+            <div class="combo-deal-card reveal" style="display:flex; flex-direction:column; height:100%; overflow:hidden; border-radius:16px; background:#fff; border:1px solid rgba(201,150,58,0.15); box-shadow:0 6px 20px rgba(0,0,0,0.04); transition: transform 0.3s ease;">
+                <!-- Cover Image -->
+                <div style="position:relative; width:100%; height:280px; background:#f7f4ef; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                    {% if bm.cover_image %}
+                    <img src="{{ bm.cover_image }}" alt="{{ bm.title }}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    {% else %}
+                    <div style="font-size: 64px;">🔖</div>
+                    {% endif %}
+
+                    {% if bm.discount_percentage > 0 %}
+                    <div class="combo-savings-ribbon" style="position:absolute; top:12px; left:12px; background:var(--gold); color:#fff; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">
+                        {{ bm.discount_percentage }}% OFF
+                    </div>
+                    {% endif %}
+
+                    {% if not bm.in_stock %}
+                    <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(255,255,255,0.75); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+                        <span style="background:#c53030; color:#fff; font-weight:700; font-size:12px; padding:6px 14px; border-radius:20px; text-transform:uppercase; letter-spacing:1px;">Out of Stock</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Bookmark Content -->
+                <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
+                    <h3 style="font-family:'Outfit', sans-serif; font-size:18px; font-weight:700; color:var(--ink); margin-bottom:6px; line-height:1.3;">{{ bm.title }}</h3>
+                    {% if bm.description %}
+                    <p style="font-size:13px; color:var(--ink-soft); margin-bottom:16px; line-height:1.5; flex:1;">{{ bm.description|truncatewords:15 }}</p>
+                    {% else %}
+                    <div style="flex:1;"></div>
+                    {% endif %}
+
+                    <!-- Stock indicator (Customer view rule: No numbers displayed except "Only 1 Left") -->
+                    <div style="margin-bottom:14px;">
+                        {% if bm.stock == 1 %}
+                            <span style="display:inline-block; font-size:11px; font-weight:700; color:#c53030; background:#fff5f5; padding:4px 10px; border-radius:12px; border:1px solid #feb2b2;">
+                                ⚠️ Only 1 Left
+                            </span>
+                        {% elif bm.stock > 1 %}
+                            <span style="display:inline-block; font-size:11px; font-weight:600; color:#276749; background:#f0fff4; padding:4px 10px; border-radius:12px; border:1px solid #9ae6b4;">
+                                ✓ In Stock
+                            </span>
+                        {% else %}
+                            <span style="display:inline-block; font-size:11px; font-weight:700; color:#742a2a; background:#fff5f5; padding:4px 10px; border-radius:12px; border:1px solid #feb2b2;">
+                                Out of Stock
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Price & Action -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:auto; padding-top:12px; border-top:1px solid rgba(0,0,0,0.06);">
+                        <div>
+                            <div style="font-size:20px; font-weight:800; color:var(--ink); font-family:'Outfit', sans-serif;">
+                                ₹{{ bm.final_price }}
+                            </div>
+                            {% if bm.discount_percentage > 0 %}
+                            <div style="font-size:11px; color:#888; text-decoration:line-through;">
+                                ₹{{ bm.price }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if bm.in_stock %}
+                        <a href="{% url 'orders:add_bookmark_to_cart' bm.id %}" class="btn-combo-add" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 18px; font-size:13px; font-weight:700; border-radius:30px; text-decoration:none; background:var(--gold); color:#fff; transition:all 0.2s ease;">
+                            🛒 Add to Cart
+                        </a>
+                        {% else %}
+                        <button class="btn-combo-add" disabled style="padding:10px 18px; font-size:13px; font-weight:700; border-radius:30px; background:#e2e8f0; color:#a0aec0; border:none; cursor:not-allowed;">
+                            Sold Out
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 80px 20px; background: #fff; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+            <div style="font-size: 54px; margin-bottom: 16px;">🔖</div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">New Bookmarks Arriving Soon!</h2>
+            <p style="color: var(--ink-soft); font-size: 14px; margin-bottom: 24px;">Our handcrafted bookmark collection is being restocked. Check back shortly!</p>
+            <a href="{% url 'store:book_list' %}" class="btn-primary" style="display: inline-block; padding: 12px 28px; text-decoration: none; border-radius: 30px;">
+                Browse Books
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

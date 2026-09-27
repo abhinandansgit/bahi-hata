@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from store.models import Book, BookCombo, Offer, MagazineEdition
+from store.models import Book, BookCombo, Offer, MagazineEdition, Bookmark
 
 
 class Cart(models.Model):
@@ -24,15 +24,20 @@ class Cart(models.Model):
         return sum(item.total_price for item in self.magazine_items.all())
 
     @property
+    def bookmark_items_total(self):
+        return sum(item.total_price for item in self.bookmark_items.all())
+
+    @property
     def total_price(self):
-        return round(self.book_items_total + self.combo_items_total + self.magazine_items_total, 2)
+        return round(self.book_items_total + self.combo_items_total + self.magazine_items_total + self.bookmark_items_total, 2)
 
     @property
     def item_count(self):
         book_qty = sum(i.quantity for i in self.items.all())
         combo_qty = sum(i.quantity for i in self.combo_items.all())
         mag_qty = sum(i.quantity for i in self.magazine_items.all())
-        return book_qty + combo_qty + mag_qty
+        bookmark_qty = sum(i.quantity for i in self.bookmark_items.all())
+        return book_qty + combo_qty + mag_qty + bookmark_qty
 
 
 class CartItem(models.Model):
@@ -83,6 +88,23 @@ class MagazineCartItem(models.Model):
 
     class Meta:
         unique_together = ('cart', 'edition')
+
+
+class BookmarkCartItem(models.Model):
+    """A Bookmark SKU added to a user's cart."""
+    cart = models.ForeignKey(Cart, related_name='bookmark_items', on_delete=models.CASCADE)
+    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} × Bookmark: {self.bookmark.title}"
+
+    @property
+    def total_price(self):
+        return round(self.bookmark.final_price * self.quantity, 2)
+
+    class Meta:
+        unique_together = ('cart', 'bookmark')
 
 
 class Order(models.Model):
@@ -177,6 +199,27 @@ class MagazineOrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} × Magazine: {self.title_snapshot} (Order #{self.order.id})"
+
+    @property
+    def total_price(self):
+        return round(self.price * self.quantity, 2)
+
+
+class BookmarkOrderItem(models.Model):
+    """A Bookmark line-item in an order."""
+    order = models.ForeignKey(Order, related_name='bookmark_items', on_delete=models.CASCADE)
+    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    title_snapshot = models.CharField(max_length=255, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.title_snapshot and self.bookmark_id:
+            self.title_snapshot = self.bookmark.title
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.quantity} × Bookmark: {self.title_snapshot} (Order #{self.order.id})"
 
     @property
     def total_price(self):

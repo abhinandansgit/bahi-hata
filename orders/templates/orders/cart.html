@@ -19,7 +19,7 @@
         {% endfor %}
         {% endif %}
 
-        {% if items or combo_items or magazine_items %}
+        {% if items or combo_items or magazine_items or bookmark_items %}
         <div class="cart-layout">
             <!-- Items -->
             <div class="reveal">
@@ -87,6 +87,40 @@
 
                             <div class="cart-item-subtotal">₹{{ mi.total_price }}</div>
                             <a href="{% url 'orders:remove_magazine_from_cart' mi.id %}" class="cart-remove" title="Remove magazine">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Bookmark Items -->
+                {% for bmi in bookmark_items %}
+                <div class="cart-item-card" data-cart-item-id="{{ bmi.id }}" data-unit-price="{{ bmi.bookmark.final_price }}" data-stock="{{ bmi.bookmark.stock }}" style="border-left: 3px solid var(--gold);">
+                    <div class="cart-item-img">
+                        {% if bmi.bookmark.cover_image %}
+                        <img src="{{ bmi.bookmark.cover_image }}" alt="{{ bmi.bookmark.title }}">
+                        {% else %}
+                        <span style="font-size: 36px;">🔖</span>
+                        {% endif %}
+                    </div>
+                    <div class="cart-item-body">
+                        <div class="cart-item-cat" style="color: var(--gold);">🔖 Bookmark</div>
+                        <h3 class="cart-item-title">
+                            <a href="{% url 'store:bookmarks' %}">{{ bmi.bookmark.title }}</a>
+                        </h3>
+
+                        <div class="cart-item-footer">
+                            <div class="cart-item-price">₹{{ bmi.bookmark.final_price }}</div>
+
+                            <div class="qty-ctrl">
+                                <a href="{% url 'orders:update_bookmark_cart_item' bmi.id %}?action=decrease" class="qty-btn">−</a>
+                                <span class="qty-val">{{ bmi.quantity }}</span>
+                                <a href="{% url 'orders:update_bookmark_cart_item' bmi.id %}?action=increase" class="qty-btn">+</a>
+                            </div>
+
+                            <div class="cart-item-subtotal">₹{{ bmi.total_price }}</div>
+                            <a href="{% url 'orders:remove_bookmark_from_cart' bmi.id %}" class="cart-remove" title="Remove bookmark">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
                             </a>
                         </div>

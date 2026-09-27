@@ -1,0 +1,150 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Manage Bookmarks{% endblock %}
+{% block header_title %}Bookmark SKUs{% endblock %}
+{% block header_subtitle %}{{ total_count }} bookmark SKU(s) in catalog{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card" style="margin-bottom: 28px;">
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+        <div class="table-toolbar-left">
+            <form method="GET" class="search-bar" id="filter-form">
+                <input type="text" name="q" value="{{ query }}" placeholder="🔍 Search bookmark title..." class="search-input">
+                <button type="submit" class="btn-sm btn-dark">Search</button>
+                {% if query %}
+                <a href="{% url 'admin_panel:manage_bookmarks' %}" class="btn-sm btn-danger" style="text-decoration:none;">✕ Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="table-toolbar-right">
+            <a href="{% url 'admin_panel:add_bookmark' %}" class="btn-topbar btn-gold" style="text-decoration:none;">+ Add New Bookmark</a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 56px;">Image</th>
+                    <th>Bookmark Title & SKU</th>
+                    <th>Price</th>
+                    <th>Stock (Inventory)</th>
+                    <th>Status</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bm in bookmarks %}
+                <tr id="bookmark-row-{{ bm.id }}">
+                    <td>
+                        {% if bm.cover_image %}
+                            <img src="{{ bm.cover_image }}" class="book-cover-thumb" alt="{{ bm.title }}" style="object-fit: cover;">
+                        {% else %}
+                            <div class="book-cover-placeholder">🔖</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--ink); font-size: 14px;">{{ bm.title }}</div>
+                        <div style="font-size: 12px; color: var(--ink-softer); margin-top: 3px;">
+                            {{ bm.description|default:"No description"|truncatewords:8 }}
+                        </div>
+                        {% if bm.is_featured %}
+                        <span class="badge badge-gold" style="margin-top: 5px; font-size: 9px;">⭐ Featured</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: var(--ink);">₹{{ bm.final_price }}</div>
+                        {% if bm.discount_percentage > 0 %}
+                        <div style="font-size: 11px; color: var(--forest);"><span style="text-decoration:line-through; color:#888;">₹{{ bm.price }}</span> {{ bm.discount_percentage }}% OFF</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="number" value="{{ bm.stock }}" min="0" 
+                                   style="width: 70px; padding: 4px 8px; border: 1px solid var(--beige-warm); border-radius: 6px; font-weight:700;"
+                                   onchange="quickUpdateBookmark({{ bm.id }}, 'stock', this.value)">
+                            <span class="badge {% if bm.in_stock %}badge-success{% else %}badge-danger{% endif %}" id="stock-badge-{{ bm.id }}">
+                                {% if bm.stock == 0 %}Out of Stock{% elif bm.stock == 1 %}Only 1 Left{% else %}In Stock ({{ bm.stock }}){% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="toggleActive({{ bm.id }}, {% if bm.is_active %}false{% else %}true{% endif %})" 
+                                class="btn-sm {% if bm.is_active %}btn-success{% else %}btn-secondary{% endif %}" style="padding: 4px 10px; font-size: 11px;">
+                            {% if bm.is_active %}Active{% else %}Hidden{% endif %}
+                        </button>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <a href="{% url 'admin_panel:edit_bookmark' bm.id %}" class="btn-sm btn-edit" title="Edit details">✏️ Edit</a>
+                            <form action="{% url 'admin_panel:delete_bookmark' bm.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Delete bookmark {{ bm.title|escapejs }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-sm btn-danger" title="Delete">🗑</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 60px; color: var(--ink-softer);">
+                        <div style="font-size: 40px; margin-bottom: 12px;">🔖</div>
+                        <div style="font-size: 16px; font-weight: 600;">No bookmarks found</div>
+                        <div style="font-size: 13px; margin-top: 6px;">Add bookmark products to display in the customer store.</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function quickUpdateBookmark(bookmarkId, field, value) {
+    fetch("{% url 'admin_panel:quick_update_bookmark' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ bookmark_id: bookmarkId, field: field, value: value })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'ok') {
+            const badge = document.getElementById(`stock-badge-${bookmarkId}`);
+            if(badge) {
+                if(data.new_value == 0) {
+                    badge.className = 'badge badge-danger';
+                    badge.innerText = 'Out of Stock';
+                } else if(data.new_value == 1) {
+                    badge.className = 'badge badge-success';
+                    badge.innerText = 'Only 1 Left';
+                } else {
+                    badge.className = 'badge badge-success';
+                    badge.innerText = `In Stock (${data.new_value})`;
+                }
+            }
+        }
+    });
+}
+
+function toggleActive(bookmarkId, newStatus) {
+    fetch("{% url 'admin_panel:quick_update_bookmark' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ bookmark_id: bookmarkId, field: 'is_active', value: newStatus })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'ok') {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

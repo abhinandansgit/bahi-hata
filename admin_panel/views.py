@@ -4,7 +4,7 @@ from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
-from store.models import Book, Category, Mood, BookReview, BookCombo, Offer, MagazineEdition, MagazineSubmission
+from store.models import Book, Category, Mood, BookReview, BookCombo, Offer, MagazineEdition, MagazineSubmission, Bookmark
 from orders.models import Order, OrderItem
 import json
 
@@ -763,5 +763,128 @@ def upload_image_view(request):
             return JsonResponse(result, status=500)
             
     return JsonResponse({'success': False, 'error': 'POST method required.'}, status=405)
+
+
+# ─────────────────────────────────────────────────
+# BOOKMARK MANAGEMENT
+# ─────────────────────────────────────────────────
+
+@staff_member_required
+def manage_bookmarks(request):
+    """List and manage bookmark SKUs in admin panel."""
+    q = request.GET.get('q', '').strip()
+    bookmarks = Bookmark.objects.all()
+    if q:
+        bookmarks = bookmarks.filter(Q(title__icontains=q) | Q(description__icontains=q))
+
+    context = {
+        'bookmarks': bookmarks,
+        'query': q,
+        'total_count': bookmarks.count(),
+        'in_stock_count': bookmarks.filter(stock__gt=0).count(),
+        'out_of_stock_count': bookmarks.filter(stock=0).count(),
+    }
+    return render(request, 'admin_panel/bookmarks.html', context)
+
+
+@staff_member_required
+def add_bookmark(request):
+    """Add a new Bookmark SKU."""
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        price = request.POST.get('price', 49.00)
+        discount_percentage = request.POST.get('discount_percentage', 0)
+        stock = request.POST.get('stock', 10)
+        cover_image_url = request.POST.get('cover_image_url', '').strip()
+        image_2_url = request.POST.get('image_2_url', '').strip()
+        image_3_url = request.POST.get('image_3_url', '').strip()
+        is_featured = request.POST.get('is_featured') == 'on'
+        is_active = request.POST.get('is_active') == 'on'
+
+        if not title or not price:
+            messages.error(request, 'Please provide title and price for the bookmark.')
+            return redirect('admin_panel:add_bookmark')
+
+        bookmark = Bookmark.objects.create(
+            title=title,
+            description=description,
+            price=price,
+            discount_percentage=discount_percentage,
+            stock=stock,
+            cover_image_url=cover_image_url,
+            image_2_url=image_2_url,
+            image_3_url=image_3_url,
+            is_featured=is_featured,
+            is_active=is_active,
+        )
+
+        messages.success(request, f'🔖 Bookmark SKU "{bookmark.title}" created successfully!')
+        return redirect('admin_panel:manage_bookmarks')
+
+    return render(request, 'admin_panel/add_bookmark.html')
+
+
+@staff_member_required
+def edit_bookmark(request, bookmark_id):
+    """Edit an existing Bookmark SKU."""
+    bookmark = get_object_or_404(Bookmark, id=bookmark_id)
+    if request.method == 'POST':
+        bookmark.title = request.POST.get('title', '').strip()
+        bookmark.description = request.POST.get('description', '').strip()
+        bookmark.price = request.POST.get('price', bookmark.price)
+        bookmark.discount_percentage = request.POST.get('discount_percentage', bookmark.discount_percentage)
+        bookmark.stock = request.POST.get('stock', bookmark.stock)
+        bookmark.cover_image_url = request.POST.get('cover_image_url', '').strip()
+        bookmark.image_2_url = request.POST.get('image_2_url', '').strip()
+        bookmark.image_3_url = request.POST.get('image_3_url', '').strip()
+        bookmark.is_featured = request.POST.get('is_featured') == 'on'
+        bookmark.is_active = request.POST.get('is_active') == 'on'
+        bookmark.save()
+
+        messages.success(request, f'🔖 Bookmark "{bookmark.title}" updated successfully!')
+        return redirect('admin_panel:manage_bookmarks')
+
+    context = {'bookmark': bookmark}
+    return render(request, 'admin_panel/edit_bookmark.html', context)
+
+
+@staff_member_required
+def delete_bookmark(request, bookmark_id):
+    """Delete a Bookmark SKU."""
+    bookmark = get_object_or_404(Bookmark, id=bookmark_id)
+    if request.method == 'POST':
+        title = bookmark.title
+        bookmark.delete()
+        messages.success(request, f'🗑️ Bookmark "{title}" deleted.')
+    return redirect('admin_panel:manage_bookmarks')
+
+
+@staff_member_required
+def quick_update_bookmark(request):
+    """AJAX quick update for Bookmark stock or price or active state."""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            bookmark_id = data.get('bookmark_id')
+            field = data.get('field')
+            val = data.get('value')
+
+            bookmark = get_object_or_404(Bookmark, id=bookmark_id)
+            if field == 'stock':
+                bookmark.stock = max(0, int(val))
+                bookmark.save(update_fields=['stock'])
+                return JsonResponse({'status': 'ok', 'new_value': bookmark.stock, 'in_stock': bookmark.in_stock})
+            elif field == 'price':
+                bookmark.price = max(0, float(val))
+                bookmark.save(update_fields=['price'])
+                return JsonResponse({'status': 'ok', 'new_value': str(bookmark.final_price)})
+            elif field == 'is_active':
+                bookmark.is_active = bool(val)
+                bookmark.save(update_fields=['is_active'])
+                return JsonResponse({'status': 'ok', 'is_active': bookmark.is_active})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=405)
 
 

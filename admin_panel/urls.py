@@ -43,6 +43,13 @@ urlpatterns = [
     path('magazine/submissions/<int:submission_id>/update/', views.update_submission_status, name='update_submission_status'),
     path('magazine/submissions/<int:submission_id>/delete/', views.delete_magazine_submission, name='delete_magazine_submission'),
 
+    # Bookmarks
+    path('bookmarks/', views.manage_bookmarks, name='manage_bookmarks'),
+    path('bookmarks/add/', views.add_bookmark, name='add_bookmark'),
+    path('bookmarks/<int:bookmark_id>/edit/', views.edit_bookmark, name='edit_bookmark'),
+    path('bookmarks/<int:bookmark_id>/delete/', views.delete_bookmark, name='delete_bookmark'),
+    path('bookmarks/quick-update/', views.quick_update_bookmark, name='quick_update_bookmark'),
+
     # Image Upload to Supabase Storage
     path('upload-image/', views.upload_image_view, name='upload_image'),
 ]

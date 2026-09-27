@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Book, Category, Mood, BookReview, BookCombo, Offer
+from .models import Book, Category, Mood, BookReview, BookCombo, Offer, Bookmark
 
 
 def book_list(request):
@@ -13,6 +13,7 @@ def book_list(request):
     mood_slug = request.GET.get('mood', '').strip()
     is_heritage = request.GET.get('heritage', '').strip()
     language = request.GET.get('language', '').strip()
+    is_bestseller = request.GET.get('bestseller', '').strip()
 
     if search_query:
         from django.db.models import Q
@@ -30,6 +31,8 @@ def book_list(request):
         books = books.filter(is_odisha_heritage=True)
     if language:
         books = books.filter(language=language)
+    if is_bestseller == 'true':
+        books = books.filter(is_trending_in_odisha=True)
 
     books_list = books.distinct()
     suggested_books = None
@@ -48,9 +51,19 @@ def book_list(request):
         'current_mood': mood_slug,
         'current_heritage': is_heritage == 'true',
         'current_language': language,
+        'current_bestseller': is_bestseller == 'true',
         'total_count': books_list.count(),
     }
     return render(request, 'store/book_list.html', context)
+
+
+def bookmarks_list(request):
+    bookmarks = Bookmark.objects.filter(is_active=True)
+    context = {
+        'bookmarks': bookmarks,
+        'total_count': bookmarks.count(),
+    }
+    return render(request, 'store/bookmarks.html', context)
 
 
 def explore_hata(request):

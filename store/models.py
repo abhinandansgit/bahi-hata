@@ -463,7 +463,75 @@ class MagazineSubmission(models.Model):
     def __str__(self):
         return f"{self.title_of_work} by {self.author_name} ({self.get_language_display()})"
 
+class Bookmark(models.Model):
+    """
+    Artistic & Custom Reading Bookmarks (SKU range ~₹35 to ₹99).
+    Full admin price/image/stock/public display management.
+    """
+    title = models.CharField(max_length=255, help_text="e.g. Odia Heritage Wooden Bookmark, Golden Nib Bookmark")
+    slug = models.SlugField(unique=True, blank=True)
+    description = models.TextField(blank=True, help_text="Material, dimensions, theme, and craftsmanship details")
+    
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=49.00, help_text="Original Price (e.g. ₹35 - ₹99)")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    stock = models.PositiveIntegerField(default=50, help_text="Available inventory units")
+
+    cover_image_url = models.URLField(max_length=1024, blank=True, null=True, help_text="Primary Image (500x500)")
+    image_2_url = models.URLField(max_length=1024, blank=True, null=True, help_text="Secondary Image (500x500)")
+    image_3_url = models.URLField(max_length=1024, blank=True, null=True, help_text="Tertiary Image (500x500)")
+
+    is_featured = models.BooleanField(default=False, help_text="Highlight on store homepage / showcase")
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def cover_image(self):
+        return ImageURLWrapper(self.cover_image_url)
+
+    @property
+    def all_images(self):
+        imgs = []
+        if self.cover_image_url:
+            imgs.append(self.cover_image_url)
+        if self.image_2_url:
+            imgs.append(self.image_2_url)
+        if self.image_3_url:
+            imgs.append(self.image_3_url)
+        return imgs
+
+    @property
+    def has_multiple_images(self):
+        return len(self.all_images) > 1
+
+    @property
+    def final_price(self):
+        if self.discount_percentage > 0:
+            discount_amount = (self.price * self.discount_percentage) / 100
+            return round(self.price - discount_amount, 2)
+        return self.price
+
+    @property
+    def in_stock(self):
+        return self.stock > 0
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Bookmark.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.title} (₹{self.final_price})"
+
     class Meta:
-        ordering = ['-submitted_at']
-        verbose_name = "Magazine Submission"
-        verbose_name_plural = "Magazine Submissions"
+        ordering = ['-created_at']
+        verbose_name = "Bookmark"
+        verbose_name_plural = "Bookmarks"
+
