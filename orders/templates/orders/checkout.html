@@ -122,6 +122,23 @@
                         </div>
                         {% endfor %}
 
+                        {% for bmi in bookmark_items %}
+                        <div class="co-item-row" style="border-left: 3px solid var(--gold); padding-left: 8px;">
+                            <div class="co-item-img">
+                                {% if bmi.bookmark.cover_image_url %}
+                                <img src="{{ bmi.bookmark.cover_image_url }}" alt="{{ bmi.bookmark.title }}">
+                                {% else %}
+                                <span>🔖</span>
+                                {% endif %}
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="co-item-title">🔖 {{ bmi.bookmark.title }}</div>
+                                <div class="co-item-meta" style="color: var(--gold);">Bookmark SKU · (Qty: {{ bmi.quantity }})</div>
+                            </div>
+                            <div class="co-item-subtotal">₹{{ bmi.total_price }}</div>
+                        </div>
+                        {% endfor %}
+
                         {% for ci in combo_items %}
                         <div class="co-item-row combo-row">
                             <div class="co-item-img" style="background: var(--gold-pale); font-size: 20px; display: flex; align-items: center; justify-content: center;">🎁</div>

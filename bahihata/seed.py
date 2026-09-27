@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bahihata.settings')
 django.setup()
 
-from store.models import Category, Mood, Book, BookCombo, Offer, MagazineEdition, MagazineSubmission
+from store.models import Category, Mood, Book, BookCombo, Offer, MagazineEdition, MagazineSubmission, Bookmark
 from core.models import ReaderStory
 from accounts.models import User
 
@@ -180,6 +180,45 @@ def run():
         }
     )
     print("[+] Seeded Abhilasha Magazine Edition.")
+
+    # 6.5 Bookmarks
+    bookmarks_data = [
+        {
+            'title': 'Classic Odia Palm Leaf Calligraphy Bookmark',
+            'description': 'Handcrafted palm-leaf inspired bookmark with Odia literary quotes & gold tassel.',
+            'price': 35.00,
+            'stock': 10,
+            'is_featured': True,
+            'is_active': True,
+        },
+        {
+            'title': 'Handmade Tassel Brass Bookmark',
+            'description': 'Premium metallic bookmark featuring intricate Odisha temple heritage motifs.',
+            'price': 49.00,
+            'stock': 8,
+            'is_featured': True,
+            'is_active': True,
+        },
+        {
+            'title': 'Jagannath Culture Wooden Bookmark',
+            'description': 'Laser-engraved polished wooden bookmark celebrating Odia heritage.',
+            'price': 79.00,
+            'stock': 5,
+            'is_featured': True,
+            'is_active': True,
+        },
+        {
+            'title': 'Abhilasha Vintage Leatherette Bookmark',
+            'description': 'Collector edition leatherette bookmark with embossed Odia script.',
+            'price': 99.00,
+            'stock': 1,
+            'is_featured': True,
+            'is_active': True,
+        },
+    ]
+    for bm_data in bookmarks_data:
+        Bookmark.objects.get_or_create(title=bm_data['title'], defaults=bm_data)
+    print(f"[+] Seeded {len(bookmarks_data)} Bookmark SKUs.")
 
     # 7. Reader Stories
     stories_seed = [

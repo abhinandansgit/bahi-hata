@@ -102,7 +102,7 @@ def _serialize_cart(cart):
             'original_price': float(bmi.bookmark.price),
             'quantity': bmi.quantity,
             'subtotal': subtotal,
-            'cover_image_url': bmi.bookmark.cover_image or '',
+            'cover_image_url': bmi.bookmark.cover_image_url or '',
             'stock': bmi.bookmark.stock,
             'update_url': f"/orders/cart/update-bookmark/{bmi.id}/",
             'remove_url': f"/orders/cart/remove-bookmark/{bmi.id}/",
