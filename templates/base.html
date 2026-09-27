@@ -25,8 +25,26 @@
     <!-- Accessibility: Skip to Main Content Link -->
     <a href="#main-content" class="skip-link" style="position: absolute; top: -100px; left: 10px; background: var(--terracotta); color: white; padding: 12px 20px; border-radius: 6px; z-index: 100000; text-decoration: none; font-weight: 700; transition: top 0.2s;" onfocus="this.style.top='10px'" onblur="this.style.top='-100px'">Skip to main content</a>
 
-    <!-- Custom Cursor -->
-    <div class="cursor" id="cursor"></div>
+    <!-- Golden Fountain Pen Nib Precision Cursor -->
+    <div class="cursor" id="cursor">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="nibGold" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#FFE8A3"/>
+                    <stop offset="40%" stop-color="#E6B84A"/>
+                    <stop offset="80%" stop-color="#C9963A"/>
+                    <stop offset="100%" stop-color="#9B3A1A"/>
+                </linearGradient>
+                <filter id="nibGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0.8" dy="1.2" stdDeviation="1" flood-color="#1A0A04" flood-opacity="0.45"/>
+                </filter>
+            </defs>
+            <path d="M0 0 C2 5 5 11 9 15 L15 9 C11 5 5 2 0 0 Z" fill="url(#nibGold)" filter="url(#nibGlow)"/>
+            <path d="M9 15 L13 19 L19 13 L15 9 Z" fill="#2C1A08"/>
+            <line x1="0" y1="0" x2="7" y2="7" stroke="#1A0A04" stroke-width="0.8" stroke-linecap="round"/>
+            <circle cx="7" cy="7" r="1.2" fill="#1A0A04"/>
+        </svg>
+    </div>
     <div class="cursor-follower" id="cursorFollower"></div>
 
     <!-- Reading Progress -->
