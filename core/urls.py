@@ -9,6 +9,8 @@ urlpatterns = [
     path('cookies-policy/', views.cookies_policy, name='cookies_policy'),
     path('submit-story/', views.submit_story, name='submit_story'),
     path('magazine/', store_views.magazine_page, name='magazine'),
+    path('bookmarks/', store_views.bookmarks_list, name='bookmarks'),
+    path('combos/', store_views.combo_list, name='combos'),
     path('toggle-language/', views.toggle_language, name='toggle_language'),
 ]
 
