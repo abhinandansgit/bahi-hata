@@ -14,7 +14,7 @@ TRANSLATIONS = {
         'btn_signin': 'Sign In',
         'btn_profile': 'Profile',
         'btn_logout': 'Logout',
-        'toggle_lang': 'ଓଡ଼ିଆରେ ପଢ଼ନ୍ତୁ',
+        'toggle_lang': 'ଓଡ଼ିଆ ଛୁଙ୍କ',
 
         # Home Page Hero
         'hero_eyebrow': "Odisha's Digital Book Bazaar",
@@ -170,7 +170,7 @@ TRANSLATIONS = {
         'footer_contact': 'Contact',
         
         # Cart & Shop Headers
-        'shop_title': "ଆମର <em>ସାରସ୍ୱତ ଖଜଣା</em>",
+        'shop_title': "ଆମର <em>ସାରସ୍ୱତ ଗ୍ରନ୍ଥାବଳୀ</em>",
         'shop_desc': "Discover rare finds, bestsellers, and cultural masterpieces.",
         'filters': "Filters",
         'categories': "Categories",
