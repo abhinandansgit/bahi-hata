@@ -1,54 +1,24 @@
 // ===== HIGH-PRECISION GOLDEN FOUNTAIN PEN NIB CURSOR =====
 const cursor = document.getElementById('cursor');
-const follower = document.getElementById('cursorFollower');
 
-if (cursor && follower) {
-  let mouseX = -100, mouseY = -100;
-  let followerX = -100, followerY = -100;
-  let isAnimating = false;
-
+if (cursor) {
   document.addEventListener('mousemove', e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-
-    if (!isAnimating) {
-      isAnimating = true;
-      requestAnimationFrame(animateFollower);
-    }
+    cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
   }, { passive: true });
 
-  function animateFollower() {
-    followerX += (mouseX - followerX) * 0.22;
-    followerY += (mouseY - followerY) * 0.22;
-    follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0)`;
-
-    if (Math.abs(mouseX - followerX) > 0.1 || Math.abs(mouseY - followerY) > 0.1) {
-      requestAnimationFrame(animateFollower);
-    } else {
-      isAnimating = false;
-    }
-  }
-
-  document.addEventListener('mousedown', () => {
-    cursor.classList.add('active');
-    follower.classList.add('active');
-  });
-  document.addEventListener('mouseup', () => {
-    cursor.classList.remove('active');
-    follower.classList.remove('active');
-  });
+  document.addEventListener('mousedown', () => cursor.classList.add('active'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('active'));
 
   const interactiveSelector = 'a, button, .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .quiz-option, .shelf-tab, input, select, textarea, [role="button"]';
-  document.querySelectorAll(interactiveSelector).forEach(el => {
-    el.addEventListener('mouseenter', () => { 
-      cursor.classList.add('hover'); 
-      follower.classList.add('hover'); 
-    });
-    el.addEventListener('mouseleave', () => { 
-      cursor.classList.remove('hover'); 
-      follower.classList.remove('hover'); 
-    });
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(interactiveSelector)) {
+      cursor.classList.add('hover');
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(interactiveSelector)) {
+      cursor.classList.remove('hover');
+    }
   });
 }
 

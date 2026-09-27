@@ -52,32 +52,21 @@ body {
     background: var(--ivory);
     color: var(--ink);
     overflow-x: clip;
-    cursor: none;
     position: relative;
 }
 
-a,
-button,
-[role="button"],
-input[type="submit"],
-input[type="button"],
-.book-card,
-.mood-card,
-.plan-card,
-.faq-item,
-.search-tag,
-.nav-btn,
-.nav-cta,
-.shelf-tab,
-.quiz-option {
-    cursor: pointer;
+/* Hide OS default cursor everywhere on desktop */
+@media (min-width: 992px) and (pointer: fine) {
+    *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .shelf-tab, .quiz-option {
+        cursor: none !important;
+    }
 }
 
 body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' strokeTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9998;
 }
@@ -96,7 +85,7 @@ ul {
     list-style: none;
 }
 
-/* ========== CUSTOM GOLDEN FOUNTAIN PEN NIB CURSOR ========== */
+/* ========== PRECISION GOLDEN FOUNTAIN PEN NIB CURSOR ========== */
 .cursor {
     position: fixed;
     top: 0;
@@ -104,55 +93,29 @@ ul {
     width: 24px;
     height: 24px;
     pointer-events: none;
-    z-index: 99999;
+    z-index: 999999;
     will-change: transform;
     mix-blend-mode: normal;
+    transform: translate3d(-100px, -100px, 0);
 }
 
 .cursor svg {
     display: block;
     width: 24px;
     height: 24px;
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
-}
-
-.cursor-follower {
-    position: fixed;
-    top: -12px;
-    left: -12px;
-    width: 28px;
-    height: 28px;
-    border: 1.5px solid rgba(201, 150, 58, 0.65);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99998;
-    transition: transform 0.22s ease-out, border-color 0.2s, background 0.2s, opacity 0.2s;
-    opacity: 0.65;
-    will-change: transform;
-    background: radial-gradient(circle, rgba(201, 150, 58, 0.18) 0%, transparent 75%);
+    transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+    filter: drop-shadow(1px 2px 5px rgba(26, 16, 8, 0.45));
 }
 
 /* Hover States for Interactive Elements */
 .cursor.hover svg {
-    transform: scale(1.22) rotate(-6deg);
-    filter: drop-shadow(0 3px 10px rgba(155, 58, 26, 0.6));
-}
-
-.cursor-follower.hover {
-    transform: scale(1.6);
-    border-color: var(--terracotta);
-    background: radial-gradient(circle, rgba(155, 58, 26, 0.22) 0%, transparent 80%);
-    opacity: 0.85;
+    transform: scale(1.25) rotate(-6deg);
+    filter: drop-shadow(0 4px 12px rgba(155, 58, 26, 0.65));
 }
 
 /* Click Press State */
 .cursor.active svg {
-    transform: scale(0.92) translate(1px, 1px);
-}
-
-.cursor-follower.active {
-    transform: scale(0.85);
-    opacity: 1;
+    transform: scale(0.9) translate(1px, 1px);
 }
 
 /* ========== PATTACHITRA BORDER PATTERN ========== */
