@@ -320,20 +320,26 @@ def apply_coupon(request):
 
 @login_required(login_url='accounts:login')
 def update_cart_item(request, item_id):
-    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    item = get_object_or_404(CartItem.objects.select_related('book'), id=item_id, cart__user=request.user)
     action = request.GET.get('action', '')
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
 
     if action == 'increase':
         if item.quantity < item.book.stock:
             item.quantity += 1
-            item.save()
+            item.save(update_fields=['quantity'])
         else:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Maximum stock ({item.book.stock}) reached for "{item.book.title}".',
+                    'cart': _serialize_cart(item.cart)
+                }, status=400)
             messages.warning(request, f'Maximum stock reached for "{item.book.title}".')
     elif action == 'decrease':
         if item.quantity > 1:
             item.quantity -= 1
-            item.save()
+            item.save(update_fields=['quantity'])
         else:
             item.delete()
 
@@ -368,20 +374,26 @@ def remove_combo_from_cart(request, item_id):
 
 @login_required(login_url='accounts:login')
 def update_magazine_cart_item(request, item_id):
-    item = get_object_or_404(MagazineCartItem, id=item_id, cart__user=request.user)
+    item = get_object_or_404(MagazineCartItem.objects.select_related('edition'), id=item_id, cart__user=request.user)
     action = request.GET.get('action', '')
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
 
     if action == 'increase':
         if item.quantity < item.edition.stock:
             item.quantity += 1
-            item.save()
+            item.save(update_fields=['quantity'])
         else:
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Maximum stock reached for "{item.edition.title}".',
+                    'cart': _serialize_cart(item.cart)
+                }, status=400)
             messages.warning(request, f'Maximum stock reached for "{item.edition.title}".')
     elif action == 'decrease':
         if item.quantity > 1:
             item.quantity -= 1
-            item.save()
+            item.save(update_fields=['quantity'])
         else:
             item.delete()
 

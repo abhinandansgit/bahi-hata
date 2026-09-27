@@ -172,11 +172,11 @@ function renderShelfDrawer(cart) {
             <div class="shelf-item-bottom">
               <div class="shelf-item-price">₹${item.price}</div>
               <div class="shelf-qty-stepper">
-                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=decrease')">−</button>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=decrease', this)">−</button>
                 <span class="shelf-qty-val">${item.quantity}</span>
-                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=increase')">+</button>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${item.update_url}?action=increase', this)">+</button>
               </div>
-              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${item.remove_url}')">
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${item.remove_url}', this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
               </button>
             </div>
@@ -204,11 +204,11 @@ function renderShelfDrawer(cart) {
             <div class="shelf-item-bottom">
               <div class="shelf-item-price">₹${mi.price}</div>
               <div class="shelf-qty-stepper">
-                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=decrease')">−</button>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=decrease', this)">−</button>
                 <span class="shelf-qty-val">${mi.quantity}</span>
-                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=increase')">+</button>
+                <button type="button" class="shelf-qty-btn" onclick="updateShelfItem('${mi.update_url}?action=increase', this)">+</button>
               </div>
-              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${mi.remove_url}')">
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${mi.remove_url}', this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
               </button>
             </div>
@@ -233,7 +233,7 @@ function renderShelfDrawer(cart) {
             <div class="shelf-item-bottom">
               <div class="shelf-item-price">₹${ci.price}</div>
               <span style="font-size: 12px; color: var(--ink-softer); font-weight: 700;">Qty: 1</span>
-              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${ci.remove_url}')">
+              <button type="button" class="shelf-item-remove" title="Remove" onclick="updateShelfItem('${ci.remove_url}', this)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
               </button>
             </div>
@@ -262,7 +262,28 @@ function getCookie(name) {
   return cookieValue;
 }
 
-async function updateShelfItem(url) {
+async function updateShelfItem(url, btnEl) {
+  // 0ms Optimistic UI Feedback
+  if (btnEl) {
+    const card = btnEl.closest('.shelf-item-card');
+    if (card) {
+      const qtyVal = card.querySelector('.shelf-qty-val');
+      const isIncrease = url.includes('action=increase');
+      const isDecrease = url.includes('action=decrease');
+      const isRemove = url.includes('remove');
+
+      if (isIncrease && qtyVal) {
+        qtyVal.textContent = parseInt(qtyVal.textContent, 10) + 1;
+      } else if (isDecrease && qtyVal) {
+        const val = parseInt(qtyVal.textContent, 10) - 1;
+        if (val > 0) qtyVal.textContent = val;
+        else card.style.opacity = '0.3';
+      } else if (isRemove) {
+        card.style.opacity = '0.3';
+      }
+    }
+  }
+
   try {
     const res = await fetch(url, {
       headers: {
@@ -273,6 +294,9 @@ async function updateShelfItem(url) {
     const data = await res.json();
     if (data.cart) {
       renderShelfDrawer(data.cart);
+      if (typeof applyServerCartTotalsToPage === 'function') {
+        applyServerCartTotalsToPage(data.cart);
+      }
     }
     if (data.message) {
       showToast(data.message);
