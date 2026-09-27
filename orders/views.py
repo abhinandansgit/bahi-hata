@@ -89,24 +89,27 @@ def _serialize_cart(cart):
         })
 
     bookmark_items = []
-    bm_list = list(cart.bookmark_items.select_related('bookmark').all())
-    for bmi in bm_list:
-        subtotal = float(bmi.total_price)
-        cart_subtotal += subtotal
-        total_qty += bmi.quantity
-        bookmark_items.append({
-            'id': bmi.id,
-            'type': 'bookmark',
-            'title': bmi.bookmark.title,
-            'price': float(bmi.bookmark.final_price),
-            'original_price': float(bmi.bookmark.price),
-            'quantity': bmi.quantity,
-            'subtotal': subtotal,
-            'cover_image_url': bmi.bookmark.cover_image_url or '',
-            'stock': bmi.bookmark.stock,
-            'update_url': f"/orders/cart/update-bookmark/{bmi.id}/",
-            'remove_url': f"/orders/cart/remove-bookmark/{bmi.id}/",
-        })
+    try:
+        bm_list = list(cart.bookmark_items.select_related('bookmark').all())
+        for bmi in bm_list:
+            subtotal = float(bmi.total_price)
+            cart_subtotal += subtotal
+            total_qty += bmi.quantity
+            bookmark_items.append({
+                'id': bmi.id,
+                'type': 'bookmark',
+                'title': bmi.bookmark.title,
+                'price': float(bmi.bookmark.final_price),
+                'original_price': float(bmi.bookmark.price),
+                'quantity': bmi.quantity,
+                'subtotal': subtotal,
+                'cover_image_url': bmi.bookmark.cover_image_url or '',
+                'stock': bmi.bookmark.stock,
+                'update_url': f"/orders/cart/update-bookmark/{bmi.id}/",
+                'remove_url': f"/orders/cart/remove-bookmark/{bmi.id}/",
+            })
+    except Exception as e:
+        print("[!] Error serializing cart bookmark items:", e)
 
     cart_subtotal = round(cart_subtotal, 2)
     free_shipping_threshold = 799.0

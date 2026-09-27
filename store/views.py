@@ -58,10 +58,16 @@ def book_list(request):
 
 
 def bookmarks_list(request):
-    bookmarks = Bookmark.objects.filter(is_active=True)
+    try:
+        bookmarks = Bookmark.objects.filter(is_active=True)
+        count = bookmarks.count()
+    except Exception as e:
+        print("[!] Error fetching bookmarks:", e)
+        bookmarks = []
+        count = 0
     context = {
         'bookmarks': bookmarks,
-        'total_count': bookmarks.count(),
+        'total_count': count,
     }
     return render(request, 'store/bookmarks.html', context)
 

@@ -1,41 +1,46 @@
 // ===== HIGH-PRECISION GOLDEN FOUNTAIN PEN NIB CURSOR =====
-const cursor = document.getElementById('cursor');
+(function() {
+  if (window.__bahiHataCursorInit) return;
+  window.__bahiHataCursorInit = true;
 
-if (cursor) {
-  let cursorActive = false;
+  const cursor = document.getElementById('cursor');
 
-  document.addEventListener('mousemove', e => {
-    if (!cursorActive) {
-      cursorActive = true;
-      document.body.classList.add('custom-cursor-active');
-      cursor.style.opacity = '1';
-    }
-    cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-  }, { passive: true });
+  if (cursor) {
+    let cursorActive = false;
 
-  document.addEventListener('mouseleave', () => {
-    cursor.style.opacity = '0';
-  });
+    document.addEventListener('mousemove', e => {
+      if (!cursorActive) {
+        cursorActive = true;
+        document.body.classList.add('custom-cursor-active');
+        cursor.style.opacity = '1';
+      }
+      cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+    }, { passive: true });
 
-  document.addEventListener('mouseenter', () => {
-    if (cursorActive) cursor.style.opacity = '1';
-  });
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
 
-  document.addEventListener('mousedown', () => cursor.classList.add('active'));
-  document.addEventListener('mouseup', () => cursor.classList.remove('active'));
+    document.addEventListener('mouseenter', () => {
+      if (cursorActive) cursor.style.opacity = '1';
+    });
 
-  const interactiveSelector = 'a, button, .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .quiz-option, .shelf-tab, input, select, textarea, [role="button"]';
-  document.addEventListener('mouseover', e => {
-    if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
-      cursor.classList.add('hover');
-    }
-  });
-  document.addEventListener('mouseout', e => {
-    if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
-      cursor.classList.remove('hover');
-    }
-  });
-}
+    document.addEventListener('mousedown', () => cursor.classList.add('active'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('active'));
+
+    const interactiveSelector = 'a, button, .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .quiz-option, .shelf-tab, input, select, textarea, [role="button"]';
+    document.addEventListener('mouseover', e => {
+      if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
+        cursor.classList.add('hover');
+      }
+    });
+    document.addEventListener('mouseout', e => {
+      if (e.target && typeof e.target.closest === 'function' && e.target.closest(interactiveSelector)) {
+        cursor.classList.remove('hover');
+      }
+    });
+  }
+})();
 
 // ===== READING PROGRESS =====
 const progressBar = document.getElementById('readingProgress');
