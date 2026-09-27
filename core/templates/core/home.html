@@ -87,6 +87,10 @@
   .mood-bg-6 {
     background: linear-gradient(135deg, #2a2a3a, #4a4a7a);
   }
+
+  .msg-alert { padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+  .msg-error { background: rgba(197,48,48,0.2); color: #feb2b2; border: 1px solid rgba(197,48,48,0.4); }
+  .msg-success { background: rgba(45,90,39,0.25); color: #9ae6b4; border: 1px solid rgba(72,187,120,0.4); }
 </style>
 <!-- ===== HERO ===== -->
 <section class="hero">
@@ -306,8 +310,8 @@
         {% endif %}
         <div class="mood-overlay"></div>
         <div class="mood-content">
-          <span class="mood-emoji">{% cycle ' ' ' ' ' ' ' ' ' ' ' ' %}</span>
-          <div class="mood-label">For {{ mood.name }}</div>
+          <span class="mood-emoji">{% cycle '🌧️' '🎯' '✨' '🏛️' '🧘' '⚡' %}</span>
+          <div class="mood-label">{% if "For " in mood.name %}{{ mood.name }}{% else %}For {{ mood.name }}{% endif %}</div>
           <div class="mood-count">✦ {{ t.mood_curated }}</div>
         </div>
         <div class="mood-arrow">→</div>
@@ -424,10 +428,7 @@
     {% if messages %}
     <div style="max-width: 900px; margin: 0 auto 24px;">
       {% for msg in messages %}
-      <div style="padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
-                  background: {% if msg.tags == 'error' %}rgba(197,48,48,0.2){% else %}rgba(45,90,39,0.25){% endif %};
-                  color: {% if msg.tags == 'error' %}#feb2b2{% else %}#9ae6b4{% endif %};
-                  border: 1px solid {% if msg.tags == 'error' %}rgba(197,48,48,0.4){% else %}rgba(72,187,120,0.4){% endif %};">
+      <div class="msg-alert {% if msg.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
         {{ msg }}
       </div>
       {% endfor %}
@@ -488,7 +489,7 @@
             
             <div class="story-indicators" id="storyDots">
               {% for story in reader_stories %}
-              <button type="button" class="story-dot {% if forloop.first %}active{% endif %}" onclick="goToStorySlide({{ forloop.counter0 }})" aria-label="Slide {{ forloop.counter }}"></button>
+              <button type="button" class="story-dot {% if forloop.first %}active{% endif %}" onclick="goToStorySlide('{{ forloop.counter0 }}')" aria-label="Slide {{ forloop.counter }}"></button>
               {% endfor %}
             </div>
 
@@ -762,7 +763,7 @@
   }
 
   function goToStorySlide(idx) {
-    renderStorySlide(idx);
+    renderStorySlide(parseInt(idx, 10));
     resetStoryAutoPlay();
   }
 

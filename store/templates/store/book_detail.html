@@ -57,8 +57,8 @@
                     <div class="product-thumbnails-strip">
                         {% for img_url in book.all_images %}
                         <button type="button" class="gallery-thumb-btn {% if forloop.first %}active{% endif %}"
-                                onclick="switchProductImage('{{ img_url }}', {{ forloop.counter }}, this)"
-                                onmouseenter="switchProductImage('{{ img_url }}', {{ forloop.counter }}, this)">
+                                onclick="switchProductImage('{{ img_url }}', '{{ forloop.counter }}', this)"
+                                onmouseenter="switchProductImage('{{ img_url }}', '{{ forloop.counter }}', this)">
                             <img src="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}" width="90" height="90">
                             <span class="thumb-label">
                                 {% if forloop.counter == 1 %}Front Cover

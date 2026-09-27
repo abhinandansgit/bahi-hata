@@ -49,7 +49,7 @@
             </div>
             <input type="url" name="cover_image_url" id="edit_combo_cover" class="form-control" value="{{ combo.cover_image_url|default:'' }}" placeholder="https://... or click Upload File">
             <div id="edit_combo_preview" style="margin-top: 8px;">
-                <img id="edit_combo_preview_img" src="{{ combo.cover_image_url|default:'' }}" style="{% if not combo.cover_image_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--beige-warm);">
+                <img id="edit_combo_preview_img" src="{{ combo.cover_image_url|default:'' }}" style="display: {% if not combo.cover_image_url %}none{% else %}inline-block{% endif %}; width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--beige-warm);">
             </div>
         </div>
 

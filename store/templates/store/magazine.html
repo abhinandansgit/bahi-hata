@@ -354,6 +354,9 @@
         margin-bottom: 6px;
     }
 
+    .mag-msg-err { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+    .mag-msg-ok { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+
     @media (max-width: 991px) {
         .flagship-card { grid-template-columns: 1fr; padding: 24px; gap: 24px; }
         .submissions-wrap { grid-template-columns: 1fr; padding: 28px; gap: 32px; }
@@ -604,10 +607,7 @@
 
                 {% if messages %}
                 {% for msg in messages %}
-                <div style="padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 600;
-                            background: {% if msg.tags == 'error' %}#fff5f5{% else %}#f0fff4{% endif %};
-                            color: {% if msg.tags == 'error' %}#c53030{% else %}#276749{% endif %};
-                            border: 1px solid {% if msg.tags == 'error' %}#fed7d7{% else %}#c6f6d5{% endif %};">
+                <div class="msg-alert {% if msg.tags == 'error' %}mag-msg-err{% else %}mag-msg-ok{% endif %}" style="margin-bottom: 20px;">
                     {{ msg }}
                 </div>
                 {% endfor %}

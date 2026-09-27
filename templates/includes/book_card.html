@@ -43,7 +43,7 @@
         <div class="slider-dots" onclick="event.stopPropagation();">
             {% for img_url in book.all_images %}
             <button type="button" class="slider-dot {% if forloop.first %}active{% endif %}"
-                    onclick="goToSlide(event, this, {{ forloop.counter0 }})" aria-label="Go to slide {{ forloop.counter }}"></button>
+                    onclick="goToSlide(event, this, '{{ forloop.counter0 }}')" aria-label="Go to slide {{ forloop.counter }}"></button>
             {% endfor %}
         </div>
         <button type="button" class="slider-arrow slider-prev" onclick="manualSlide(event, this, -1)" aria-label="Previous image">‹</button>

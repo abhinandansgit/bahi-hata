@@ -81,7 +81,7 @@
                     </div>
                     <input type="url" name="cover_image_url" id="coverUrl" class="form-control" value="{{ edition.cover_image_url|default:'' }}" oninput="previewImage('previewCover', this.value)">
                     <div id="previewCover" style="margin-top: 10px; text-align: center;">
-                        <img id="previewCoverImg" src="{{ edition.cover_image_url|default:'' }}" style="{% if not edition.cover_image_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                        <img id="previewCoverImg" src="{{ edition.cover_image_url|default:'' }}" style="display: {% if not edition.cover_image_url %}none{% else %}inline-block{% endif %}; width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@
                     </div>
                     <input type="url" name="image_2_url" id="image2Url" class="form-control" value="{{ edition.image_2_url|default:'' }}" oninput="previewImage('previewImg2', this.value)">
                     <div id="previewImg2" style="margin-top: 10px; text-align: center;">
-                        <img id="previewImg2Img" src="{{ edition.image_2_url|default:'' }}" style="{% if not edition.image_2_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                        <img id="previewImg2Img" src="{{ edition.image_2_url|default:'' }}" style="display: {% if not edition.image_2_url %}none{% else %}inline-block{% endif %}; width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
                     </div>
                 </div>
 
@@ -109,8 +109,9 @@
                     </div>
                     <input type="url" name="image_3_url" id="image3Url" class="form-control" value="{{ edition.image_3_url|default:'' }}" oninput="previewImage('previewImg3', this.value)">
                     <div id="previewImg3" style="margin-top: 10px; text-align: center;">
-                        <img id="previewImg3Img" src="{{ edition.image_3_url|default:'' }}" style="{% if not edition.image_3_url %}display:none;{% endif %} width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
+                        <img id="previewImg3Img" src="{{ edition.image_3_url|default:'' }}" style="display: {% if not edition.image_3_url %}none{% else %}inline-block{% endif %}; width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--beige-warm);">
                     </div>
+                </div>
                 </div>
             </div>
         </div>

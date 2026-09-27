@@ -9,10 +9,23 @@ def home(request):
     trending_books = Book.objects.select_related('category').filter(is_trending_in_odisha=True)\
         .annotate(order_count=Count('orderitem'))\
         .order_by('-order_count', '-created_at')[:8]
+    if not trending_books.exists():
+        trending_books = Book.objects.select_related('category').all().order_by('-created_at')[:8]
         
     heritage_picks = Book.objects.select_related('category').filter(is_odisha_heritage=True).order_by('-created_at')[:8]
+    if not heritage_picks.exists():
+        heritage_picks = Book.objects.select_related('category').filter(language='OD').order_by('-created_at')[:8]
+    if not heritage_picks.exists():
+        heritage_picks = Book.objects.select_related('category').all().order_by('-created_at')[:8]
+
     bestseller_books = Book.objects.select_related('category').filter(is_bestseller=True).order_by('-created_at')[:8]
+    if not bestseller_books.exists():
+        bestseller_books = Book.objects.select_related('category').all().order_by('id')[:8]
+
     popular_books = Book.objects.select_related('category').filter(is_popular=True).order_by('-created_at')[:8]
+    if not popular_books.exists():
+        popular_books = Book.objects.select_related('category').all().order_by('-price')[:8]
+
     moods = Mood.objects.all()
     site_stats = SiteStat.objects.all()
     reader_stories = ReaderStory.objects.filter(is_approved=True).order_by('-created_at')[:10]

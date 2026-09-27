@@ -322,17 +322,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ===== TOAST =====
-let toastTimer;
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  const toastMsg = document.getElementById('toastMsg');
-  if(toastMsg) toastMsg.textContent = msg;
-  if(toast) {
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-}
+// Note: showToast and toastTimer are defined at the bottom of main.js with duration support.
 
 // ===== SHELF SCROLL =====
 function scrollShelf(dir) {

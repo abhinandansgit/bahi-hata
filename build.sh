@@ -11,3 +11,7 @@ python manage.py collectstatic --no-input
 
 echo "Running database migrations..."
 python manage.py migrate
+
+echo "Seeding initial database content..."
+python bahihata/seed.py
+

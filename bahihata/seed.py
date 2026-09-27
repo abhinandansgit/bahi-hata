@@ -220,8 +220,21 @@ def run():
         )
     print("[+] Seeded Approved Reader Stories.")
 
+    # 8. Site Stats
+    from core.models import SiteStat
+    stats_data = [
+        {"label": "Books", "value": "500+", "numeric_value": 500, "order": 1},
+        {"label": "Odia Titles", "value": "18+", "numeric_value": 18, "order": 2},
+        {"label": "Delivery", "value": "7-days", "numeric_value": 7, "order": 3},
+        {"label": "Rating", "value": "4.9★", "numeric_value": 4.9, "order": 4},
+    ]
+    for sdata in stats_data:
+        SiteStat.objects.get_or_create(label=sdata["label"], defaults=sdata)
+    print("[+] Seeded Site Stats.")
+
     print("[*] All Bahi Hata platform features seeded successfully!")
 
 if __name__ == '__main__':
     run()
+
 

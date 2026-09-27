@@ -342,8 +342,8 @@
                     </div>
                     <input type="url" name="cover_image" id="cover_image" class="form-control" value="{{ book.cover_image.url }}" placeholder="https://.../cover.jpg or click Upload File" required oninput="previewUrl(this.value, 'cover-preview', 'cover-ph')">
                     <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
-                        <img src="{% if book.cover_image %}{{ book.cover_image.url }}{% endif %}" id="cover-preview" alt="Cover 1" style="{% if not book.cover_image %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
-                        <span id="cover-ph" style="{% if book.cover_image %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 1</span>
+                        <img src="{% if book.cover_image %}{{ book.cover_image.url }}{% endif %}" id="cover-preview" alt="Cover 1" style="display: {% if not book.cover_image %}none{% else %}inline-block{% endif %}; width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="cover-ph" style="display: {% if book.cover_image %}none{% else %}inline{% endif %}; font-size: 11px; color: var(--ink-softer);">No image 1</span>
                     </div>
                 </div>
 
@@ -358,8 +358,8 @@
                     </div>
                     <input type="url" name="image_2_url" id="image_2_url" class="form-control" value="{{ book.image_2_url|default:'' }}" placeholder="https://.../back.jpg or click Upload File" oninput="previewUrl(this.value, 'img2-preview', 'img2-ph')">
                     <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
-                        <img src="{{ book.image_2_url|default:'' }}" id="img2-preview" alt="Image 2" style="{% if not book.image_2_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
-                        <span id="img2-ph" style="{% if book.image_2_url %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 2</span>
+                        <img src="{{ book.image_2_url|default:'' }}" id="img2-preview" alt="Image 2" style="display: {% if not book.image_2_url %}none{% else %}inline-block{% endif %}; width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="img2-ph" style="display: {% if book.image_2_url %}none{% else %}inline{% endif %}; font-size: 11px; color: var(--ink-softer);">No image 2</span>
                     </div>
                 </div>
 
@@ -374,8 +374,8 @@
                     </div>
                     <input type="url" name="image_3_url" id="image_3_url" class="form-control" value="{{ book.image_3_url|default:'' }}" placeholder="https://.../spine.jpg or click Upload File" oninput="previewUrl(this.value, 'img3-preview', 'img3-ph')">
                     <div style="margin-top: 6px; border: 1px dashed var(--beige-warm); border-radius: 8px; padding: 8px; text-align: center; background: var(--ivory);">
-                        <img src="{{ book.image_3_url|default:'' }}" id="img3-preview" alt="Image 3" style="{% if not book.image_3_url %}display:none;{% endif %} width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
-                        <span id="img3-ph" style="{% if book.image_3_url %}display:none;{% endif %} font-size: 11px; color: var(--ink-softer);">No image 3</span>
+                        <img src="{{ book.image_3_url|default:'' }}" id="img3-preview" alt="Image 3" style="display: {% if not book.image_3_url %}none{% else %}inline-block{% endif %}; width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                        <span id="img3-ph" style="display: {% if book.image_3_url %}none{% else %}inline{% endif %}; font-size: 11px; color: var(--ink-softer);">No image 3</span>
                     </div>
                 </div>
             </div>
