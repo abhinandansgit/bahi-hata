@@ -2,9 +2,24 @@
 const cursor = document.getElementById('cursor');
 
 if (cursor) {
+  let cursorActive = false;
+
   document.addEventListener('mousemove', e => {
+    if (!cursorActive) {
+      cursorActive = true;
+      document.body.classList.add('custom-cursor-active');
+      cursor.style.opacity = '1';
+    }
     cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
   }, { passive: true });
+
+  document.addEventListener('mouseleave', () => {
+    cursor.style.opacity = '0';
+  });
+
+  document.addEventListener('mouseenter', () => {
+    if (cursorActive) cursor.style.opacity = '1';
+  });
 
   document.addEventListener('mousedown', () => cursor.classList.add('active'));
   document.addEventListener('mouseup', () => cursor.classList.remove('active'));

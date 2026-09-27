@@ -55,9 +55,12 @@ body {
     position: relative;
 }
 
-/* Hide OS default cursor everywhere on desktop */
+/* Hide OS default cursor everywhere on desktop ONLY when custom cursor JS is active */
 @media (min-width: 992px) and (pointer: fine) {
-    *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], .book-card, .mood-card, .plan-card, .faq-item, .search-tag, .nav-btn, .nav-cta, .shelf-tab, .quiz-option {
+    body.custom-cursor-active,
+    body.custom-cursor-active *,
+    body.custom-cursor-active *::before,
+    body.custom-cursor-active *::after {
         cursor: none !important;
     }
 }
@@ -96,6 +99,8 @@ ul {
     z-index: 999999;
     will-change: transform;
     mix-blend-mode: normal;
+    opacity: 0;
+    transition: opacity 0.2s ease;
     transform: translate3d(-100px, -100px, 0);
 }
 
