@@ -25,8 +25,8 @@
             {% elif book.discount_percentage > 0 %}
                 <div class="book-ribbon discount-ribbon">-{{ book.discount_percentage|floatformat:0 }}% OFF</div>
             {% endif %}
-            {% if book.stock <= 3 and book.stock > 0 %}
-                <div class="book-stock-badge">Only {{ book.stock }} Left</div>
+            {% if book.stock == 1 %}
+                <div class="book-stock-badge">Only 1 Left</div>
             {% endif %}
         </div>
 

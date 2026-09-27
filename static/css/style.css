@@ -2104,21 +2104,7 @@ footer {
     border-radius: 2px 0 0 2px;
 }
 
-/* ========== RANDOM PAGE BOX ========== */
-.random-page-box {
-    margin-top: 24px;
-    padding: 24px;
-    background-color: var(--ivory);
-    border-left: 4px solid var(--gold);
-    border-radius: 0 8px 8px 0;
-    box-shadow: 0 4px 20px rgba(201, 150, 58, 0.1);
-    display: none;
-    font-style: italic;
-    font-family: var(--font-body);
-    font-size: 18px;
-    color: var(--ink);
-    line-height: 1.6;
-}
+
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
@@ -6065,29 +6051,7 @@ footer {
     background: #FFF8F4;
 }
 
-.btn-flip-page {
-    width: 100%;
-    padding: 14px;
-    background: var(--ivory);
-    border: 1.5px solid var(--gold-pale);
-    border-radius: 12px;
-    color: var(--ink);
-    font-family: var(--font-ui);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
 
-.btn-flip-page:hover {
-    background: white;
-    border-color: var(--gold);
-    transform: translateY(-1px);
-}
 
 /* Description & Specs */
 .detail-block-title {
