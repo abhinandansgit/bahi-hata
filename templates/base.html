@@ -70,11 +70,8 @@
 
             <!-- DESKTOP: Nav Links -->
             <div class="nav-links">
-                <a href="{% url 'store:book_list' %}" class="nav-link">{{ t.nav_shop }}</a>
                 <a href="{% url 'store:combos' %}" class="nav-link">🎁 Combos</a>
                 <a href="{% url 'store:magazine' %}" class="nav-link">📖 Abhilasha</a>
-                <a href="{% url 'home' %}#odia" class="nav-link">{{ t.nav_odia_books }}</a>
-                <a href="{% url 'home' %}#moods" class="nav-link">{{ t.nav_moods }}</a>
             </div>
 
             <!-- DESKTOP: Search Bar -->
@@ -168,10 +165,6 @@
             </form>
 
             <nav class="mobile-drawer-nav">
-                <a href="{% url 'store:book_list' %}" onclick="toggleMobileMenu()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    <span>{{ t.nav_shop }}</span>
-                </a>
                 <a href="{% url 'store:combos' %}" onclick="toggleMobileMenu()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V22H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
                     <span>🎁 Combo Deals</span>
@@ -179,14 +172,6 @@
                 <a href="{% url 'store:magazine' %}" onclick="toggleMobileMenu()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                     <span>📖 Abhilasha Magazine</span>
-                </a>
-                <a href="{% url 'home' %}#odia" onclick="toggleMobileMenu()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <span>{{ t.nav_odia_books }}</span>
-                </a>
-                <a href="{% url 'home' %}#moods" onclick="toggleMobileMenu()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                    <span>{{ t.nav_moods }}</span>
                 </a>
                 {% if request.user.is_authenticated and request.user.is_staff %}
                 <a href="{% url 'admin_panel:dashboard' %}" onclick="toggleMobileMenu()" style="color: var(--terracotta);">
