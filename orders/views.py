@@ -91,7 +91,9 @@ def _serialize_cart(cart):
     cart_subtotal = round(cart_subtotal, 2)
     free_shipping_threshold = 799.0
     has_free_shipping = cart_subtotal >= free_shipping_threshold
+    shipping_charge = 0.0 if has_free_shipping else (79.0 if cart_subtotal > 0 else 0.0)
     amount_needed_for_free_shipping = max(0.0, round(free_shipping_threshold - cart_subtotal, 2))
+    cart_total_with_shipping = round(cart_subtotal + shipping_charge, 2)
 
     return {
         'items': items,
@@ -101,7 +103,9 @@ def _serialize_cart(cart):
         'subtotal': cart_subtotal,
         'free_shipping_threshold': free_shipping_threshold,
         'has_free_shipping': has_free_shipping,
+        'shipping_charge': shipping_charge,
         'amount_needed_for_free_shipping': amount_needed_for_free_shipping,
+        'final_total': cart_total_with_shipping,
     }
 
 
@@ -267,10 +271,12 @@ def view_cart(request):
             del request.session['coupon_code']
             coupon_code = ''
 
-    final_total = round(total - coupon_discount, 2)
     free_shipping_threshold = 799
     has_free_shipping = total >= free_shipping_threshold
+    shipping_charge = 0 if has_free_shipping else (79 if total > 0 else 0)
     amount_needed_for_free_shipping = max(0, round(free_shipping_threshold - total, 2))
+
+    final_total = round(total - coupon_discount + shipping_charge, 2)
 
     context = {
         'items': items,
@@ -278,6 +284,7 @@ def view_cart(request):
         'magazine_items': magazine_items,
         'total': total,
         'coupon_discount': round(coupon_discount, 2),
+        'shipping_charge': shipping_charge,
         'final_total': final_total,
         'coupon_code': coupon_code,
         'coupon_obj': coupon_obj,
@@ -452,10 +459,12 @@ def checkout(request):
         except Offer.DoesNotExist:
             pass
 
-    final_total = round(subtotal - coupon_discount, 2)
     free_shipping_threshold = 799
     has_free_shipping = subtotal >= free_shipping_threshold
+    shipping_charge = 0 if has_free_shipping else (79 if subtotal > 0 else 0)
     amount_needed_for_free_shipping = max(0, round(free_shipping_threshold - subtotal, 2))
+
+    final_total = round(subtotal - coupon_discount + shipping_charge, 2)
 
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip()
@@ -554,9 +563,15 @@ def checkout(request):
             f"─────────────────\n"
             f"*Items:*\n" + "\n".join(wa_lines) +
             f"\n─────────────────\n"
+            f"Subtotal: ₹{subtotal}\n"
         )
         if coupon_discount > 0:
-            message += f"Subtotal: ₹{subtotal}\nDiscount ({coupon_code}): -₹{round(coupon_discount,2)}\n"
+            message += f"Discount ({coupon_code}): -₹{round(coupon_discount, 2)}\n"
+        if shipping_charge > 0:
+            message += f"Delivery Charge: ₹{shipping_charge}\n"
+        else:
+            message += f"Delivery: FREE (Order > ₹799)\n"
+
         message += (
             f"*Total: ₹{final_total}*\n\n"
             f"*Delivery Address:*\n{shipping_address}\n\n"
@@ -573,6 +588,7 @@ def checkout(request):
         'magazine_items': magazine_items,
         'subtotal': subtotal,
         'coupon_discount': round(coupon_discount, 2),
+        'shipping_charge': shipping_charge,
         'final_total': final_total,
         'coupon_code': coupon_code,
         'coupon_obj': coupon_obj,

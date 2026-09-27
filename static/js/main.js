@@ -147,7 +147,7 @@ function renderShelfDrawer(cart) {
         shippingBadge.innerHTML = `<span style="color: var(--forest); font-weight:700;">🎉 FREE Shipping Unlocked!</span>`;
       } else {
         const needed = (799 - cart.subtotal).toFixed(2);
-        shippingBadge.innerHTML = `Add <strong>₹${needed}</strong> more for <strong>FREE Shipping</strong> (Orders over ₹799)`;
+        shippingBadge.innerHTML = `Add <strong>₹${needed}</strong> more for <strong>FREE Shipping</strong> (Flat ₹79 delivery charge applies)`;
       }
     }
   }
