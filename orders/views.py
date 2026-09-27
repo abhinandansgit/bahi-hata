@@ -88,12 +88,20 @@ def _serialize_cart(cart):
             'remove_url': f"/orders/cart/remove-magazine/{mi.id}/",
         })
 
+    cart_subtotal = round(cart_subtotal, 2)
+    free_shipping_threshold = 799.0
+    has_free_shipping = cart_subtotal >= free_shipping_threshold
+    amount_needed_for_free_shipping = max(0.0, round(free_shipping_threshold - cart_subtotal, 2))
+
     return {
         'items': items,
         'combo_items': combo_items,
         'magazine_items': magazine_items,
         'total_items_count': total_qty,
-        'subtotal': round(cart_subtotal, 2),
+        'subtotal': cart_subtotal,
+        'free_shipping_threshold': free_shipping_threshold,
+        'has_free_shipping': has_free_shipping,
+        'amount_needed_for_free_shipping': amount_needed_for_free_shipping,
     }
 
 
@@ -260,6 +268,9 @@ def view_cart(request):
             coupon_code = ''
 
     final_total = round(total - coupon_discount, 2)
+    free_shipping_threshold = 799
+    has_free_shipping = total >= free_shipping_threshold
+    amount_needed_for_free_shipping = max(0, round(free_shipping_threshold - total, 2))
 
     context = {
         'items': items,
@@ -272,6 +283,9 @@ def view_cart(request):
         'coupon_obj': coupon_obj,
         'coupon_error': coupon_error,
         'cart': cart,
+        'free_shipping_threshold': free_shipping_threshold,
+        'has_free_shipping': has_free_shipping,
+        'amount_needed_for_free_shipping': amount_needed_for_free_shipping,
     }
     return render(request, 'orders/cart.html', context)
 
@@ -439,6 +453,9 @@ def checkout(request):
             pass
 
     final_total = round(subtotal - coupon_discount, 2)
+    free_shipping_threshold = 799
+    has_free_shipping = subtotal >= free_shipping_threshold
+    amount_needed_for_free_shipping = max(0, round(free_shipping_threshold - subtotal, 2))
 
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip()
@@ -560,6 +577,9 @@ def checkout(request):
         'coupon_code': coupon_code,
         'coupon_obj': coupon_obj,
         'user': request.user,
+        'free_shipping_threshold': free_shipping_threshold,
+        'has_free_shipping': has_free_shipping,
+        'amount_needed_for_free_shipping': amount_needed_for_free_shipping,
     }
     return render(request, 'orders/checkout.html', context)
 

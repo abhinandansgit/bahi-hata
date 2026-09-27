@@ -147,7 +147,11 @@
                         {% endif %}
                         <div class="co-summary-row">
                             <span>Shipping</span>
-                            <span style="color: var(--forest); font-weight: 700;">FREE</span>
+                            {% if has_free_shipping %}
+                            <span style="color: var(--forest); font-weight: 700;">FREE (Orders > ₹799)</span>
+                            {% else %}
+                            <span style="color: var(--forest); font-weight: 700;">FREE (Promo)</span>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -162,7 +166,7 @@
                             <span>✓</span> 100% Genuine books guaranteed
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--forest); font-weight: 600;">
-                            <span>✓</span> Free delivery across Odisha
+                            <span>✓</span> Free Express delivery on orders over ₹799
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--forest); font-weight: 600;">
                             <span>✓</span> Order confirmed within 1 hour

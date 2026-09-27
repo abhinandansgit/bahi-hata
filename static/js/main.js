@@ -140,6 +140,16 @@ function renderShelfDrawer(cart) {
   if (footer) {
     footer.style.display = 'block';
     if (subtotalEl) subtotalEl.textContent = `₹${(cart.subtotal || 0).toFixed(2)}`;
+
+    const shippingBadge = document.getElementById('shelfShippingBadge');
+    if (shippingBadge) {
+      if (cart.subtotal >= 799) {
+        shippingBadge.innerHTML = `<span style="color: var(--forest); font-weight:700;">🎉 FREE Shipping Unlocked!</span>`;
+      } else {
+        const needed = (799 - cart.subtotal).toFixed(2);
+        shippingBadge.innerHTML = `Add <strong>₹${needed}</strong> more for <strong>FREE Shipping</strong> (Orders over ₹799)`;
+      }
+    }
   }
 
   let html = '';
