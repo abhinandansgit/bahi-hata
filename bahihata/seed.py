@@ -147,6 +147,13 @@ def run():
         created_books.append(book)
     print(f"[+] Seeded {len(created_books)} Books with 3 high-res images each.")
 
+    # 4.1 Datasheet 99-Book Inventory Import
+    try:
+        from import_stock import run_import
+        run_import()
+    except Exception as e:
+        print(f"[!] Stock datasheet import error: {e}")
+
     # 5. Book Combo
     combo, _ = BookCombo.objects.get_or_create(
         name="Odia Literary Heritage Pack",
