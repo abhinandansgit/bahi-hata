@@ -7,5 +7,17 @@
         "*test.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "antigravity.models.openrouterApiKey": "${env:OPENROUTER_API_KEY}",
+    "antigravity.models.customProviders": [
+        {
+            "name": "OpenRouter (NVIDIA)",
+            "baseUrl": "https://openrouter.ai/api/v1",
+            "apiKey": "${env:OPENROUTER_API_KEY}",
+            "models": [
+                "nvidia/neotron-3-ultra",
+                "nvidia/nemotron-4-340b-instruct"
+            ]
+        }
+    ]
 }

@@ -1,0 +1,23 @@
+{
+  "providers": [
+    {
+      "id": "openrouter",
+      "name": "OpenRouter (NVIDIA)",
+      "apiKey": "${env:OPENROUTER_API_KEY}",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "models": [
+        {
+          "id": "nvidia/neotron-3-ultra",
+          "name": "NVIDIA Neotron 3 Ultra",
+          "contextWindow": 128000
+        },
+        {
+          "id": "nvidia/nemotron-4-340b-instruct",
+          "name": "NVIDIA Nemotron 4 340B Instruct",
+          "contextWindow": 128000
+        }
+      ]
+    }
+  ],
+  "defaultModel": "nvidia/neotron-3-ultra"
+}
